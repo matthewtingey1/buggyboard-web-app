@@ -42,6 +42,7 @@ Current pages / modals that require a page object class:
 | Board page | `tests/pages/board-page.ts` |
 | Create Bug modal | `tests/pages/create-bug-modal.ts` |
 | Edit Bug modal | `tests/pages/edit-bug-modal.ts` |
+| Delete confirmation | `tests/pages/delete-confirm-modal.ts` |
 
 Add a new file whenever a new page or modal is introduced.
 
@@ -184,3 +185,33 @@ Structure every test body as:
 No test may rely on state created by another test. Each test must create its own
 preconditions (via `seed.spec.ts` helpers or direct API calls) and leave the database
 in a state that does not affect subsequent tests.
+
+### Test data
+
+The database is shared with the running app and with other test runs. Create data through the
+`bugApi` fixture (`tests/fixtures/bug-api.ts`), never by hand:
+
+- `bugApi.create(title)` prefixes the title with `[e2e]` and deletes the bug after the test.
+- `bugApi.createRaw(...)` and `bugApi.send('POST', '/api/bugs', ...)` track any bug they create.
+- Before creating a bug through the UI, call `bugApi.expectTitle(title)` so cleanup finds it even
+  if the test fails first.
+- Give every title a unique token (`uid()`), and never assert on board totals or an empty board.
+
+### Locators
+
+Bug rows are exposed as buttons, so a bug title can collide with a button's name. Scope locators to
+their region and use `exact: true` for title-bar buttons, for example
+`header.getByRole('button', { name: 'New Bug', exact: true })`.
+
+### Known defects
+
+A test for a confirmed defect is kept and marked `test.fail(true, '<reason>')`. The suite stays
+green, and the test reports an unexpected pass once the defect is fixed; that's the cue to remove
+the marker.
+
+### Failed logins
+
+`POST /api/login` refuses a client and username after 20 failed attempts in a row, for 15 minutes.
+A test that sends a failed login for a made-up user must give it a unique name (`no-such-user-${uid()}`),
+or the failures pile up across runs and lock that name. Keep failed logins for real accounts to a
+handful per run; a successful login resets the count.
