@@ -48,6 +48,36 @@ function normalizeSeverity(s: string): Severity | null {
   return SEVERITIES.includes(u as Severity) ? (u as Severity) : null;
 }
 
+// Characters that render as nothing (zero-width, bidi marks, soft hyphen, fillers, braille blank),
+// so a value made only of them is blank. They are only ignored for this check, never stripped.
+const INVISIBLE = /[\p{Default_Ignorable_Code_Point}\u2800]/gu;
+
+function isBlank(s: string): boolean {
+  return s.replace(INVISIBLE, "").trim() === "";
+}
+
+// A title is a one-line summary; the edit form's single-line input would otherwise silently join its lines.
+function oneLine(s: string): string {
+  return s.replace(/\s*[\r\n\u0085\u2028\u2029]+\s*/g, " ");
+}
+
+type FieldCode = "BLANK_TITLE" | "BLANK_SEVERITY" | "INVALID_SEVERITY" | "BLANK_OWNER" | "BLANK_DESCRIPTION";
+
+function validateFields(input: BugInput):
+  | { ok: true; title: string; severity: Severity; owner: string; description: string }
+  | { ok: false; code: FieldCode } {
+  const title = oneLine(input.title.trim());
+  const owner = input.owner.trim();
+  const description = input.description.trim();
+  if (isBlank(title)) return { ok: false, code: "BLANK_TITLE" };
+  if (input.severity.trim() === "") return { ok: false, code: "BLANK_SEVERITY" };
+  const severity = normalizeSeverity(input.severity);
+  if (severity === null) return { ok: false, code: "INVALID_SEVERITY" };
+  if (isBlank(owner)) return { ok: false, code: "BLANK_OWNER" };
+  if (isBlank(description)) return { ok: false, code: "BLANK_DESCRIPTION" };
+  return { ok: true, title, severity, owner, description };
+}
+
 function normalizeState(s: string): BugState | null {
   const u = s.trim().toUpperCase();
   return BUG_STATES.includes(u as BugState) ? (u as BugState) : null;
@@ -57,24 +87,15 @@ function normalizeState(s: string): BugState | null {
  * Create a bug. Validates required fields; ID is set by the database. Severity is stored as HIGH, MID, LOW.
  */
 export function createBug(input: BugInput): CreateBugResult {
-  const title = input.title.trim();
-  const owner = input.owner.trim();
-  const description = input.description.trim();
-  const severity = normalizeSeverity(input.severity);
-
-  if (title === "") return { success: false, code: "BLANK_TITLE" };
-  if (severity === null) return { success: false, code: "INVALID_SEVERITY" };
-  if (owner === "") return { success: false, code: "BLANK_OWNER" };
-  if (description === "") return { success: false, code: "BLANK_DESCRIPTION" };
+  const v = validateFields(input);
+  if (!v.ok) return { success: false, code: v.code };
 
   const stmt = db.prepare(
     `INSERT INTO bugs (title, severity, owner, description, state) VALUES (?, ?, ?, ?, 'OPEN')`
   );
-  const result = stmt.run(title, severity, owner, description);
-  const id = result.lastInsertRowid as number;
-
-  const bug: Bug = { id, title, severity, owner, description, state: "OPEN" };
-  return { success: true, bug };
+  const result = stmt.run(v.title, v.severity, v.owner, v.description);
+  // Read back rather than echo the input, so the response is exactly what was stored.
+  return { success: true, bug: getBug(Number(result.lastInsertRowid)) as Bug };
 }
 
 /**
@@ -104,24 +125,16 @@ export function updateBug(id: number, input: UpdateBugInput): UpdateBugResult {
   const existing = getBug(id);
   if (!existing) return { success: false, code: "NOT_FOUND" };
 
-  const title = input.title.trim();
-  const owner = input.owner.trim();
-  const description = input.description.trim();
-  const severity = normalizeSeverity(input.severity);
+  const v = validateFields(input);
+  if (!v.ok) return { success: false, code: v.code };
   const state = normalizeState(input.state);
-
-  if (title === "") return { success: false, code: "BLANK_TITLE" };
-  if (severity === null) return { success: false, code: "INVALID_SEVERITY" };
-  if (owner === "") return { success: false, code: "BLANK_OWNER" };
-  if (description === "") return { success: false, code: "BLANK_DESCRIPTION" };
   if (state === null) return { success: false, code: "INVALID_STATE" };
 
   db.prepare(
     "UPDATE bugs SET title = ?, severity = ?, owner = ?, description = ?, state = ? WHERE id = ?"
-  ).run(title, severity, owner, description, state, id);
+  ).run(v.title, v.severity, v.owner, v.description, state, id);
 
-  const bug: Bug = { id, title, severity, owner, description, state };
-  return { success: true, bug };
+  return { success: true, bug: getBug(id) as Bug };
 }
 
 /**
