@@ -1,0 +1,45 @@
+{
+  "forged": {
+    "url": "http://localhost:5173/board",
+    "rows": 11,
+    "ghostNameShown": false,
+    "apiCalls": [
+      "GET http://localhost:5173/api/bugs",
+      "GET http://localhost:5173/api/bugs"
+    ]
+  },
+  "logout": {
+    "storedValue": "{\"username\":\"buggy\"}",
+    "cookies": [],
+    "apiRequestsDuringLogout": [
+      "GET http://localhost:5173/api/bugs",
+      "GET http://localhost:5173/api/bugs",
+      "GET http://localhost:5173/api/bugs"
+    ],
+    "apiStatusAfterLogout": 200,
+    "replayedStoredValueUrl": "http://localhost:5173/board"
+  },
+  "xss": {
+    "board": {
+      "xss": null,
+      "docTitle": "BuggyBoard",
+      "injectedImgs": 0,
+      "rowText": "5\tHIGH\t[security] XSS <img src=x onerror=\"window.__xss=1;document.title='PWNED-title'\"> <script>window.__xss=2</script>\t<img src=x onerror=\"window.__xss=3\">'; DROP TABLE bugs;--"
+    },
+    "modal": {
+      "xss": null,
+      "injectedNodes": 0,
+      "fieldValues": [
+        "5",
+        "[security] XSS <img src=x onerror=\"window.__xss=1;document.title='PWNED-title'\"> <script>window.__xss=2</script>",
+        "<img src=x onerror=\"window.__xss=3\">'; DROP TABLE bugs;--",
+        "<script>window.__xss=4</script><img src=x onerror=\"window.__xss=5\"> ' OR '1'='1 \"); DELETE FROM bugs; -- <svg onload=\"window.__xss=6\"></svg> [javascript link](javascript:alert(1))"
+      ]
+    },
+    "confirm": {
+      "xss": null,
+      "text": "Are you sure you want to delete bug #5: [security] XSS <img src=x onerror=\"window.__xss=1;document.title='PWNED-title'\"> <script>window.__xss=2</script>?"
+    },
+    "dialogs": []
+  }
+}

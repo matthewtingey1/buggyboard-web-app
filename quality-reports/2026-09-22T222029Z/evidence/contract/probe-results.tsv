@@ -1,0 +1,64 @@
+row	method	path	input	expected	actual	content-type	body
+R01a	POST	/api/login	username number	400 JSON	500	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>TypeError: username.trim is not a function<br> &nbsp; &n
+R01b	POST	/api/login	username array	400 JSON	500	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>TypeError: username.trim is not a function<br> &nbsp; &n
+R01c	POST	/api/login	username object	400 JSON	500	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>TypeError: username.trim is not a function<br> &nbsp; &n
+R01d	POST	/api/login	password number	400 JSON	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+R02a	POST	/api/login	malformed JSON	400 JSON	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nb
+R02b	POST	/api/bugs	malformed JSON	400 JSON	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nb
+R02d	POST	/api/login	body null	400 JSON	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>SyntaxError: Unexpected token &#39;n&#39;, &quot;null&qu
+R03a	GET	/api/bugs/3081abc	id 1abc	400 invalid_id	200	application/json; charset=utf-8	{"id":3081,"title":"[contract] R03 target 15803","severity":"LOW","owner":"buggy","description":"probe","state":"OPEN"}
+R03b	GET	/api/bugs/3081.9	id decimal	400 invalid_id	200	application/json; charset=utf-8	{"id":3081,"title":"[contract] R03 target 15803","severity":"LOW","owner":"buggy","description":"probe","state":"OPEN"}
+R03c	GET	/api/bugs/%203081	id leading space	400 invalid_id	200	application/json; charset=utf-8	{"id":3081,"title":"[contract] R03 target 15803","severity":"LOW","owner":"buggy","description":"probe","state":"OPEN"}
+R03d	GET	/api/bugs/-1	negative id	400 invalid_id	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R03e	GET	/api/bugs/0x1	hex id	400 invalid_id	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R04a	GET	/api/nope	unknown path	404 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot GET /api/nope</pre> </body> </html> 
+R04b	POST	/api/health	wrong method	405 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot POST /api/health</pre> </body> </html> 
+R05a	POST	/api/bugs	severity critical	400 invalid_severity	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+R05b	POST	/api/bugs	title number	400 invalid_type	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+R06a	POST	/api/login	valid JSON, no Content-Type	415	400	application/json; charset=utf-8	{"error":"missing_credentials","message":"Please enter your username and password."}
+R06b	POST	/api/bugs	valid JSON, text/plain	415	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+R07	POST	/api/login	whitespace-only password	400 blank_password?	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+N01	PUT	/api/bugs/abc	non-numeric id	400 invalid_id	400	application/json; charset=utf-8	{"error":"invalid_id","message":"Bug ID must be a number."}
+N02	PUT	/api/bugs/3084abc	id 1abc	400 invalid_id	200	application/json; charset=utf-8	{"id":3084,"title":"[contract] via 1abc","severity":"MID","owner":"buggy","description":"d","state":"OPEN"}
+N02v	GET	/api/bugs/3084	verify target after PUT 1abc	title unchanged	200	application/json; charset=utf-8	{"id":3084,"title":"[contract] via 1abc","severity":"MID","owner":"buggy","description":"d","state":"OPEN"}
+N03	PUT	/api/bugs/3084.5	id decimal	400 invalid_id	200	application/json; charset=utf-8	{"id":3084,"title":"[contract] upd","severity":"MID","owner":"buggy","description":"d","state":"OPEN"}
+N04	PUT	/api/bugs/3084e5	id exponent	400 invalid_id	200	application/json; charset=utf-8	{"id":3084,"title":"[contract] upd","severity":"MID","owner":"buggy","description":"d","state":"OPEN"}
+N05	PUT	/api/bugs/-1	negative id	400 invalid_id	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+N06	PUT	/api/bugs/0x1	hex id	400 invalid_id	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+N07	PUT	/api/bugs/999999999	missing numeric id, invalid body	404 or 400	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+N08	PUT	/api/bugs/3084	malformed JSON	400 JSON	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nb
+N09	PUT	/api/bugs/3084	no Content-Type	415	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+N10	DELETE	/api/bugs/-1	negative id	400 invalid_id	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+N11	DELETE	/api/bugs/abc	malformed JSON body on DELETE	400 invalid_id or ignored	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>SyntaxError: Expected property name or &#39;}&#39; in JS
+M01	PATCH	/api/bugs/3084	PATCH	405 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot PATCH /api/bugs/3084</pre> </body> </html> 
+M02	DELETE	/api/bugs	DELETE collection	405 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot DELETE /api/bugs</pre> </body> </html> 
+M03	PUT	/api/bugs	PUT collection	405 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot PUT /api/bugs</pre> </body> </html> 
+M04	GET	/api/login	GET login	405 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot GET /api/login</pre> </body> </html> 
+M05	DELETE	/api/health	DELETE health	405 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot DELETE /api/health</pre> </body> </html> 
+M06	HEAD	/api/health	HEAD health	200 no body	200	application/json; charset=utf-8	HTTP/1.1 200 OK Vary: Origin x-powered-by: Express access-control-allow-origin: http://localhost:5173 access-control-allow-methods: GET, POST, PUT, DELETE, 
+M07	HEAD	/api/bugs	HEAD bugs	200 no body	200	application/json; charset=utf-8	HTTP/1.1 200 OK Vary: Origin x-powered-by: Express access-control-allow-origin: http://localhost:5173 access-control-allow-methods: GET, POST, PUT, DELETE, 
+M08	HEAD	/api/nope	HEAD unknown	404	404	text/html; charset=utf-8	HTTP/1.1 404 Not Found Vary: Origin x-powered-by: Express access-control-allow-origin: http://localhost:5173 access-control-allow-methods: GET, POST, PUT, D
+M09	OPTIONS	/api/bugs	OPTIONS no preflight headers	204	204		
+M10	OPTIONS	/api/bugs/3084	CORS preflight PUT	204 + ACAO	204		
+M11	OPTIONS	/api/login	CORS preflight POST	204 + ACAO	204		
+C01	POST	/api/bugs	application/json; charset=utf-8	201	201	application/json; charset=utf-8	{"id":3085,"title":"[contract] ct1","severity":"LOW","owner":"buggy","description":"d","state":"OPEN"}
+C02	POST	/api/bugs	application/vnd.api+json	415 or 201	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C03	POST	/api/bugs	form-urlencoded fields	415	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C04	POST	/api/bugs	multipart form	415	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C05	POST	/api/bugs	application/json; charset=latin1	415 JSON	415	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>UnsupportedMediaTypeError: unsupported charset &quot;LAT
+C06	POST	/api/login	Content-Encoding: gzip, body not gzip	400 JSON	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Error: incorrect header check<br> &nbsp; &nbsp;at generi
+C07	POST	/api/login	Content-Encoding: br (unsupported)	415 JSON	415	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>UnsupportedMediaTypeError: unsupported content encoding 
+C08	POST	/api/bugs	empty body with application/json	400 blank_title	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C09	POST	/api/bugs	body is a JSON array	400 JSON	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C10	POST	/api/bugs	body is a JSON string (strict)	400 JSON	400	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>SyntaxError: Unexpected token &#39;&quot;&#39;, &quot;&q
+C11	GET	/api/bugs	Accept: application/xml	200 JSON or 406	200	application/json; charset=utf-8	[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimmin
+L01	POST	/api/bugs	200 KB body (> 100kb limit)	413 JSON	413	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>PayloadTooLargeError: request entity too large<br> &nbsp
+L02	PUT	/api/bugs/3084	200 KB body	413 JSON	413	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>PayloadTooLargeError: request entity too large<br> &nbsp
+L03	POST	/api/bugs	90 KB description (under limit)	201 or 400 too_long	201	application/json; charset=utf-8	{"id":3086,"title":"[contract] ninety tttttttttttttttttttt","severity":"LOW","owner":"buggy","description":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+L04	POST	/api/bugs	10k-char title	400 too_long?	201	application/json; charset=utf-8	{"id":3087,"title":"[contract] ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+E01	GET	/api/bugs/	trailing slash	200	200	application/json; charset=utf-8	[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimmin
+E02	GET	/API/BUGS	upper-case path	404?	200	text/html	<!doctype html> <html lang="en">   <head>     <script type="module">import { injectIntoGlobalHook } from "/@react-refresh"; injectIntoGlobalHook(window); window
+E03	GET	/api/bugs/3084/	id trailing slash	200	200	application/json; charset=utf-8	{"id":3084,"title":"[contract] upd","severity":"MID","owner":"buggy","description":"d","state":"OPEN"}
+E04	GET	/api/bugs/3084/extra	extra segment	404 JSON	404	text/html; charset=utf-8	<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head> <body> <pre>Cannot GET /api/bugs/3084/extra</pre> </body> </html> 
+E05	GET	/api/bugs/99999999999999999999	huge id	404 or 400	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+E06	GET	/api/bugs/0	zero id	400 invalid_id	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}

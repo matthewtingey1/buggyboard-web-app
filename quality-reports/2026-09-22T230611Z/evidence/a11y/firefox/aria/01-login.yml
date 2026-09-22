@@ -1,0 +1,8 @@
+- main:
+  - heading "BuggyBoard" [level=1]
+  - heading "Log in" [level=2]
+  - text: Username
+  - textbox "Username"
+  - text: Password
+  - textbox "Password"
+  - button "Login"

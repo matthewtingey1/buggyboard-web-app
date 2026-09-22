@@ -1,0 +1,27 @@
+{
+  "N3": [
+    "Tabs from page load to New Bug: 2",
+    "focus after open create: INPUT#bug-title ''",
+    "severity after ArrowDown: mid",
+    "focus before submit: BUTTON 'Save'",
+    "created: 1; focus after create closes: BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "Tabs from search box to first row: 10",
+    "edit open=1, focus=INPUT#edit-bug-title ''",
+    "2 tabs from title: SELECT#edit-bug-state 'OpenClosed'",
+    "state after type-ahead 'c': closed",
+    "Tabs from State to Save: 5",
+    "saved via keyboard: state=CLOSED; focus after edit closes: BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "Tabs from title to Delete: 5",
+    "confirm open=1, focus=BUTTON 'Delete'",
+    "Tabs to reach confirm Delete=4",
+    "after confirm: bug exists=0; dialogs=0; focus=BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "CHARTER ERROR locator.focus: Timeout 30000ms exceeded."
+  ],
+  "N6": [
+    "created 200 bugs in 545ms",
+    "board load with >=200 extra rows: 46ms, rows=228",
+    "typing 18 chars: 117ms; rows=1",
+    "search+sort title asc: 0 rows, sorted=true, first='undefined'",
+    "CHARTER ERROR locator.innerText: Timeout 30000ms exceeded."
+  ]
+}

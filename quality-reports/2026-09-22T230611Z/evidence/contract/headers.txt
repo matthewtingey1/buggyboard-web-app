@@ -1,0 +1,77 @@
+### OPTIONS http://localhost:5173/api/bugs/1 (no Origin)
+HTTP/1.1 204 No Content
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Content-Length: 0
+
+
+### OPTIONS http://localhost:5173/api/bugs/1 preflight Origin localhost:5173, PUT
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: http://localhost:5173
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Access-Control-Allow-Headers: content-type
+Content-Length: 0
+
+
+### OPTIONS http://localhost:5173/api/nope
+HTTP/1.1 204 No Content
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Content-Length: 0
+
+
+### GET http://localhost:5173/API/BUGS and /API/NOPE
+200 text/html
+200 text/html
+
+### GET http://localhost:5173/api (bare)
+HTTP/1.1 404 Not Found
+content-type: text/html; charset=utf-8
+<pre>Cannot GET /api</pre>
+
+### OPTIONS http://127.0.0.1:3002/api/bugs/1 (no Origin)
+HTTP/1.1 204 No Content
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Allow: GET, PUT, DELETE, OPTIONS
+
+
+### OPTIONS http://127.0.0.1:3002/api/bugs/1 preflight Origin localhost:5173, PUT
+HTTP/1.1 204 No Content
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Allow: GET, PUT, DELETE, OPTIONS
+
+
+### OPTIONS http://127.0.0.1:3002/api/nope
+HTTP/1.1 404 Not Found
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 52
+ETag: W/"34-KTzAKdvPYw76m4o+mpEnjnrYrls"
+
+{"error":"not_found","message":"No such API route."}
+
+### GET http://127.0.0.1:3002/API/BUGS and /API/NOPE
+200 application/json; charset=utf-8
+404 application/json; charset=utf-8
+
+### GET http://127.0.0.1:3002/api (bare)
+HTTP/1.1 404 Not Found
+Content-Type: text/html; charset=utf-8
+<pre>Cannot GET /api</pre>
+

@@ -1,0 +1,22 @@
+{
+  "c1_deleteWhileOpenElsewhere": [
+    "ERROR locator.fill: Timeout 30000ms exceeded."
+  ],
+  "c2_lostUpdate": [
+    "ERROR locator.fill: Timeout 30000ms exceeded."
+  ],
+  "C3": [
+    "tab1 logged out; localStorage buggyboard_user in tab2 = null",
+    "tab2 still on /board; created bug after logout: #90 owner=buggy",
+    "tab1 now logged in as vanny; tab2 Create modal default owner = \"buggy\""
+  ],
+  "C4": [
+    "dblclick: bugs created = 1",
+    "enterRepeat: bugs created = 1",
+    "syncDoubleClick: bugs created = 2",
+    "doubleRequestSubmit: bugs created = 2"
+  ],
+  "c4_doubleSubmit": [
+    "ERROR locator.fill: Timeout 30000ms exceeded."
+  ]
+}

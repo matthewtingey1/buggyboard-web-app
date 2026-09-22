@@ -14,7 +14,8 @@ When working on the **BuggyBoard** web app (bug tracker SUT for the Playwright c
 3. **Update** `specs/PROGRESS.md` when a feature or step is completed.
 4. **Pause for review** after each feature; do not start the next feature until the user directs.
 5. **Ask the user** when a decision is unclear instead of assuming.
-6. **Write atomic tests rather than grand tours** so that every test focuses on one thing and is easier to debug when it fails.
+6. **Test plans and quality runs.** Test plans live in `specs/testing/` and start from `tests/seed.spec.ts`. The six testing agents are in `.claude/agents/`, and `/quality-run` runs them as a team (contract: `quality-reports/REPORT-CONTRACT.md`).
+7. **Write atomic tests rather than grand tours** so that every test focuses on one thing and is easier to debug when it fails.
    - See `specs/engineering/test-automation-patterns.md` for full rules.
    - Tests must use Page Object classes from `tests/pages/`; never write raw `page.*` call chains directly in test files.
    - Tests should follow the Arrange-Act-Assert pattern.

@@ -1,0 +1,28 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search "Search bugs by title": "[a11y] keyboard walk 1790110567858"
+  - button "Clear search"
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed"
+  - table "Bugs":
+    - rowgroup:
+      - row "ID Severity Title Owner":
+        - columnheader "ID":
+          - button "ID"
+        - columnheader "Severity":
+          - button "Severity"
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Owner":
+          - button "Owner"
+    - rowgroup:
+      - button "87 MID [a11y] keyboard walk 1790110567858 buggy":
+        - cell "87"
+        - cell "MID"
+        - cell "[a11y] keyboard walk 1790110567858"
+        - cell "buggy"

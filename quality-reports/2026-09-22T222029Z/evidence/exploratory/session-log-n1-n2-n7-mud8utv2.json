@@ -1,0 +1,16 @@
+{
+  "N1": [
+    "CHARTER ERROR locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:"
+  ],
+  "N2": [
+    "first dialog to open: 'Edit bug #3313' (B=#3313)",
+    "after A's slow GET arrives: dialog='Edit bug #3312', description field='exploratory charter'",
+    "700ms after clicking a slow row: dialogs=0, busy indicator=0"
+  ],
+  "N7": [
+    "GET /api/bugs 500 on load: body shows 'No bugs.', alerts=0",
+    "GET aborted on load: body shows 'No bugs.', page errors=[\"Failed to fetch\",\"Failed to fetch\"]",
+    "row click with network failure: dialogs=0, alerts=0",
+    "create OK but refetch 503: modal closed=true, row visible=0, server has it=1, alerts=0"
+  ]
+}

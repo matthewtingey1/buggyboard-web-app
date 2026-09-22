@@ -1,0 +1,218 @@
+{
+  "computedFromApp": {
+    "high": {
+      "color": "rgb(184, 74, 46)",
+      "bg": "color(srgb 0.721569 0.290196 0.180392 / 0.22)"
+    },
+    "mid": {
+      "color": "rgb(166, 124, 71)",
+      "bg": "color(srgb 0.65098 0.486275 0.278431 / 0.22)"
+    },
+    "low": {
+      "color": "rgb(74, 107, 94)",
+      "bg": "color(srgb 0.290196 0.419608 0.368627 / 0.22)"
+    },
+    "placeholder": "rgb(168, 162, 158)",
+    "searchWrapBg": "rgb(250, 250, 249)"
+  },
+  "pairs": [
+    {
+      "pair": "Severity HIGH text on 22% tint over white row",
+      "fg": "#b84a2e",
+      "bg": "#efd7d1",
+      "ratio": 3.77,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity HIGH text on 22% tint over hovered row (stone-50/80)",
+      "fg": "#b84a2e",
+      "bg": "#ecd4cd",
+      "ratio": 3.66,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity MID text on 22% tint over white row",
+      "fg": "#a67c47",
+      "bg": "#ebe2d7",
+      "ratio": 2.93,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity MID text on 22% tint over hovered row (stone-50/80)",
+      "fg": "#a67c47",
+      "bg": "#e8dfd3",
+      "ratio": 2.85,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity LOW text on 22% tint over white row",
+      "fg": "#4a6b5e",
+      "bg": "#d7dedc",
+      "ratio": 4.32,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity LOW text on 22% tint over hovered row (stone-50/80)",
+      "fg": "#4a6b5e",
+      "bg": "#d4dbd8",
+      "ratio": 4.2,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Login/Save/Open-selected: stone-800 text on primary #b8ae76",
+      "fg": "#292524",
+      "bg": "#b8ae76",
+      "ratio": 6.76,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "\"Log in\" subtitle: primary #b8ae76 text on white",
+      "fg": "#b8ae76",
+      "bg": "#ffffff",
+      "ratio": 2.25,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "New Bug: stone-800 text on primary/25 over white",
+      "fg": "#292524",
+      "bg": "#edebdd",
+      "ratio": 12.66,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring: primary #b8ae76 vs white",
+      "fg": "#b8ae76",
+      "bg": "#ffffff",
+      "ratio": 2.25,
+      "required": 3,
+      "sc": "1.4.11 / 2.4.13",
+      "pass": false
+    },
+    {
+      "pair": "Focus ring: primary #b8ae76 vs stone-100 page",
+      "fg": "#b8ae76",
+      "bg": "#f5f5f4",
+      "ratio": 2.06,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": false
+    },
+    {
+      "pair": "Selected Open (primary bg) vs white toggle track",
+      "fg": "#b8ae76",
+      "bg": "#ffffff",
+      "ratio": 2.25,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": false
+    },
+    {
+      "pair": "Search placeholder stone-400 on stone-50",
+      "fg": "#a8a29e",
+      "bg": "#fafaf9",
+      "ratio": 2.41,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Search placeholder stone-400 on white (focused)",
+      "fg": "#a8a29e",
+      "bg": "#ffffff",
+      "ratio": 2.52,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Error text red-600 on white",
+      "fg": "#dc2626",
+      "bg": "#ffffff",
+      "ratio": 4.83,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Delete (edit) red-700 on white",
+      "fg": "#b91c1c",
+      "bg": "#ffffff",
+      "ratio": 6.47,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Confirm Delete white on red-600",
+      "fg": "#ffffff",
+      "bg": "#dc2626",
+      "ratio": 4.83,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Unselected toggle stone-500 on white",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "ID column / read-only ID stone-500 on white / stone-50",
+      "fg": "#78716c",
+      "bg": "#fafaf9",
+      "ratio": 4.59,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Input border stone-300 on white",
+      "fg": "#d6d3d1",
+      "bg": "#ffffff",
+      "ratio": 1.49,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": false
+    },
+    {
+      "pair": "Close X stone-500 on white",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Disabled Save: stone-800 on primary at 50% opacity (exempt)",
+      "fg": "#949292",
+      "bg": "#dcd7bb",
+      "ratio": 2.13,
+      "required": 0,
+      "sc": "1.4.3 (inactive, exempt)",
+      "pass": true
+    }
+  ]
+}

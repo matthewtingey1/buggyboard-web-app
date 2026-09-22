@@ -1,0 +1,17 @@
+{
+  "N7": [
+    "click ID cell: dialog opened=true",
+    "click owner cell: dialog opened=true",
+    "click title cell padding (right of text): dialog opened=true",
+    "drag-select across title: selection='' dialog opened=true",
+    "drag-select across whole row: selection='' dialog opened=true",
+    "viewport 375: {\"doc\":375,\"header\":375,\"logoutRight\":240.25}",
+    "viewport 320: {\"doc\":320,\"header\":320,\"logoutRight\":240.25}"
+  ],
+  "N8": [
+    "multi-line title POST -> 201 stored='\"[exploratory] N8 line one line two mudap0o9\"' description=\"a\\nb\"",
+    "edit title to a zero-width space: Save enabled=true",
+    "after Save: alert='Title is required.' server title='[exploratory] N8 zw mudap0o9'",
+    "edit title to spaces: Save enabled=false (create modal shows 'Title is required.' on submit; edit gives no message)"
+  ]
+}

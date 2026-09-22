@@ -1,0 +1,8 @@
+- heading "BuggyBoard" [level=1]
+- paragraph: Log in
+- text: Username
+- textbox "Username": buggy
+- text: Password
+- textbox "Password": wrong-on-purpose
+- alert: Invalid username or password.
+- button "Login"

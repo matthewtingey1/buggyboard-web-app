@@ -1,0 +1,8 @@
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › tests/security/security.spec.ts:5:1 › script in a bug title renders as text on the board
+[2/4] [chromium] › tests/security/security.spec.ts:15:1 › script in bug fields renders as text in the edit modal
+[3/4] [chromium] › tests/security/security.spec.ts:26:1 › script in a bug title renders as text in the delete confirmation
+[4/4] [chromium] › tests/security/security.spec.ts:38:1 › a forged session for a user that does not exist is refused
+  4 passed (8.1s)

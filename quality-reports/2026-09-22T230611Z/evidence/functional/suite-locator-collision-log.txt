@@ -1,0 +1,39 @@
+probe id 7090
+
+Running 33 tests using 1 worker
+
+[1/33] [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button
+[2/33] [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user
+[3/33] [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal
+[4/33] [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload
+[5/33] [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Cancel does not save the bug
+[6/33] [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with the X button does not save the bug
+[7/33] [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Escape does not save the bug
+[8/33] [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data
+[9/33] [chromium] › tests/create-bug/create-bug.spec.ts:92:1 › saving with every field blank names each required field
+[10/33] [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only title blocks saving
+[11/33] [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only owner blocks saving
+[12/33] [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only description blocks saving
+[13/33] [chromium] › tests/create-bug/create-bug.spec.ts:126:1 › severity has no blank option in the create modal
+[14/33] [chromium] › tests/create-bug/create-bug.spec.ts:132:1 › the API rejects a bug with a blank severity
+[15/33] [chromium] › tests/create-bug/create-bug.spec.ts:139:3 › selected HIGH severity is shown in its severity colour
+[16/33] [chromium] › tests/create-bug/create-bug.spec.ts:139:3 › selected MID severity is shown in its severity colour
+[17/33] [chromium] › tests/create-bug/create-bug.spec.ts:139:3 › selected LOW severity is shown in its severity colour
+[18/33] [chromium] › tests/login/session.spec.ts:3:1 › authenticated session persists across a page refresh
+[19/33] [chromium] › tests/logout/logout.spec.ts:3:1 › logout clears the session and redirects to /login
+[20/33] [chromium] › tests/logout/logout.spec.ts:12:1 › visiting /board after logout redirects to /login
+[21/33] [chromium] › tests/logout/logout.spec.ts:21:1 › browser Back after logout does not restore the session
+[22/33] [chromium] › tests/logout/logout.spec.ts:33:1 › landing on the board via Back after logout redirects to login
+[23/33] [chromium] › tests/search/search.spec.ts:15:1 › a blank search shows every bug and no clear button
+[24/33] [chromium] › tests/search/search.spec.ts:22:1 › typing a term hides titles that do not contain it
+[25/33] [chromium] › tests/search/search.spec.ts:29:1 › "login" matches a title containing "log-in"
+[26/33] [chromium] › tests/search/search.spec.ts:36:1 › matching ignores case and collapses whitespace
+[27/33] [chromium] › tests/search/search.spec.ts:42:1 › the X button clears the search and restores every bug
+[28/33] [chromium] › tests/search/search.spec.ts:53:1 › the sort order and arrow are kept while searching
+[29/33] [chromium] › tests/search/search.spec.ts:64:1 › a search with no matches shows "No bugs matched." and no rows
+[30/33] [chromium] › tests/title-bar/layout.spec.ts:8:1 › title bar shows the logo, the BuggyBoard title and a logout button
+[31/33] [chromium] › tests/title-bar/layout.spec.ts:14:1 › logo sits in a rounded box
+[32/33] [chromium] › tests/title-bar/layout.spec.ts:18:1 › title sits immediately to the right of the logo
+[33/33] [chromium] › tests/title-bar/layout.spec.ts:25:1 › logout button is right-justified
+  33 passed (18.6s)
+delete: 204

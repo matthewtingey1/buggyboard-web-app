@@ -1,0 +1,11 @@
+{
+  "R01": [
+    "after buggy close: state=CLOSED",
+    "after vanny description save: state=OPEN description=vanny edit -> REPRODUCES"
+  ],
+  "R02": [
+    "save after delete: modal open=true alert='Bug not found.'",
+    "row behind modal after save 404: 0",
+    "stale row after Cancel: 0"
+  ]
+}

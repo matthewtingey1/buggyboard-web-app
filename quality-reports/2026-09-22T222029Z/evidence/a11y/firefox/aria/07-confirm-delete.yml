@@ -1,0 +1,57 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search "Search bugs by title": "[a11y] walk firefox 1790115936332"
+  - button "Clear search"
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed"
+  - table "Bugs":
+    - rowgroup:
+      - row "ID Severity Title Owner":
+        - columnheader "ID":
+          - button "ID"
+        - columnheader "Severity":
+          - button "Severity"
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Owner":
+          - button "Owner"
+    - rowgroup:
+      - button "3307 MID [a11y] walk firefox 1790115936332 edited buggy":
+        - cell "3307"
+        - cell "MID"
+        - cell "[a11y] walk firefox 1790115936332 edited"
+        - cell "buggy"
+- 'dialog "Edit bug #3307"':
+  - 'heading "Edit bug #3307" [level=2]'
+  - button "Close"
+  - text: ID
+  - textbox "ID": "3307"
+  - text: Title
+  - textbox "Title": "[a11y] walk firefox 1790115936332 edited"
+  - text: Severity
+  - combobox "Severity":
+    - option "HIGH"
+    - option "MID" [selected]
+    - option "LOW"
+  - text: State
+  - combobox "State":
+    - option "Open" [selected]
+    - option "Closed"
+  - text: Owner
+  - textbox "Owner": buggy
+  - text: Description
+  - textbox "Description": Created by a11y keyboard walk
+  - button "Delete"
+  - button "Cancel"
+  - button "Save" [disabled]
+- dialog "Delete bug":
+  - heading "Delete bug" [level=2]
+  - button "Close"
+  - paragraph: "Are you sure you want to delete bug #3307: [a11y] walk firefox 1790115936332 edited?"
+  - button "Cancel"
+  - button "Delete"

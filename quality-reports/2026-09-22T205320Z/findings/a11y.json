@@ -1,0 +1,213 @@
+{
+  "agent": "a11y",
+  "run": "2026-09-22T205320Z",
+  "scope": "WCAG 2.2 AA audit of the working tree (no frontend diff vs cce584c). Headless Chromium keyboard-only walk: login (bad + good password), board tab order, New Bug open/trap/Escape/validation/save, search type + clear, open row by Enter, edit + save, Delete -> confirm -> Escape -> Delete, Open/Closed toggle, sort header, logout. ariaSnapshot per view, computed-style contrast for 22 colour pairs, reflow at 320 CSS px, target sizes. One [a11y] bug created per run and deleted by keyboard (plus one leftover from an aborted run deleted via API).",
+  "verdict": "not-ready",
+  "confidence": "medium",
+  "commands": [
+    "curl -s localhost:5173/api/health",
+    "node quality-reports/2026-09-22T205320Z/evidence/a11y/keyboard-walk.cjs",
+    "node quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.cjs",
+    "curl -s -X DELETE localhost:5173/api/bugs/16",
+    "curl -s localhost:5173/api/bugs (verify no [a11y] bugs remain)"
+  ],
+  "findings": [
+    {
+      "id": "a11y-01",
+      "title": "Specs contain no accessibility requirement",
+      "status": "gap",
+      "severity": "medium",
+      "requirement": "specs/design/theme.md 'Other UI/UX' (accessibility placeholder); WCAG 2.2 AA used as authority",
+      "location": "specs/design/theme.md:21",
+      "evidence": "theme.md leaves accessibility as '(... accessibility, and other design rules can be added here ...)'. No feature spec has an a11y acceptance criterion; no a11y tests exist (tests/example.spec.ts targets playwright.dev).",
+      "repro": "grep -ri 'accessib\\|wcag\\|aria' specs/",
+      "fix": "Add an accessibility section to theme.md committing to WCAG 2.2 AA (contrast, focus management in modals, keyboard operation, reflow at 320px) and an a11y acceptance criterion per feature."
+    },
+    {
+      "id": "a11y-02",
+      "title": "Search input has role=\"search\", so it is exposed as a landmark, not a textbox",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "WCAG 4.1.2 Name, Role, Value; 1.3.1 Info and Relationships",
+      "location": "frontend/src/TitleBar.tsx:48",
+      "evidence": "ariaSnapshot of banner: `search \"Search bugs by title\"` - no textbox role; editable field announced as a region. See evidence/a11y/aria/03-board.yml.",
+      "repro": "Log in, run page.locator('header').ariaSnapshot(); the input appears as `search`, not `textbox`/`searchbox`.",
+      "fix": "Remove role=\"search\" from the <input>, use type=\"search\" (searchbox role), and put role=\"search\" on the wrapping <div>."
+    },
+    {
+      "id": "a11y-03",
+      "title": "Bug table rows have role=\"button\", destroying row semantics",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "WCAG 1.3.1 Info and Relationships; 4.1.2 Name, Role, Value",
+      "location": "frontend/src/BoardPage.tsx:263-273",
+      "evidence": "ariaSnapshot: tbody children are `button \"87 MID [a11y] keyboard walk ... buggy\"` containing cells, not `row`. The button name concatenates every cell; table row/column navigation is broken. Keyboard activation itself works (Enter on row opened 'Edit bug #87').",
+      "repro": "Log in; page.getByRole('table').ariaSnapshot() -> rows listed as button.",
+      "fix": "Remove role/tabIndex/onKeyDown from <tr>; render the Title (or ID) cell content as a <button> that calls handleRowClick; keep the <tr> onClick for mouse users."
+    },
+    {
+      "id": "a11y-04",
+      "title": "Open/Closed toggle selected state is conveyed only visually",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "WCAG 4.1.2 Name, Role, Value; 1.4.1 Use of Color",
+      "location": "frontend/src/BoardPage.tsx:163-184",
+      "evidence": "After Space on Closed: Open aria-pressed=null, Closed aria-pressed=null, no aria-current. ariaSnapshot shows plain `button \"Open\"`, `button \"Closed\"`. Selected state is only the #b8ae76 fill, which is 2.25:1 against the white track.",
+      "repro": "Tab to Closed, press Space, read getAttribute('aria-pressed') on both buttons.",
+      "fix": "Add aria-pressed={stateFilter === \"OPEN\"} and aria-pressed={stateFilter === \"CLOSED\"} to the two buttons."
+    },
+    {
+      "id": "a11y-05",
+      "title": "Create and Edit modals do not trap focus; Tab walks into the page behind",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 2.4.3 Focus Order; 2.1.2 (aria-modal=\"true\" contract); theme.md modal consistency",
+      "location": "frontend/src/CreateBugModal.tsx:106-111; frontend/src/EditBugModal.tsx:207-212",
+      "evidence": "Create bug: Tab 6 from title -> BODY, Tab 7 -> search field, 8 New Bug, 9 Logout, 10 Open (all outside dialog). Edit bug: Tab 7 -> BODY, then search, Clear search, New Bug, Logout, Open. Close X is also skipped on the way out. keyboard-path.log lines 'Trap test'; screenshot 06-create-modal-focus-escaped.png.",
+      "repro": "Open New Bug with Enter, press Tab 7 times, check document.activeElement.closest('[role=dialog]') is null.",
+      "fix": "Use native <dialog>.showModal(), or set `inert` on #root content while a modal is open, or add a Tab/Shift+Tab wrap handler on the panel."
+    },
+    {
+      "id": "a11y-06",
+      "title": "Focus is dropped to <body> after closing a modal, saving, deleting, or clearing search",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 2.4.3 Focus Order",
+      "location": "frontend/src/BoardPage.tsx:296-309; frontend/src/TitleBar.tsx:55-59",
+      "evidence": "Escape right after opening Create from New Bug -> BODY. Save (create) -> BODY. Save (edit) -> BODY (not the row). Confirm Delete -> BODY. Escape on delete confirm -> BODY. Enter on Clear search -> BODY (button becomes visibility:hidden). Keyboard users restart from the top of the page each time.",
+      "repro": "Focus New Bug, Enter, Escape; document.activeElement === document.body.",
+      "fix": "Store the trigger element when opening and call .focus() on it in onClose (New Bug, or the row's button); after delete focus the table or next row; after Clear search focus the search input."
+    },
+    {
+      "id": "a11y-07",
+      "title": "Delete confirmation dialog does not receive focus; focus stays behind it in the Edit dialog",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 2.4.3 Focus Order; 4.1.2 (two simultaneous aria-modal dialogs)",
+      "location": "frontend/src/EditBugModal.tsx:358-364",
+      "evidence": "Enter on Delete -> focus remains on `button \"Delete\" (in dialog \"Edit bug #87\")` under the overlay; Tab 1 -> Edit dialog Cancel, Tab 2 reaches 'Delete bug' Close. ariaSnapshot 10-confirm-delete.yml exposes both dialogs; screenshot 10-confirm-delete.png shows the focus ring on the dimmed Delete.",
+      "repro": "Open a bug, focus Delete, press Enter, read document.activeElement.",
+      "fix": "Focus the confirm dialog's Cancel button when showConfirmDelete becomes true, make the Edit dialog inert while it is shown, and return focus to Delete on cancel."
+    },
+    {
+      "id": "a11y-08",
+      "title": "Severity badge text fails 4.5:1 on its own tint (HIGH 3.77, MID 2.93, LOW 4.32)",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.3 Contrast (Minimum); spec 08 colours",
+      "location": "frontend/src/index.css:8-10,22-33",
+      "evidence": "Computed in app: HIGH #b84a2e on #efd7d1 = 3.77:1 (3.66 hovered); MID #a67c47 on #ebe2d7 = 2.93:1 (2.85 hovered); LOW #4a6b5e on #d7dedc = 4.32:1 (4.20 hovered). Badge is 14px/600, not large text. contrast.json.",
+      "repro": "node quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.cjs",
+      "fix": "Darken the text colours (e.g. HIGH #a24128, MID #7e5e36, LOW #47675a reach ~4.6:1 on white rows; go slightly darker for hovered rows) or lighten the tint; update spec 08 hex values to match."
+    },
+    {
+      "id": "a11y-09",
+      "title": "Login 'Log in' subtitle in #b8ae76 on white is 2.25:1",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.3 Contrast (Minimum)",
+      "location": "frontend/src/LoginPage.tsx:71",
+      "evidence": "#b8ae76 on #ffffff = 2.25:1 at 16px/500. (Contrast of stone-800 text on the beige primary is fine at 6.76:1.)",
+      "repro": "node quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.cjs",
+      "fix": "Use text-stone-700, or add a darker brand shade for text (e.g. #7a7040, 4.98:1)."
+    },
+    {
+      "id": "a11y-10",
+      "title": "Search placeholder text is 2.41:1",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.3 Contrast (Minimum)",
+      "location": "frontend/src/TitleBar.tsx:53",
+      "evidence": "placeholder computed rgb(168,162,158) (#a8a29e) on #fafaf9 = 2.41:1; on white when focused 2.52:1. The placeholder is the only visible label.",
+      "repro": "node quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.cjs",
+      "fix": "placeholder-stone-500 (#78716c: 4.59:1 on stone-50)."
+    },
+    {
+      "id": "a11y-11",
+      "title": "Focus ring, input borders and selected toggle fail 3:1 non-text contrast",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.11 Non-text Contrast (2.4.7 relies on it)",
+      "location": "frontend/src/*.tsx focus:ring-primary classes; input border-stone-300; BoardPage.tsx:168",
+      "evidence": "Focus ring #b8ae76 vs white 2.25:1, vs stone-100 page 2.06:1 (inputs get only a 1px ring). Input border #d6d3d1 vs white 1.49:1. Selected toggle fill vs track 2.25:1. Table rows fall back to Chrome's default blue outline (passes) because they have no custom focus style.",
+      "repro": "node quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.cjs",
+      "fix": "Use a darker ring (e.g. focus:ring-stone-700, or a #7a7040 brand shade), border-stone-500 on inputs, and add a border or check to the selected toggle."
+    },
+    {
+      "id": "a11y-12",
+      "title": "Board header does not reflow at 320 CSS px (400% zoom); Logout is off-screen",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.10 Reflow",
+      "location": "frontend/src/TitleBar.tsx:28,43,45",
+      "evidence": "At 320x640: documentElement.scrollWidth 524 vs clientWidth 320; New Bug at x 313-413 and Logout at x 438-524 need horizontal scroll; the h1 collapses to 0 px wide and the search box covers the logo. The table's own horizontal scroll is allowed by the 1.4.10 exception. /login reflows (320 = 320). Screenshot 14-board-320.png.",
+      "repro": "Open /board with viewport 320x640 and compare document.documentElement.scrollWidth to clientWidth.",
+      "fix": "Add flex-wrap to the header, drop flex-shrink-0 on the button group, and make the search w-full below sm (e.g. `w-full sm:w-80`)."
+    },
+    {
+      "id": "a11y-13",
+      "title": "Clear-search button is 22x36 px, next to the input",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 2.5.8 Target Size (Minimum)",
+      "location": "frontend/src/TitleBar.tsx:59",
+      "evidence": "Measured 22x36 px; it sits right next to the search input, so the spacing exception does not apply. Modal Close X measures 18x32 px but has no adjacent target, so it passes on spacing.",
+      "repro": "page.locator('button[aria-label=\"Clear search\"]').boundingBox() with search text entered.",
+      "fix": "p-2 or min-w-6 min-h-6 on the clear button (and on the Close X for consistency)."
+    },
+    {
+      "id": "a11y-14",
+      "title": "Submitting login drops focus to <body> because the fields are disabled while loading",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 2.4.3 Focus Order",
+      "location": "frontend/src/LoginPage.tsx:89,107,119",
+      "evidence": "Enter with wrong password -> BODY; after the 'Invalid username or password.' alert, the user has to Tab back into the form. The error is announced via role=alert, but the fields have no aria-invalid or aria-describedby.",
+      "repro": "On /login type a bad password, press Enter, read document.activeElement.",
+      "fix": "Use readOnly/aria-disabled instead of disabled during submit, or focus the username field when setting error; add aria-invalid and aria-describedby pointing at the error."
+    },
+    {
+      "id": "a11y-15",
+      "title": "Page title is 'BuggyBoard' on every route",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 2.4.2 Page Titled",
+      "location": "frontend/index.html:7",
+      "evidence": "document.title on /board = \"BuggyBoard\", same as /login.",
+      "repro": "Log in and read page.title().",
+      "fix": "Set document.title per route, e.g. 'Log in - BuggyBoard' and 'Board - BuggyBoard'."
+    },
+    {
+      "id": "a11y-16",
+      "title": "Login page has no main landmark and 'Log in' is a paragraph, not a heading",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "WCAG 1.3.1 Info and Relationships (best practice)",
+      "location": "frontend/src/LoginPage.tsx:58-71",
+      "evidence": "ariaSnapshot 01-login.yml: no landmark at all; `paragraph: Log in`.",
+      "repro": "page.locator('body').ariaSnapshot() on /login.",
+      "fix": "Wrap the card in <main> and make 'Log in' an <h2> (or wrap it in a labelled <form>)."
+    },
+    {
+      "id": "a11y-17",
+      "title": "Screen reader announcements (sort change, filter change, dialog open, save result) not verified",
+      "status": "potential",
+      "severity": "low",
+      "requirement": "WCAG 4.1.3 Status Messages; 4.1.2",
+      "location": "frontend/src/BoardPage.tsx:105-112,157-186",
+      "evidence": "aria-sort is set correctly on the active header (Title -> ascending, others null) and the arrow is aria-hidden, but nothing announces a sort, filter, save or delete result, and no status live region exists. No real screen reader was run.",
+      "repro": "Manual check with VoiceOver/NVDA: activate a sort header, toggle Closed, save a bug.",
+      "fix": "Add a visually hidden role=status region announcing e.g. 'Sorted by Title ascending', 'Showing 3 closed bugs', 'Bug saved'."
+    }
+  ],
+  "notTested": [
+    "axe-core: @axe-core/playwright is not installed, so it was not run (no packages added)",
+    "Real screen readers (VoiceOver, NVDA, JAWS): announcement quality and virtual-cursor behaviour with aria-modal are unverified",
+    "Firefox and WebKit keyboard behaviour (Chromium only); Safari's Tab-skips-buttons default",
+    "Actual browser zoom to 400% (320 CSS px viewport emulated instead); 1.4.12 text spacing; 1.4.4 resize to 200%",
+    "Windows High Contrast / forced-colors mode (focus rings drawn with box-shadow may disappear)",
+    "Keyboard change of <select> values: on macOS Chromium, arrow keys open the popup instead of changing the value; the walk edited the title instead",
+    "Error-state contrast inside modals beyond red-600 on white; hover-only states",
+    "Mobile touch / screen-reader gestures"
+  ]
+}

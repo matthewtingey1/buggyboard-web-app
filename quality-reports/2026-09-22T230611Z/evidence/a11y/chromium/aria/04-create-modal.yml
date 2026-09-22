@@ -1,0 +1,132 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search:
+    - textbox "Search bugs by title":
+      - /placeholder: Search bugs…
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open" [pressed]
+    - button "Closed"
+  - status: 15 open bugs shown.
+  - region "Bug table":
+    - table "Bugs":
+      - rowgroup:
+        - row "ID Severity Title Owner":
+          - columnheader "ID":
+            - button "ID"
+          - columnheader "Severity":
+            - button "Severity"
+          - columnheader "Title":
+            - button "Title"
+          - columnheader "Owner":
+            - button "Owner"
+      - rowgroup:
+        - row "2 HIGH Bug API endpoints work without logging in matt":
+          - cell "2"
+          - cell "HIGH"
+          - cell "Bug API endpoints work without logging in":
+            - button "Bug API endpoints work without logging in"
+          - cell "matt"
+        - row "6942 HIGH [exploratory] R01 lost-update mudahpux buggy":
+          - cell "6942"
+          - cell "HIGH"
+          - cell "[exploratory] R01 lost-update mudahpux":
+            - button "[exploratory] R01 lost-update mudahpux"
+          - cell "buggy"
+        - row "6952 HIGH [exploratory] R02b click-deleted mudahpux buggy":
+          - cell "6952"
+          - cell "HIGH"
+          - cell "[exploratory] R02b click-deleted mudahpux":
+            - button "[exploratory] R02b click-deleted mudahpux"
+          - cell "buggy"
+        - row "6969 HIGH [contract] lc buggy":
+          - cell "6969"
+          - cell "HIGH"
+          - cell "[contract] lc":
+            - button "[contract] lc"
+          - cell "buggy"
+        - row "3 MID Search does not match on bug description matt":
+          - cell "3"
+          - cell "MID"
+          - cell "Search does not match on bug description":
+            - button "Search does not match on bug description"
+          - cell "matt"
+        - row "1 LOW Login page accepts username with trailing spaces matt":
+          - cell "1"
+          - cell "LOW"
+          - cell "Login page accepts username with trailing spaces":
+            - button "Login page accepts username with trailing spaces"
+          - cell "matt"
+        - row "6967 LOW [contract] R03 target 24312 buggy":
+          - cell "6967"
+          - cell "LOW"
+          - cell "[contract] R03 target 24312":
+            - button "[contract] R03 target 24312"
+          - cell "buggy"
+        - row:
+          - cell "6968"
+          - cell "LOW"
+          - cell:
+            - button
+          - cell "buggy"
+        - row "6970 LOW [contract] line1 line2 buggy":
+          - cell "6970"
+          - cell "LOW"
+          - cell "[contract] line1 line2":
+            - button "[contract] line1 line2"
+          - cell "buggy"
+        - row "6971 LOW [contract] ls1 ls2 buggy":
+          - cell "6971"
+          - cell "LOW"
+          - cell "[contract] ls1 ls2":
+            - button "[contract] ls1 ls2"
+          - cell "buggy"
+        - row "6972 LOW ‎ buggy":
+          - cell "6972"
+          - cell "LOW"
+          - cell "‎":
+            - button "‎"
+          - cell "buggy"
+        - row "6973 LOW ⠀ buggy":
+          - cell "6973"
+          - cell "LOW"
+          - cell "⠀":
+            - button "⠀"
+          - cell "buggy"
+        - row "6974 LOW [contract] 🐛 � buggy":
+          - cell "6974"
+          - cell "LOW"
+          - cell "[contract] 🐛 �":
+            - button "[contract] 🐛 �"
+          - cell "buggy"
+        - row "6975 LOW [contract] utf8 é buggy":
+          - cell "6975"
+          - cell "LOW"
+          - cell "[contract] utf8 é":
+            - button "[contract] utf8 é"
+          - cell "buggy"
+        - row "6976 LOW [contract] gz real buggy":
+          - cell "6976"
+          - cell "LOW"
+          - cell "[contract] gz real":
+            - button "[contract] gz real"
+          - cell "buggy"
+- dialog "Create bug":
+  - heading "Create bug" [level=2]
+  - button "Close"
+  - text: Title
+  - textbox "Title"
+  - text: Severity
+  - combobox "Severity":
+    - option "HIGH"
+    - option "MID" [selected]
+    - option "LOW"
+  - text: Owner
+  - textbox "Owner": buggy
+  - text: Description
+  - textbox "Description"
+  - button "Cancel"
+  - button "Save"

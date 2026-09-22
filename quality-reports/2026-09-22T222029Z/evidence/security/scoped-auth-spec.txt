@@ -1,0 +1,8 @@
+
+Running 4 tests using 1 worker
+
+[1/4] [api] › tests/api/auth.spec.ts:4:1 › GET /api/bugs without a session returns 401
+[2/4] [api] › tests/api/auth.spec.ts:12:1 › POST /api/bugs without a session returns 401
+[3/4] [api] › tests/api/auth.spec.ts:21:1 › DELETE /api/bugs/:id without a session leaves the bug in place
+[4/4] [api] › tests/api/auth.spec.ts:30:1 › responses do not advertise the server framework
+  4 passed (484ms)

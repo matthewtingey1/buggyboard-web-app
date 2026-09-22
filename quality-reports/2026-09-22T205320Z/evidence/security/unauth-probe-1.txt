@@ -1,0 +1,28 @@
+### POST /api/bugs (no session, direct backend, no cookie/auth header)
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 132
+ETag: W/"84-AW3tbY5wcZLal8tEEztHAeCItag"
+Date: Tue, 22 Sep 2026 20:54:33 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":4,"title":"[security] unauth create","severity":"LOW","owner":"nobody","description":"created with no session","state":"OPEN"}
+### GET /api/bugs (no session) - first 300 bytes
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 758
+ETag: W/"2f6-DCKIB2WhkbiJ/kV/GwjYeMaoZqg"
+Date: Tue, 22 Sep 2026 20:54:33 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimming is intended and consistent.","state":"OPEN"},{"id":2,"title":"Bug API endpoints work without logging in","severity":"HIGH","owner":"matt","description":"GET/POST/PUT/DELETE /api/bugs succeed with no session; auth is only enforced in the frontend.","state":"OPEN"},{"id":3,"title":"Search does not match on bug description","severity":"MID","o

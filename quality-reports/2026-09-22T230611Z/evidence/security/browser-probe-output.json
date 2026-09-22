@@ -1,0 +1,32 @@
+{
+  "created": {
+    "id": 6995,
+    "title": "[security] <script>window.__xss='title'</script><svg onload=\"window.__xss='svg-title'\"> ' OR 1=1;-- tstdhq",
+    "severity": "LOW",
+    "owner": "<svg/onload=\"window.__xss='owner'\"><script>window.__xss='owner-s'</script>'); DROP TABLE bugs;--",
+    "description": "<img src=x onerror=\"window.__xss='desc'\"><iframe src=\"javascript:window.top.__xss='iframe'\"></iframe>\" OR \"\"=\"",
+    "state": "OPEN"
+  },
+  "storedVerbatim": true,
+  "boardRowText": "6995\tLOW\t[security] <script>window.__xss='title'</script><svg onload=\"window.__xss='svg-title'\"> ' OR 1=1;-- tstdhq\t<svg/onload=\"window.__xss='owner'\"><script>window.__xss='owner-s'</script>'); DROP TABLE bugs;--",
+  "boardScriptOrSvgElementsInRow": 0,
+  "xssAfterBoard": null,
+  "modalValues": [
+    "6995",
+    "[security] <script>window.__xss='title'</script><svg onload=\"window.__xss='svg-title'\"> ' OR 1=1;-- tstdhq",
+    "<svg/onload=\"window.__xss='owner'\"><script>window.__xss='owner-s'</script>'); DROP TABLE bugs;--",
+    "<img src=x onerror=\"window.__xss='desc'\"><iframe src=\"javascript:window.top.__xss='iframe'\"></iframe>\" OR \"\"=\""
+  ],
+  "xssAfterModal": null,
+  "cookiesAfterLogin": 0,
+  "savedSession": "{\"username\":\"buggy\"}",
+  "apiCallsDuringLogout": [],
+  "fetchBugsAfterLogout": 200,
+  "replayUrl": "/board",
+  "replayRows": 34,
+  "tabBUrlAfterLogoutInA": "/login",
+  "forgedUrl": "/board",
+  "forgedHeaderText": "BuggyBoard New Bug Logout",
+  "dialogs": [],
+  "cleanupDelete": 204
+}

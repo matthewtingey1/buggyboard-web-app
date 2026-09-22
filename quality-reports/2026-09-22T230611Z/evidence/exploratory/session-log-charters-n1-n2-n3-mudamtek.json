@@ -1,0 +1,22 @@
+{
+  "N1": [
+    "(a) during Saving: Cancel disabled=true Close(x) disabled=false",
+    "(a) after clicking Close(x) during Saving: dialogs=0",
+    "(a) after first POST returned: dialogs=0 (second draft DISCARDED); first saved=1, second saved=0",
+    "(b) failed save after Close(x): new draft alert='Simulated server error' saved=1",
+    "(c) after A's PUT returned: dialogs=0 B description on server='exploratory charter' (typed edit DISCARDED)",
+    "(d) during Deleting: confirm Cancel disabled=true confirm Close(x) disabled=false",
+    "(d) after Close(x): confirm open=0 edit modal open=1 title input enabled=true edit Close(x) enabled=true"
+  ],
+  "N2": [
+    "400ms after slow row click: dialogs=0 busy indicators=0",
+    "after slow GET returned: dialogs=2 [\"create-bug-modal-title\",\"edit-bug-modal-title\"] focus=INPUT#edit-bug-title '[exploratory] N2 slow mudamtek'",
+    "create title after typing ' more'='my new bug title' edit title='[exploratory] N2 slow mudamtek more'",
+    "one Escape: dialogs left=1"
+  ],
+  "N3": [
+    "right after delete: rows=[\"7123\\tMID\\t[exploratory] N3 created mudamtek\\tbuggy\"]",
+    "after the slow post-create refresh landed: rows=[\"7122\\tHIGH\\t[exploratory] N3 delete-me mudamtek\\tbuggy\",\"7123\\tMID\\t[exploratory] N3 created mudamtek\\tbuggy\"]; server has deleted bug=404",
+    "click resurrected row: dialogs=0 status='That bug no longer exists. 1 open bug shown.' row left=0"
+  ]
+}

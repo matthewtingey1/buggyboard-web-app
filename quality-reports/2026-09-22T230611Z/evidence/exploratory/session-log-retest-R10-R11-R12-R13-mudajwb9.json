@@ -1,0 +1,17 @@
+{
+  "R10": [
+    "(a) Escape during Saving: dialog still open=true -> Escape path fixed",
+    "(d) Escape during Deleting: confirm still open=true"
+  ],
+  "R11": [
+    "after A's late response: header='Edit bug #7020' (B=#7020) desc='typed into B' -> fixed"
+  ],
+  "R12": [
+    "load 500: body shows 'Couldn't load bugs.'=true 'No bugs.'=false",
+    "row GET 500: dialogs=0 status='Couldn't open the bug. Try again. 1 open bug shown.' visible message on page=true",
+    "POST ok + refresh 503: dialogs=0 tbody='Couldn't load bugs. Try again' status='Bug created. Couldn't load bugs.'"
+  ],
+  "R13": [
+    "'unicode cafe' rows=0, exact accents rows=1 -> still no folding"
+  ]
+}

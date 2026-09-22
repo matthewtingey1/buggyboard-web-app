@@ -1,0 +1,162 @@
+| row | request | input | expected | actual | content-type | Allow | body |
+|---|---|---|---|---|---|---|---|
+| R01a | `POST /api/login` | username number | 400 invalid_username | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_username","message":"username must be text."}` |
+| R01b | `POST /api/login` | username array | 400 invalid_username | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_username","message":"username must be text."}` |
+| R01c | `POST /api/login` | username object | 400 invalid_username | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_username","message":"username must be text."}` |
+| R01d | `POST /api/login` | password number | 400 invalid_password | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_password","message":"password must be text."}` |
+| R02a | `POST /api/login` | malformed JSON | 400 invalid_json | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| R02b | `POST /api/bugs` | malformed JSON | 400 invalid_json | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| R02d | `POST /api/login` | body null | 400 invalid_json | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| R02e | `POST /api/bugs` | body "x" (non-object JSON) | 400 invalid_json | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| R02f | `POST /api/bugs` | 200 KB body | 413 payload_too_large | 413 | application/json; charset=utf-8 |  | `{"error":"payload_too_large","message":"The request body is too large."}` |
+| R02g | `POST /api/bugs` | charset=latin1 | 415 unsupported_media_type | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send UTF-8 JSON without compression."}` |
+| R02h | `POST /api/bugs` | Content-Encoding br | 415 unsupported_media_type | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send UTF-8 JSON without compression."}` |
+| R02i | `POST /api/bugs` | Content-Encoding gzip, plain body | 400 JSON | 400 | application/json; charset=utf-8 |  | `{"error":"bad_request","message":"The request could not be read."}` |
+| R03a | `GET /api/bugs/6967abc` | id <id>abc | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03b | `GET /api/bugs/6967.9` | id decimal | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03c | `GET /api/bugs/%206967` | id leading space | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03d | `GET /api/bugs/-1` | negative id | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03e | `GET /api/bugs/0x1` | hex id | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03f | `GET /api/bugs/0` | zero id | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03g | `PUT /api/bugs/6967abc` | PUT <id>abc | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03h | `PUT /api/bugs/6967.5` | PUT <id>.5 | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03i | `PUT /api/bugs/6967e5` | PUT <id>e5 | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03j | `DELETE /api/bugs/6967abc` | DELETE <id>abc | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| R03v | `GET /api/bugs/6967` | verify target untouched | 200 title "R03 target", state OPEN | 200 | application/json; charset=utf-8 |  | `{"id":6967,"title":"[contract] R03 target 24312","severity":"LOW","owner":"buggy","descrip` |
+| R04a | `GET /api/nope` | unknown path | 404 JSON not_found | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"No such API route."}` |
+| R04b | `POST /api/health` | wrong method | 405 Allow: GET | 405 | application/json; charset=utf-8 | GET | `{"error":"method_not_allowed","message":"Use GET for /api/health."}` |
+| R04c | `PATCH /api/bugs/6967` | PATCH | 405 Allow: GET, PUT, DELETE | 405 | application/json; charset=utf-8 | GET, PUT, DELETE | `{"error":"method_not_allowed","message":"Use GET, PUT, DELETE for /api/bugs/:id."}` |
+| R04d | `PUT /api/bugs` | PUT collection | 405 Allow: GET, POST | 405 | application/json; charset=utf-8 | GET, POST | `{"error":"method_not_allowed","message":"Use GET, POST for /api/bugs."}` |
+| R04e | `DELETE /api/bugs` | DELETE collection | 405 Allow: GET, POST | 405 | application/json; charset=utf-8 | GET, POST | `{"error":"method_not_allowed","message":"Use GET, POST for /api/bugs."}` |
+| R04f | `GET /api/login` | GET login | 405 Allow: POST | 405 | application/json; charset=utf-8 | POST | `{"error":"method_not_allowed","message":"Use POST for /api/login."}` |
+| R04g | `DELETE /api/health` | DELETE health | 405 Allow: GET | 405 | application/json; charset=utf-8 | GET | `{"error":"method_not_allowed","message":"Use GET for /api/health."}` |
+| R04h | `GET /api/bugs/6967/extra` | extra segment | 404 JSON | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"No such API route."}` |
+| R04i | `HEAD /api/nope` | HEAD unknown | 404 JSON | 404 | application/json; charset=utf-8 |  | `` |
+| R05a | `POST /api/bugs` | severity critical | 400 invalid_severity | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_severity","message":"Severity must be high, mid, or low."}` |
+| R05b | `POST /api/bugs` | title number | 400 invalid_title | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_title","message":"title must be text."}` |
+| R05c | `POST /api/bugs` | severity missing | 400 blank_severity | 400 | application/json; charset=utf-8 |  | `{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}` |
+| R05d | `POST /api/bugs` | severity blank | 400 blank_severity | 400 | application/json; charset=utf-8 |  | `{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}` |
+| R05e | `POST /api/bugs` | severity whitespace | 400 blank_severity | 400 | application/json; charset=utf-8 |  | `{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}` |
+| R06a | `POST /api/login` | valid JSON, no Content-Type | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| R06b | `POST /api/bugs` | valid JSON, text/plain | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| R06c | `PUT /api/bugs/6967` | PUT, no Content-Type | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| R06d | `POST /api/bugs` | form-urlencoded | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| R06e | `POST /api/bugs` | multipart | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| R06f | `POST /api/bugs` | vnd.api+json | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| R07 | `POST /api/login` | whitespace-only password (throwaway user) | 400 blank_password? (open decision) | 401 | application/json; charset=utf-8 |  | `{"error":"invalid_credentials","message":"Invalid username or password."}` |
+| R10a | `PUT /api/bugs/6967` | state missing | invalid_state (open decision) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_state","message":"State must be Open or Closed."}` |
+| R10b | `PUT /api/bugs/6967` | state blank | invalid_state (open decision) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_state","message":"State must be Open or Closed."}` |
+| R12a | `POST /api/bugs` | 10,000-char title | 201 (no limit specified) | 201 | application/json; charset=utf-8 |  | `{"id":6968,"title":"[contract] ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt` |
+| H01 | `GET /api/health` | valid | 200 {ok,message,database} | 200 | application/json; charset=utf-8 |  | `{"ok":true,"message":"BuggyBoard API is running","database":"connected"}` |
+| H02 | `HEAD /api/health` | HEAD | 200 no body | 200 | application/json; charset=utf-8 |  | `` |
+| H03 | `OPTIONS /api/health` | OPTIONS | 204 Allow: GET, OPTIONS | 204 |  |  | `` |
+| H04 | `GET /api/health?x=1` | query string | 200 | 200 | application/json; charset=utf-8 |  | `{"ok":true,"message":"BuggyBoard API is running","database":"connected"}` |
+| H05 | `POST /api/health` | POST text/plain body | 405 (method before media type) | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| H06 | `POST /api/health` | POST malformed JSON | 405 (method before body) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| L01 | `POST /api/login` | valid | 200 {username} | 200 | application/json; charset=utf-8 |  | `{"username":"buggy"}` |
+| L02 | `POST /api/login` | username padded | 200 {username:"buggy"} | 200 | application/json; charset=utf-8 |  | `{"username":"buggy"}` |
+| L03 | `POST /api/login` | missing username | 400 blank_username | 400 | application/json; charset=utf-8 |  | `{"error":"blank_username","message":"Username cannot be blank."}` |
+| L04 | `POST /api/login` | missing password (throwaway) | 400 blank_password | 400 | application/json; charset=utf-8 |  | `{"error":"blank_password","message":"Password cannot be blank."}` |
+| L05 | `POST /api/login` | empty object | 400 missing_credentials | 400 | application/json; charset=utf-8 |  | `{"error":"missing_credentials","message":"Please enter your username and password."}` |
+| L06 | `POST /api/login` | username null | 400 blank_username | 400 | application/json; charset=utf-8 |  | `{"error":"blank_username","message":"Username cannot be blank."}` |
+| L07 | `POST /api/login` | password null (throwaway) | 400 blank_password | 400 | application/json; charset=utf-8 |  | `{"error":"blank_password","message":"Password cannot be blank."}` |
+| L08 | `POST /api/login` | password array (throwaway) | 400 invalid_password | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_password","message":"password must be text."}` |
+| L09 | `POST /api/login` | username boolean | 400 invalid_username | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_username","message":"username must be text."}` |
+| L10 | `POST /api/login` | whitespace username | 400 blank_username | 400 | application/json; charset=utf-8 |  | `{"error":"blank_username","message":"Username cannot be blank."}` |
+| L11 | `POST /api/login` | zero-width-only username | 400 blank_username | 401 | application/json; charset=utf-8 |  | `{"error":"invalid_credentials","message":"Invalid username or password."}` |
+| L12 | `POST /api/login` | body is array | 400 missing_credentials | 400 | application/json; charset=utf-8 |  | `{"error":"missing_credentials","message":"Please enter your username and password."}` |
+| L13 | `POST /api/login` | unknown user | 401 invalid_credentials | 401 | application/json; charset=utf-8 |  | `{"error":"invalid_credentials","message":"Invalid username or password."}` |
+| L14 | `POST /api/login` | text/plain | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| L15 | `POST /api/login` | charset=utf-8 | 200 | 200 | application/json; charset=utf-8 |  | `{"username":"buggy"}` |
+| L16 | `POST /api/login` | upper-case media type | 200 | 200 | application/json; charset=utf-8 |  | `{"username":"buggy"}` |
+| L17 | `POST /api/login` | 150 KB body | 413 JSON | 413 | application/json; charset=utf-8 |  | `{"error":"payload_too_large","message":"The request body is too large."}` |
+| L18 | `OPTIONS /api/login` | OPTIONS | 204 Allow: POST, OPTIONS | 204 |  |  | `` |
+| L19 | `HEAD /api/login` | HEAD | 405 | 405 | application/json; charset=utf-8 | POST | `` |
+| L20 | `POST /api/login` | no body at all | 400 missing_credentials | 400 | application/json; charset=utf-8 |  | `{"error":"missing_credentials","message":"Please enter your username and password."}` |
+| L21 | `POST /api/login` | trailing garbage after JSON | 400 invalid_json | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| B01 | `GET /api/bugs` | valid | 200 array | 200 | application/json; charset=utf-8 |  | `[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owne` |
+| B02 | `HEAD /api/bugs` | HEAD | 200 no body | 200 | application/json; charset=utf-8 |  | `` |
+| B03 | `OPTIONS /api/bugs` | OPTIONS | 204 Allow: GET, POST, OPTIONS | 204 |  |  | `` |
+| B04 | `GET /api/bugs/` | trailing slash | 200 array | 200 | application/json; charset=utf-8 |  | `[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owne` |
+| B1-title-num | `POST /api/bugs` | title number | 400 invalid_title | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_title","message":"title must be text."}` |
+| B1-title-null | `POST /api/bugs` | title null | 400 blank_title | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| B1-title-arr | `POST /api/bugs` | title array | 400 invalid_title | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_title","message":"title must be text."}` |
+| B1-title-zw | `POST /api/bugs` | title zero-width only | 400 blank_title | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| B1-owner-num | `POST /api/bugs` | owner number | 400 invalid_owner | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_owner","message":"owner must be text."}` |
+| B1-owner-null | `POST /api/bugs` | owner null | 400 blank_owner | 400 | application/json; charset=utf-8 |  | `{"error":"blank_owner","message":"Owner is required."}` |
+| B1-owner-arr | `POST /api/bugs` | owner array | 400 invalid_owner | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_owner","message":"owner must be text."}` |
+| B1-owner-zw | `POST /api/bugs` | owner zero-width only | 400 blank_owner | 400 | application/json; charset=utf-8 |  | `{"error":"blank_owner","message":"Owner is required."}` |
+| B1-description-num | `POST /api/bugs` | description number | 400 invalid_description | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_description","message":"description must be text."}` |
+| B1-description-null | `POST /api/bugs` | description null | 400 blank_description | 400 | application/json; charset=utf-8 |  | `{"error":"blank_description","message":"Description is required."}` |
+| B1-description-arr | `POST /api/bugs` | description array | 400 invalid_description | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_description","message":"description must be text."}` |
+| B1-description-zw | `POST /api/bugs` | description zero-width only | 400 blank_description | 400 | application/json; charset=utf-8 |  | `{"error":"blank_description","message":"Description is required."}` |
+| B20 | `POST /api/bugs` | severity number | 400 invalid_severity (type) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_severity","message":"severity must be text."}` |
+| B21 | `POST /api/bugs` | severity array | 400 invalid_severity (type) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_severity","message":"severity must be text."}` |
+| B22 | `POST /api/bugs` | severity lowercase "high" | 201 severity HIGH | 201 | application/json; charset=utf-8 |  | `{"id":6969,"title":"[contract] lc","severity":"HIGH","owner":"buggy","description":"d","st` |
+| B23 | `POST /api/bugs` | severity "Medium" | 400 invalid_severity | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_severity","message":"Severity must be high, mid, or low."}` |
+| B24 | `POST /api/bugs` | body array | 400 blank_title | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| B25 | `POST /api/bugs` | title with CRLF | 201 title on one line | 201 | application/json; charset=utf-8 |  | `{"id":6970,"title":"[contract] line1 line2","severity":"LOW","owner":"buggy","description"` |
+| B26 | `POST /api/bugs` | title with U+2028 | 201 title on one line? | 201 | application/json; charset=utf-8 |  | `{"id":6971,"title":"[contract] ls1 ls2","severity":"LOW","owner":"buggy","description":"d"` |
+| B27 | `POST /api/bugs` | title only soft hyphen / LRM | 400 blank_title? | 201 | application/json; charset=utf-8 |  | `{"id":6972,"title":"­‎","severity":"LOW","owner":"buggy","description":"d","state":"OPEN"}` |
+| B28 | `POST /api/bugs` | title only braille blank U+2800 | 400 blank_title? | 201 | application/json; charset=utf-8 |  | `{"id":6973,"title":"⠀","severity":"LOW","owner":"buggy","description":"d","state":"OPEN"}` |
+| B29 | `POST /api/bugs` | emoji + lone surrogate title | 201 | 201 | application/json; charset=utf-8 |  | `{"id":6974,"title":"[contract] 🐛 �","severity":"LOW","owner":"buggy","description":"d","s` |
+| B30 | `POST /api/bugs` | Content-Type with charset=utf-8 | 201 | 201 | application/json; charset=utf-8 |  | `{"id":6975,"title":"[contract] utf8 é","severity":"LOW","owner":"buggy","description":"d",` |
+| B31 | `POST /api/bugs` | real gzip body | 201 | 201 | application/json; charset=utf-8 |  | `{"id":6976,"title":"[contract] gz real","severity":"LOW","owner":"buggy","description":"d"` |
+| B32 | `POST /api/bugs` | chunked, no Content-Type | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| B33 | `POST /api/bugs` | no body, no Content-Type | 400 blank_title | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| B34 | `POST /api/bugs/1` | POST to item | 405 Allow: GET, PUT, DELETE | 405 | application/json; charset=utf-8 | GET, PUT, DELETE | `{"error":"method_not_allowed","message":"Use GET, PUT, DELETE for /api/bugs/:id."}` |
+| B35 | `POST /api/nope` | POST unknown path, text/plain body | 404 (route before media type) | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| I01 | `GET /api/bugs/6977` | valid | 200 bug | 200 | application/json; charset=utf-8 |  | `{"id":6977,"title":"[contract] item target 3898","severity":"LOW","owner":"buggy","descrip` |
+| I02 | `HEAD /api/bugs/6977` | HEAD | 200 | 200 | application/json; charset=utf-8 |  | `` |
+| I03 | `OPTIONS /api/bugs/6977` | OPTIONS | 204 Allow: GET, PUT, DELETE, OPTIONS | 204 |  |  | `` |
+| I04 | `GET /api/bugs/abc` | non-numeric | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I05 | `GET /api/bugs/999999999` | numeric missing | 404 not_found | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"Bug not found."}` |
+| I06 | `GET /api/bugs/06977` | leading zero | 400 invalid_id (or 200?) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I07 | `GET /api/bugs/6977%20` | trailing space | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I08 | `GET /api/bugs/99999999999999999999999` | huge id | 404 not_found | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"Bug not found."}` |
+| I09 | `GET /api/bugs/%E0%A4%A` | malformed percent-encoding | 400 JSON | 400 | application/json; charset=utf-8 |  | `{"error":"bad_request","message":"The request could not be read."}` |
+| I10 | `GET /api/bugs/%d9%a1` | Arabic-Indic digit | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I11 | `HEAD /api/bugs/abc` | HEAD bad id | 400 | 400 | application/json; charset=utf-8 |  | `` |
+| I20 | `PUT /api/bugs/6977` | valid, title CRLF | 200 stored row, one-line title | 200 | application/json; charset=utf-8 |  | `{"id":6977,"title":"[contract] put line2","severity":"HIGH","owner":"vanny","description":` |
+| I20v | `GET /api/bugs/6977` | verify PUT stored | matches I20 body | 200 | application/json; charset=utf-8 |  | `{"id":6977,"title":"[contract] put line2","severity":"HIGH","owner":"vanny","description":` |
+| I2-title-miss | `PUT /api/bugs/6977` | title missing | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| I2-title-num | `PUT /api/bugs/6977` | title number | 400 invalid_title | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_title","message":"title must be text."}` |
+| I2-title-ws | `PUT /api/bugs/6977` | title whitespace | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| I2-severity-miss | `PUT /api/bugs/6977` | severity missing | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}` |
+| I2-severity-num | `PUT /api/bugs/6977` | severity number | 400 invalid_severity | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_severity","message":"severity must be text."}` |
+| I2-severity-ws | `PUT /api/bugs/6977` | severity whitespace | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}` |
+| I2-owner-miss | `PUT /api/bugs/6977` | owner missing | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_owner","message":"Owner is required."}` |
+| I2-owner-num | `PUT /api/bugs/6977` | owner number | 400 invalid_owner | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_owner","message":"owner must be text."}` |
+| I2-owner-ws | `PUT /api/bugs/6977` | owner whitespace | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_owner","message":"Owner is required."}` |
+| I2-description-miss | `PUT /api/bugs/6977` | description missing | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_description","message":"Description is required."}` |
+| I2-description-num | `PUT /api/bugs/6977` | description number | 400 invalid_description | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_description","message":"description must be text."}` |
+| I2-description-ws | `PUT /api/bugs/6977` | description whitespace | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"blank_description","message":"Description is required."}` |
+| I2-state-miss | `PUT /api/bugs/6977` | state missing | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_state","message":"State must be Open or Closed."}` |
+| I2-state-num | `PUT /api/bugs/6977` | state number | 400 invalid_state | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_state","message":"state must be text."}` |
+| I2-state-ws | `PUT /api/bugs/6977` | state whitespace | 400 | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_state","message":"State must be Open or Closed."}` |
+| I30 | `PUT /api/bugs/6977` | severity "critical" | 400 invalid_severity | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_severity","message":"Severity must be high, mid, or low."}` |
+| I31 | `PUT /api/bugs/6977` | state "pending" | 400 invalid_state | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_state","message":"State must be Open or Closed."}` |
+| I32 | `PUT /api/bugs/abc` | non-numeric | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I33 | `PUT /api/bugs/-1` | negative | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I34 | `PUT /api/bugs/0` | zero | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I35 | `PUT /api/bugs/999999999` | numeric missing | 404 not_found | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"Bug not found."}` |
+| I36 | `PUT /api/bugs/6977` | malformed JSON | 400 invalid_json | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| I37 | `PUT /api/bugs/6977` | text/plain | 415 | 415 | application/json; charset=utf-8 |  | `{"error":"unsupported_media_type","message":"Send the request body as application/json."}` |
+| I38 | `PUT /api/bugs/6977` | 150 KB | 413 payload_too_large | 413 | application/json; charset=utf-8 |  | `{"error":"payload_too_large","message":"The request body is too large."}` |
+| I39 | `PUT /api/bugs/6977` | no body | 400 blank_title | 400 | application/json; charset=utf-8 |  | `{"error":"blank_title","message":"Title is required."}` |
+| I40 | `PUT /api/bugs/abc` | bad id + malformed JSON | 400 (either code) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| I41 | `PUT /api/bugs/999999999` | missing id + invalid body | 404 or 400 | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"Bug not found."}` |
+| I42 | `GET /api/bugs/6977` | verify after failed PUTs | unchanged from I20v | 200 | application/json; charset=utf-8 |  | `{"id":6977,"title":"[contract] put line2","severity":"HIGH","owner":"vanny","description":` |
+| I50 | `DELETE /api/bugs/abc` | non-numeric | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I51 | `DELETE /api/bugs/-1` | negative | 400 invalid_id | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_id","message":"Bug ID must be a positive whole number."}` |
+| I52 | `DELETE /api/bugs/999999999` | numeric missing | 404 not_found | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"Bug not found."}` |
+| I53 | `DELETE /api/bugs/abc` | malformed JSON body | 400 (either code) | 400 | application/json; charset=utf-8 |  | `{"error":"invalid_json","message":"The request body is not valid JSON."}` |
+| I54 | `DELETE /api/bugs/6977` | with text/plain body | 204 (body ignored) | 204 |  |  | `` |
+| I55 | `DELETE /api/bugs/6977` | again | 404 not_found | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"Bug not found."}` |
+| U01 | `GET /api` | bare /api | 404 JSON | 404 | text/html; charset=utf-8 |  | `<!DOCTYPE html> <html lang="en"> <head> <meta charset="utf-8"> <title>Error</title> </head` |
+| U02 | `GET /api/` | /api/ | 404 JSON | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"No such API route."}` |
+| U03 | `GET /API/BUGS` | upper-case path | same on proxy and direct | 200 | text/html |  | `<!doctype html> <html lang="en">   <head>     <script type="module">import { injectIntoGlo` |
+| U04 | `GET /api/bugs//1` | double slash | 404 JSON | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"No such API route."}` |
+| U05 | `OPTIONS /api/nope` | OPTIONS unknown | 404 JSON | 204 |  |  | `` |
+| U06 | `GET /api/%E0` | malformed URI unknown path | 400 or 404 JSON | 400 | application/json; charset=utf-8 |  | `{"error":"bad_request","message":"The request could not be read."}` |
+| U07 | `DELETE /api/nope` | DELETE unknown | 404 JSON | 404 | application/json; charset=utf-8 |  | `{"error":"not_found","message":"No such API route."}` |

@@ -1,0 +1,15 @@
+security-12 re-test (username and home path shown as <user>/<home>; counts only)
+Working tree, tracked + untracked non-ignored files outside this run, pattern /Users/<user>|<user>|<user-with-dash>|/private/tmp|claude-NNN:
+  no real home path or OS username; only placeholders (/Users/<user>, /Users/...) remain.
+  quality-reports/2026-09-22T222029Z/evidence/security/login-resource-probe.txt: 3 lsof warning lines with /private/var/folders/zz/... (system temp, not user-specific)
+git diff --cached: only the two trace.zip deletions are staged; 0 staged lines with the home path or username.
+  All redactions are unstaged (" M"), nothing committed yet.
+.gitignore:161 quality-reports/**/trace.zip ; git ls-files | grep -c trace.zip -> 0 ; 9 trace.zip on disk, all ignored.
+Pushed history, origin/e2e-suite-and-quality-run == HEAD == ffb95fd:
+  a7fa601 and ffb95fd (same tree for these paths): the OS username appears in 11 tracked files, 1,161 lines
+  (quality-report/quality-data.json 1146; prompt.md, quality-report/index.html, and 8 files under
+  quality-reports/2026-09-22T205320Z/: evidence/contract/{400-malformed-json.html,500-login-username-number.html},
+  evidence/functional/run-log.txt, evidence/security/{listeners.txt,login-probe.txt,resource-probe.txt},
+  findings/{functional.json,security.json}). 2 more files contain only the "/Users/..." placeholder.
+  trace.zip added in a7fa601 (2 files): unzipped, 48 and 38 occurrences of /Users/<user>
+  Commit author emails: <local>@users.noreply.github.com

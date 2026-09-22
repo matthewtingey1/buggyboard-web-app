@@ -1,0 +1,347 @@
+{
+  "computedFromApp": {
+    "subtitle": {
+      "color": "rgb(87, 83, 78)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "none",
+      "decoration": "rgb(87, 83, 78)"
+    },
+    "loginRing": [
+      87,
+      83,
+      78
+    ],
+    "loginInputRing": [
+      87,
+      83,
+      78
+    ],
+    "loginInputBorder": {
+      "color": "rgb(41, 37, 36)",
+      "bg": "rgb(255, 255, 255)",
+      "border": "rgb(120, 113, 108)",
+      "shadow": "none",
+      "decoration": "rgb(41, 37, 36)"
+    },
+    "high": {
+      "color": "rgb(184, 74, 46)",
+      "bg": "color(srgb 0.721569 0.290196 0.180392 / 0.22)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "none",
+      "decoration": "rgb(184, 74, 46)"
+    },
+    "mid": {
+      "color": "rgb(166, 124, 71)",
+      "bg": "color(srgb 0.65098 0.486275 0.278431 / 0.22)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "none",
+      "decoration": "rgb(166, 124, 71)"
+    },
+    "low": {
+      "color": "rgb(74, 107, 94)",
+      "bg": "color(srgb 0.290196 0.419608 0.368627 / 0.22)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "none",
+      "decoration": "rgb(74, 107, 94)"
+    },
+    "placeholder": {
+      "color": "rgb(120, 113, 108)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(120, 113, 108)",
+      "shadow": "none",
+      "decoration": "rgb(120, 113, 108)"
+    },
+    "searchWrap": {
+      "color": "rgb(0, 0, 0)",
+      "bg": "rgb(250, 250, 249)",
+      "border": "rgb(120, 113, 108)",
+      "shadow": "none",
+      "decoration": "rgb(0, 0, 0)"
+    },
+    "rowRing": [
+      87,
+      83,
+      78
+    ],
+    "newBugRing": [
+      87,
+      83,
+      78
+    ],
+    "toggleSel": {
+      "color": "rgb(41, 37, 36)",
+      "bg": "rgb(184, 174, 118)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgba(231, 229, 228, 0.5) 0px 0px 0px 1px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+      "decoration": "rgb(41, 37, 36)"
+    },
+    "toggleUnsel": {
+      "color": "rgb(120, 113, 108)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "none",
+      "decoration": "rgb(120, 113, 108)"
+    },
+    "modalInputBorder": {
+      "color": "rgb(41, 37, 36)",
+      "bg": "rgb(255, 255, 255)",
+      "border": "rgb(120, 113, 108)",
+      "shadow": "none",
+      "decoration": "rgb(41, 37, 36)"
+    },
+    "cancelRing": [
+      168,
+      162,
+      158
+    ],
+    "saveRing": [
+      87,
+      83,
+      78
+    ],
+    "closeX": {
+      "color": "rgb(120, 113, 108)",
+      "bg": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "shadow": "none",
+      "decoration": "rgb(120, 113, 108)"
+    }
+  },
+  "pairs": [
+    {
+      "pair": "Severity HIGH badge text on its tint (white row)",
+      "fg": "#b84a2e",
+      "bg": "#efd7d1",
+      "ratio": 3.77,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity HIGH badge text on its tint (hovered row stone-50/80)",
+      "fg": "#b84a2e",
+      "bg": "#ecd4cd",
+      "ratio": 3.66,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity MID badge text on its tint (white row)",
+      "fg": "#a67c47",
+      "bg": "#ebe2d7",
+      "ratio": 2.93,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity MID badge text on its tint (hovered row stone-50/80)",
+      "fg": "#a67c47",
+      "bg": "#e8dfd3",
+      "ratio": 2.85,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity LOW badge text on its tint (white row)",
+      "fg": "#4a6b5e",
+      "bg": "#d7dedc",
+      "ratio": 4.32,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Severity LOW badge text on its tint (hovered row stone-50/80)",
+      "fg": "#4a6b5e",
+      "bg": "#d4dbd8",
+      "ratio": 4.2,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": false
+    },
+    {
+      "pair": "Primary #b8ae76 bg with stone-800 text (Login, Save, selected toggle)",
+      "fg": "#292524",
+      "bg": "#b8ae76",
+      "ratio": 6.76,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "\"Log in\" subtitle (now h2) on white",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Search placeholder on stone-50 wrapper",
+      "fg": "#78716c",
+      "bg": "#fafaf9",
+      "ratio": 4.59,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Search placeholder on white (focused)",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Error text red-600 on white (login, modal errors)",
+      "fg": "#dc2626",
+      "bg": "#ffffff",
+      "ratio": 4.83,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Unselected toggle text on white",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 4.5,
+      "sc": "1.4.3",
+      "pass": true
+    },
+    {
+      "pair": "Selected toggle underline (stone-800) on primary fill",
+      "fg": "#292524",
+      "bg": "#b8ae76",
+      "ratio": 6.76,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Selected toggle fill (primary) vs white track",
+      "fg": "#b8ae76",
+      "bg": "#ffffff",
+      "ratio": 2.25,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": false
+    },
+    {
+      "pair": "Focus ring on Login button vs white offset",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 3,
+      "sc": "1.4.11 / 2.4.7",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring on inputs vs white",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring on row title button vs white row",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring on New Bug vs white header",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring on modal Save vs white",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring on modal Cancel (ring-stone-400) vs white",
+      "fg": "#a8a29e",
+      "bg": "#ffffff",
+      "ratio": 2.52,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": false
+    },
+    {
+      "pair": "Focus ring on toggle vs white track",
+      "fg": "#57534e",
+      "bg": "#ffffff",
+      "ratio": 7.63,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Login input border vs white",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Modal input border vs white",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Search wrapper border vs white header",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Modal Close X glyph vs white",
+      "fg": "#78716c",
+      "bg": "#ffffff",
+      "ratio": 4.8,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    },
+    {
+      "pair": "Focus ring on Delete buttons (ring-red-500) vs white",
+      "fg": "#ef4444",
+      "bg": "#ffffff",
+      "ratio": 3.76,
+      "required": 3,
+      "sc": "1.4.11",
+      "pass": true
+    }
+  ]
+}

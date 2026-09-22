@@ -1,0 +1,9 @@
+- main:
+  - heading "BuggyBoard" [level=1]
+  - heading "Log in" [level=2]
+  - text: Username
+  - textbox "Username" [invalid]: a11y-nouser-1790118846364
+  - text: Password
+  - textbox "Password" [invalid]: wrong-on-purpose
+  - alert: Invalid username or password.
+  - button "Login"

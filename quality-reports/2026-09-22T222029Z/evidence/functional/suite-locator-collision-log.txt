@@ -1,0 +1,559 @@
+
+Running 26 tests using 1 worker
+
+[1/26] [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button
+  1) [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:9:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-New--bbe22-with-every-field-and-button-chromium/error-context.md
+
+
+[2/26] [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user
+  2) [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user ────
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:26:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-owner-defaults-to-the-current-user-chromium/error-context.md
+
+
+[3/26] [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal
+  3) [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:33:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-savi-8c644-sts-it-and-closes-the-modal-chromium/error-context.md
+
+
+[4/26] [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload
+  4) [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:52:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-a-cr-3b1a3--the-board-without-a-reload-chromium/error-context.md
+
+
+[5/26] [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with Cancel does not save the bug
+  5) [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with Cancel does not save the bug 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:65:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-clos-e3cd5-ancel-does-not-save-the-bug-chromium/error-context.md
+
+
+[6/26] [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with the X button does not save the bug
+  6) [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with the X button does not save the bug 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:65:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-clos-40285-utton-does-not-save-the-bug-chromium/error-context.md
+
+
+[7/26] [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with Escape does not save the bug
+  7) [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with Escape does not save the bug 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:65:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-clos-1a974-scape-does-not-save-the-bug-chromium/error-context.md
+
+
+[8/26] [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data
+  8) [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:79:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-clic-5e255-the-modal-open-and-its-data-chromium/error-context.md
+
+
+[9/26] [chromium] › tests/create-bug/create-bug.spec.ts:91:1 › saving with every field blank names each required field
+  9) [chromium] › tests/create-bug/create-bug.spec.ts:91:1 › saving with every field blank names each required field 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:92:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-savi-c2fd8-k-names-each-required-field-chromium/error-context.md
+
+
+[10/26] [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only title blocks saving
+  10) [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only title blocks saving 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:107:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-a-whitespace-only-title-blocks-saving-chromium/error-context.md
+
+
+[11/26] [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only owner blocks saving
+  11) [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only owner blocks saving 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:107:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-a-whitespace-only-owner-blocks-saving-chromium/error-context.md
+
+
+[12/26] [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only description blocks saving
+  12) [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only description blocks saving 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:107:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-a-wh-f9b32-y-description-blocks-saving-chromium/error-context.md
+
+
+[13/26] [chromium] › tests/create-bug/create-bug.spec.ts:125:1 › severity has no blank option in the create modal
+  13) [chromium] › tests/create-bug/create-bug.spec.ts:125:1 › severity has no blank option in the create modal 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:126:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-seve-ee015--option-in-the-create-modal-chromium/error-context.md
+
+
+[14/26] [chromium] › tests/create-bug/create-bug.spec.ts:131:1 › the API rejects a bug with a blank severity
+[15/26] [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected HIGH severity is shown in its severity colour
+  14) [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected HIGH severity is shown in its severity colour 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:139:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-sele-89c9d-hown-in-its-severity-colour-chromium/error-context.md
+
+
+[16/26] [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected MID severity is shown in its severity colour
+  15) [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected MID severity is shown in its severity colour 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:139:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-sele-2deed-hown-in-its-severity-colour-chromium/error-context.md
+
+
+[17/26] [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected LOW severity is shown in its severity colour
+  16) [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected LOW severity is shown in its severity colour 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'New Bug' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">New Bug</button> aka getByRole('button', { name: 'New Bug', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'New Bug' })
+
+
+       at pages/board-page.ts:95
+
+      93 |
+      94 |   async openNewBug() {
+    > 95 |     await this.newBugButton.click();
+         |                             ^
+      96 |   }
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:139:21
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/create-bug-create-bug-sele-be867-hown-in-its-severity-colour-chromium/error-context.md
+
+
+[18/26] [chromium] › tests/login/session.spec.ts:3:1 › authenticated session persists across a page refresh
+  17) [chromium] › tests/login/session.spec.ts:3:1 › authenticated session persists across a page refresh 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Logout' })
+    Expected: visible
+    Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 3 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Logout</button> aka getByRole('button', { name: 'Logout', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3249 MID [exploratory] R03' })
+        3) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Logout' }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Logout' })
+
+
+       7 |
+       8 |   await expect(boardPage.page).toHaveURL(/\/board$/);
+    >  9 |   await expect(boardPage.logoutButton).toBeVisible();
+         |                                        ^
+      10 | });
+      11 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/login/session.spec.ts:9:40
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/login-session-authenticate-53f80-sists-across-a-page-refresh-chromium/error-context.md
+
+
+[19/26] [chromium] › tests/logout/logout.spec.ts:3:1 › logout clears the session and redirects to /login
+[20/26] [chromium] › tests/logout/logout.spec.ts:12:1 › visiting /board after logout redirects to /login
+[21/26] [chromium] › tests/logout/logout.spec.ts:21:1 › browser Back after logout does not restore the session
+[22/26] [chromium] › tests/logout/logout.spec.ts:33:1 › landing on the board via Back after logout redirects to login
+  18) [chromium] › tests/logout/logout.spec.ts:33:1 › landing on the board via Back after logout redirects to login 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 3 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Logout</button> aka getByRole('button', { name: 'Logout', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3249 MID [exploratory] R03' })
+        3) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'Logout' })
+
+
+       at pages/board-page.ts:91
+
+      89 |
+      90 |   async logout() {
+    > 91 |     await this.logoutButton.click();
+         |                             ^
+      92 |   }
+      93 |
+      94 |   async openNewBug() {
+        at BoardPage.logout (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:91:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/logout/logout.spec.ts:37:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/logout-logout-landing-on-t-6b4df-r-logout-redirects-to-login-chromium/error-context.md
+
+
+[23/26] [chromium] › tests/title-bar/layout.spec.ts:8:1 › title bar shows the logo, the BuggyBoard title and a logout button
+  19) [chromium] › tests/title-bar/layout.spec.ts:8:1 › title bar shows the logo, the BuggyBoard title and a logout button 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Logout' })
+    Expected: visible
+    Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 3 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Logout</button> aka getByRole('button', { name: 'Logout', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3249 MID [exploratory] R03' })
+        3) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Logout' }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Logout' })
+
+
+       9 |   await expect(boardPage.titleBarLogo).toBeVisible();
+      10 |   await expect(boardPage.titleBarHeading).toHaveText('BuggyBoard');
+    > 11 |   await expect(boardPage.logoutButton).toBeVisible();
+         |                                        ^
+      12 | });
+      13 |
+      14 | test('logo sits in a rounded box', async ({ boardPage }) => {
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/title-bar/layout.spec.ts:11:40
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/title-bar-layout-title-bar-13188-d-title-and-a-logout-button-chromium/error-context.md
+
+
+[24/26] [chromium] › tests/title-bar/layout.spec.ts:14:1 › logo sits in a rounded box
+[25/26] [chromium] › tests/title-bar/layout.spec.ts:18:1 › title sits immediately to the right of the logo
+[26/26] [chromium] › tests/title-bar/layout.spec.ts:25:1 › logout button is right-justified
+  20) [chromium] › tests/title-bar/layout.spec.ts:25:1 › logout button is right-justified ──────────
+
+    Error: locator.boundingBox: Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 3 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Logout</button> aka getByRole('button', { name: 'Logout', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3249 MID [exploratory] R03' })
+        3) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3309 MID [functional] New Bug' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'Logout' })
+
+
+       at pages/board-page.ts:13
+
+      11 |
+      12 | async function box(locator: Locator) {
+    > 13 |   const b = await locator.boundingBox();
+         |                           ^
+      14 |   if (!b) throw new Error('element is not visible');
+      15 |   return b;
+      16 | }
+        at box (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:13:27)
+        at BoardPage.logoutRightInset (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:178:26)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/title-bar/layout.spec.ts:26:10
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision/title-bar-layout-logout-button-is-right-justified-chromium/error-context.md
+
+
+  20 failed
+    [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button 
+    [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user ─────
+    [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal 
+    [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload 
+    [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with Cancel does not save the bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with the X button does not save the bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:63:3 › closing with Escape does not save the bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data 
+    [chromium] › tests/create-bug/create-bug.spec.ts:91:1 › saving with every field blank names each required field 
+    [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only title blocks saving ─
+    [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only owner blocks saving ─
+    [chromium] › tests/create-bug/create-bug.spec.ts:105:3 › a whitespace-only description blocks saving 
+    [chromium] › tests/create-bug/create-bug.spec.ts:125:1 › severity has no blank option in the create modal 
+    [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected HIGH severity is shown in its severity colour 
+    [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected MID severity is shown in its severity colour 
+    [chromium] › tests/create-bug/create-bug.spec.ts:138:3 › selected LOW severity is shown in its severity colour 
+    [chromium] › tests/login/session.spec.ts:3:1 › authenticated session persists across a page refresh 
+    [chromium] › tests/logout/logout.spec.ts:33:1 › landing on the board via Back after logout redirects to login 
+    [chromium] › tests/title-bar/layout.spec.ts:8:1 › title bar shows the logo, the BuggyBoard title and a logout button 
+    [chromium] › tests/title-bar/layout.spec.ts:25:1 › logout button is right-justified ────────────
+  6 passed (34.4s)

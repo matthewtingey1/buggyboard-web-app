@@ -1,0 +1,77 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search "Search bugs by title"
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed"
+  - table "Bugs":
+    - rowgroup:
+      - row "ID Severity Title Owner":
+        - columnheader "ID":
+          - button "ID"
+        - columnheader "Severity":
+          - button "Severity"
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Owner":
+          - button "Owner"
+    - rowgroup:
+      - button "2 HIGH Bug API endpoints work without logging in matt":
+        - cell "2"
+        - cell "HIGH"
+        - cell "Bug API endpoints work without logging in"
+        - cell "matt"
+      - button "5 HIGH [security] XSS <img src=x onerror=\"window.__xss=1;document.title='PWNED-title'\"> <script>window.__xss=2</script> <img src=x onerror=\"window.__xss=3\">'; DROP TABLE bugs;--":
+        - cell "5"
+        - cell "HIGH"
+        - cell "[security] XSS <img src=x onerror=\"window.__xss=1;document.title='PWNED-title'\"> <script>window.__xss=2</script>"
+        - cell "<img src=x onerror=\"window.__xss=3\">'; DROP TABLE bugs;--"
+      - button "7 HIGH [contract] C01 valid buggy":
+        - cell "7"
+        - cell "HIGH"
+        - cell "[contract] C01 valid"
+        - cell "buggy"
+      - button "10 HIGH [contract] C04 padded buggy":
+        - cell "10"
+        - cell "HIGH"
+        - cell "[contract] C04 padded"
+        - cell "buggy"
+      - button "11 HIGH [contract] C05 state buggy":
+        - cell "11"
+        - cell "HIGH"
+        - cell "[contract] C05 state"
+        - cell "buggy"
+      - button "3 MID Search does not match on bug description matt":
+        - cell "3"
+        - cell "MID"
+        - cell "Search does not match on bug description"
+        - cell "matt"
+      - button "9 MID [contract] C03 mixed buggy":
+        - cell "9"
+        - cell "MID"
+        - cell "[contract] C03 mixed"
+        - cell "buggy"
+      - button "16 MID [a11y] keyboard walk 1790110545523 buggy":
+        - cell "16"
+        - cell "MID"
+        - cell "[a11y] keyboard walk 1790110545523"
+        - cell "buggy"
+      - button "1 LOW Login page accepts username with trailing spaces matt":
+        - cell "1"
+        - cell "LOW"
+        - cell "Login page accepts username with trailing spaces"
+        - cell "matt"
+      - button "8 LOW [contract] C02 upper buggy":
+        - cell "8"
+        - cell "LOW"
+        - cell "[contract] C02 upper"
+        - cell "buggy"
+      - button "12 LOW [contract] C29 owner not a user nobody-at-all":
+        - cell "12"
+        - cell "LOW"
+        - cell "[contract] C29 owner not a user"
+        - cell "nobody-at-all"

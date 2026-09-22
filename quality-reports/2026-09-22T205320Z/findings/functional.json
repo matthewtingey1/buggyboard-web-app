@@ -1,0 +1,68 @@
+{
+  "agent": "functional",
+  "run": "2026-09-22T205320Z",
+  "scope": "Every Scenario / Scenario Outline row and acceptance criterion in specs/features/01-13, exercised through the UI (headless Chromium, 1 worker) against the working tree at http://localhost:5173, with API reads for persistence checks. 86 atomic tests in evidence/functional/specs using page objects in evidence/functional/pages. Includes the diff slice: login as the new user matt/<redacted>, and the backend on port 3002 behind the vite proxy.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "cd quality-reports/2026-09-22T205320Z/evidence/functional && npx playwright test --config=playwright.functional.config.ts --project=chromium --reporter=line --workers=1 --output=~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T205320Z/evidence/functional/test-results > run-log.txt 2>&1",
+    "node quality-reports/2026-09-22T205320Z/evidence/functional/probe-owner-prefill.mjs (run from repo root)",
+    "curl -s http://localhost:5173/api/bugs (checked that no [functional] bugs were left behind: 0)"
+  ],
+  "findings": [
+    {
+      "id": "functional-01",
+      "title": "Search for \"login\" does not match \"Issue with log-in\": punctuation becomes a space instead of being removed",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "specs/features/11-search-board.md Scenario: Search matching is case insensitive and normalizes whitespace and punctuation (and the Examples section: \"login\" must match \"Login fails\" and \"Issue with log-in\")",
+      "location": "frontend/src/BoardPage.tsx:44",
+      "evidence": "Searched \"login\" with bugs \"[functional] Login fails <t>\" and \"[functional] Issue with log-in <t>\" on the board. \"Login fails\" was shown, but the \"log-in\" row count was 0. The reverse also fails: the query \"log-in\" does not match \"Login fails\". normalizeForSearch changes \"log-in\" to \"log in\", which does not contain \"login\". Screenshots: evidence/functional/test-results/11-search-11-search-11-S3--64c4d-ails-and-Issue-with-log-in--chromium/test-failed-1.png and .../11-search-11-search-punctu-12058-ails-both-sides-normalised--chromium/test-failed-1.png; log in evidence/functional/run-log.txt",
+      "repro": "Create a bug titled \"Issue with log-in\". Log in as buggy/1970beetle and type \"login\" in the search field. The bug does not appear. Runnable: npx playwright test specs/11-search.spec.ts -g \"11-S3\" --config=playwright.functional.config.ts --project=chromium --workers=1 (from evidence/functional)",
+      "fix": "In normalizeForSearch, remove punctuation instead of replacing it: lower.replace(/\\p{P}/gu, \"\")"
+    },
+    {
+      "id": "functional-02",
+      "title": "No feature in specs/features/ has automated product coverage in tests/",
+      "status": "gap",
+      "severity": "medium",
+      "requirement": "specs/engineering/test-automation-patterns.md (POM tests under tests/ for Login, Board, Create Bug, Edit Bug); all Scenarios in specs/features/01-13",
+      "location": "tests/example.spec.ts",
+      "evidence": "tests/ holds only example.spec.ts, which targets playwright.dev. The lead's 6/6 pass covers none of the product. The 86 tests from this run are in the run's evidence folder, not in tests/.",
+      "repro": "ls tests/ ; grep -n goto tests/example.spec.ts",
+      "fix": "Promote evidence/functional/specs and pages into tests/<feature>/ and tests/pages/ with a fixtures/index.ts, following test-automation-patterns.md"
+    },
+    {
+      "id": "functional-03",
+      "title": "Empty-board and all-open-board scenarios cannot be run against the shared database",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "specs/features/07-bug-board.md Scenario: Board page shows an empty table when there are no bugs; specs/features/13-bug-status.md Scenario: No bugs matched message when selected state has no bugs",
+      "location": "frontend/src/BoardPage.tsx:249-260",
+      "evidence": "Both preconditions need control of the whole database, which the run rules forbid. 13-S7 was run through a proxy instead (Closed filter plus an own-bug token gives \"No bugs matched.\" and 0 rows), and it passed. The code shows that an empty database renders a \"No bugs.\" placeholder row inside tbody. That row is not a bug row, but it was not observed in this run.",
+      "repro": "Needs an isolated database (for example a per-test DB file or an API seed/reset endpoint in a test environment)",
+      "fix": "Provide an isolated test database so these scenarios can run deterministically"
+    },
+    {
+      "id": "functional-04",
+      "title": "Create-bug modal first renders Owner blank and fills in the default after paint, so an early edit to Owner is overwritten",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "specs/features/06-create-bug.md Scenario: Create-bug modal defaults owner to the current user",
+      "location": "frontend/src/CreateBugModal.tsx:32-42",
+      "evidence": "Probe: open New Bug and clear Owner at once. inputValue is \"\" straight away, and \"buggy\" after 500ms. Saving then reported only Title and Description as required. When the probe waited before clearing, Owner stayed blank as expected. The default is applied in a passive useEffect after the first render with owner=\"\". Real users are unlikely to hit this, but automation does.",
+      "repro": "node quality-reports/2026-09-22T205320Z/evidence/functional/probe-owner-prefill.mjs (from repo root)",
+      "fix": "Mount the modal only when it is open (or give it a key) and initialise the state as useState(defaultOwner), so the first paint already shows the default"
+    }
+  ],
+  "notTested": [
+    "Firefox and WebKit: only Chromium was run (--workers=1)",
+    "01 favicon art style (tan, cartoon-style 1970 Beetle) was not judged visually. Only checked that /favicon.ico is referenced and served with 200",
+    "07-S3 empty board and the exact precondition of 13-S7 (every bug open): shared DB, see functional-03",
+    "06-S9 / 09-S10 severity-blank rows: a blank severity cannot be selected in the UI (the dropdown has no empty option). Blank-severity rejection was checked through POST /api/bugs (400)",
+    "Performance of filter-as-you-type (11 design note): not measured",
+    "Board counts and totals: never asserted, because other agents write to the same DB",
+    "Server-side session or auth enforcement: auth lives only in client localStorage. Out of functional scope (security owns it)"
+  ]
+}

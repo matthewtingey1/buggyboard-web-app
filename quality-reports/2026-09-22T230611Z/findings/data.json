@@ -1,0 +1,158 @@
+{
+  "agent": "data",
+  "run": "2026-09-22T230611Z",
+  "scope": "Re-test of data-01..10 from run 2026-09-22T222029Z, then side effects of the new bugService rules. API (evidence/data/api-retest.mjs): title one-line rule on create and update for LF, CRLF+indent, CR, blank lines, NBSP/tab next to a break, inner NBSP and double space, U+2028, U+0085, VT/FF, ZWJ emoji across a break; owner/description keep their newlines; blank check for 21 invisible or format characters in each field; legitimate ZWJ/ZWNJ/VS16 values and a ZWSP-padded owner; lone surrogates in create and update responses; id parsing; 90k title and 120k description; 20 rounds of parallel full-row PUTs, stale overwrite, 10 PUT||DELETE races, PUT/DELETE after delete, id non-reuse; Open->Closed. Every value compared across the POST/PUT response, GET :id, GET list and a read-only better-sqlite3 connection. UI (headless chromium, evidence/data/ui-retest.mjs): API multi-line title through the edit modal, U+2028 title on the board and in the modal, UI creates with NBSP, bidi isolates, NUL, ZWJ family and flag sequences, space padding (request, response, DB, board, modal), zero-width and LRM titles in the create modal, zero-width title in the edit modal, stale save/delete/row click after another client's delete, 120k description, Closed filter. Suite: tests/data/round-trip.spec.ts with a residue snapshot before and after, a fixture cleanup probe (evidence/data/residue/), and an audit of UI creates that don't register their title.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "sqlite3 -readonly backend/data/buggyboard.db \"select * from sqlite_sequence; select count(*) from bugs where title like '[e2e]%'; select id, hex(title) from bugs where title not like '[%'; select id from bugs where instr(title, char(10))>0 or instr(title, char(13))>0; pragma journal_mode;\"",
+    "cd quality-reports/2026-09-22T230611Z/evidence/data && node api-retest.mjs > api-retest.log 2>&1",
+    "cd quality-reports/2026-09-22T230611Z/evidence/data && node ui-retest.mjs > ui-retest.log 2>&1",
+    "npx playwright test tests/data/round-trip.spec.ts --project=api --reporter=line --workers=1 --output=quality-reports/2026-09-22T230611Z/evidence/data/test-results (wrapped with sqlite3 -readonly residue queries; evidence/data/round-trip-run.txt)",
+    "RESIDUE_TOKEN=res1790118903 npx playwright test -c quality-reports/2026-09-22T230611Z/evidence/data/residue/residue.config.ts --reporter=line --workers=1 --output=quality-reports/2026-09-22T230611Z/evidence/data/test-results/residue",
+    "curl -s -XDELETE http://localhost:5173/api/bugs/7061; curl -s -XDELETE http://localhost:5173/api/bugs/7062"
+  ],
+  "findings": [
+    {
+      "id": "data-01",
+      "title": "Edit modal silently strips newlines from a stored title; any title edit persists the joined text",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "06-create-bug: title is a one-line summary; 09-edit-bug: save persists only the user's modifications.",
+      "location": "backend/src/bugService.ts:59-61, backend/src/bugService.ts:68",
+      "evidence": "LF, CRLF+indent, CR-only and blank-line titles are stored as '[data] a b' on create and on update, identical in response, GET :id, list and DB. UI: API title '[data] ml line1\\nline2' shows as '[data] ml line1 line2' on the board and in the modal; a description-only edit PUTs and stores the same title. Side effects checked: owner and description keep their newlines; inner NBSP and double spaces are kept; only whitespace touching a break is absorbed ('a\\u00A0\\nb' -> 'a b'); U+2028, U+0085, VT and FF are stored verbatim and U+2028 renders on one line; ZWJ emoji either side of a break are intact. The read path does no transform, and the DB has 0 titles containing CR or LF, so no existing data is affected. Residual (not demonstrable, no such rows exist): a legacy row with a newline would still be joined without a space if its title were edited in the modal, because chromium strips the break before the server sees it. evidence/data/api-retest.log, ui-retest.log.",
+      "repro": "POST title '[data] a\\nb'; GET /api/bugs/<id> -> '[data] a b'.",
+      "fix": "None needed."
+    },
+    {
+      "id": "data-02",
+      "title": "Path ids with trailing junk (Nabc, N.5, Ne5) resolve to bug N on GET, PUT and DELETE",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "06-create-bug: ID is a unique integer identifier.",
+      "location": "backend/src/index.ts:34-40",
+      "evidence": "/bugs/Nabc, N.9, Ne5, N%20junk, 0N, +N, 0, -1, Arabic-Indic digit: GET/PUT/DELETE all 400. 20-digit id: 404 on all three. The target row was unchanged afterwards. evidence/data/api-retest.log 'data-02'.",
+      "repro": "curl -XDELETE localhost:5173/api/bugs/<id>.5 -> 400.",
+      "fix": "None needed."
+    },
+    {
+      "id": "data-03",
+      "title": "Create/update responses echo the input instead of the stored row; lone surrogates read back as U+FFFD",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "A bug reads back exactly as written; the 201/200 body reflects what was persisted.",
+      "location": "backend/src/bugService.ts:97, backend/src/bugService.ts:136",
+      "evidence": "U+D800 and U+DC00 in title, owner and description: POST 201 and PUT 200 bodies now equal GET :id, list and DB (stored cps '0078 fffd 0079'). The create response also shows trimmed title, uppercase severity and state OPEN. The storage replacement of a lone surrogate by U+FFFD remains but is now visible in the response itself, so the client sees what was stored. evidence/data/api-retest.log 'data-03'.",
+      "repro": "POST title '[data] x\\ud800y' -> response title contains U+FFFD, same as GET.",
+      "fix": "None needed."
+    },
+    {
+      "id": "data-04",
+      "title": "No field length limits: a 90,000-character title is accepted and stored",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "06-create-bug: title is a concise one-line summary.",
+      "location": "backend/src/bugService.ts:65-78, frontend/src/CreateBugModal.tsx:162-225",
+      "evidence": "Still reproduces for field length: 90,007-char title -> 201, stored intact. The error half is fixed: a 120k description now gets 413 application/json {error:'payload_too_large'}, and the UI shows 'The request body is too large.' and keeps the 120,000-char draft (also guarded by create-bug-plan.spec.ts 5.1). evidence/data/api-retest.log, ui-retest.log.",
+      "repro": "POST a [data] bug with title of 90,000 characters -> 201.",
+      "fix": "maxLength on the inputs (e.g. title 200, owner 64, description 10000) and matching checks in validateFields returning a JSON 400."
+    },
+    {
+      "id": "data-05",
+      "title": "Invisible-only values (U+200B, U+2060) pass the required-field check for every field",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "06-create-bug: each field is required and cannot be left blank.",
+      "location": "backend/src/bugService.ts:52-56",
+      "evidence": "U+200B, U+200C, U+200D, U+2060, U+FEFF alone, and a mix with NBSP and LF, are 400 blank_* in title, owner and description. The create modal blocks a U+200B title client-side ('Title is required.', no request). The rule only tests; it never strips: a ZWJ emoji owner, a ZWNJ Persian owner, a VS16 heart and a ZWSP-padded owner are stored byte-for-byte. The remaining invisible characters are data-11.",
+      "repro": "POST owner '\\u2060' -> 400 blank_owner.",
+      "fix": "None needed for the listed characters; see data-11."
+    },
+    {
+      "id": "data-06",
+      "title": "After a 404 on save (bug deleted elsewhere) the board keeps listing the deleted row",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "Board reflects stored data; 09-edit-bug save/cancel semantics.",
+      "location": "frontend/src/EditBugModal.tsx:167, frontend/src/EditBugModal.tsx:201, frontend/src/BoardPage.tsx:378",
+      "evidence": "Save after another client's DELETE: PUT 404, alert 'Bug not found.', no resurrection, row already gone behind the modal and still gone after Escape. Same for Delete (DELETE 404) and for a row click on a deleted bug (no dialog; status 'That bug no longer exists.'; row removed). evidence/data/ui-retest.log, ui-06-stale-save.png.",
+      "repro": "Open a [data] bug, curl -XDELETE it, Save -> row disappears.",
+      "fix": "None needed."
+    },
+    {
+      "id": "data-07",
+      "title": "Concurrent edits: last write wins with silent lost update",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "09-edit-bug Out of Scope: conflict detection (last write wins).",
+      "location": "backend/src/bugService.ts:132-136",
+      "evidence": "20 rounds of two parallel full-row PUTs: all 200, A won 17, B won 3, 0 mixed rows; the winning response matched the DB each round. A stale read-then-write overwrote the other client's description. 10 PUT||DELETE races: 4x 200/204 and 6x 404/204, 0 rows surviving. PUT and DELETE after delete: 404/404. Matches spec.",
+      "repro": "evidence/data/api-retest.mjs 'data-07 concurrency'.",
+      "fix": "Out of scope per spec; if wanted later, a version column with WHERE id=? AND version=? returning 409."
+    },
+    {
+      "id": "data-08",
+      "title": "Persistence across a backend restart not demonstrated",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "tech-stack: single SQLite file at backend/data/buggyboard.db; 13-bug-status: state is stored in the database.",
+      "location": "backend/src/db.ts:14-15",
+      "evidence": "Not re-tested under control: restarting is forbidden. Observed only: rows 1-3 present at start and end; sqlite_sequence.bugs rose monotonically (3306 last run, 6748, 6833, 7063 this run) across the reloads the lead reports; journal_mode=delete; every write was visible to an independent read-only connection right after the API response. No restart was observed by me, so this is not evidence of restart survival.",
+      "repro": "With a restart window: create a [data] bug, restart backend, GET /api/bugs/<id>.",
+      "fix": "Run the restart check in a window the lead grants."
+    },
+    {
+      "id": "data-09",
+      "title": "Suite leaves a prefix-less U+200B bug in the shared DB on every api run; cleanup refuses to delete it",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "tests/fixtures/bug-api.ts: every bug tests create is deleted afterwards.",
+      "location": "tests/data/round-trip.spec.ts:84-88, tests/fixtures/bug-api.ts:94-103",
+      "evidence": "The test now expects 400 and the API rejects the value, so nothing is created; cleanup no longer filters by prefix. tests/data/round-trip.spec.ts: 31 passed; [e2e] rows 0 before and after; prefix-less rows unchanged (the 4 others present, ids 6972/6973/7009/7010, hex C2ADE2808E and E2A080, were created by another agent between snapshots, not by the suite); 0 rows with hex E2808B. The 6 old U+200B rows are gone. evidence/data/round-trip-run.txt.",
+      "repro": "See round-trip-run.txt.",
+      "fix": "None needed."
+    },
+    {
+      "id": "data-10",
+      "title": "Two UI tests still create without registering a title, and expectTitle matches only the exact stored title",
+      "status": "potential",
+      "severity": "low",
+      "requirement": "tests/fixtures/bug-api.ts:3: every bug tests create is deleted afterwards.",
+      "location": "tests/create-bug/create-bug.spec.ts:104-122, tests/create-bug/create-bug-plan.spec.ts:106-116, tests/fixtures/bug-api.ts:94-98",
+      "evidence": "Mostly fixed. Probe (evidence/data/residue/run.txt): rows from bugApi.create, from createRaw that failed before track(), and from a create registered with expectTitle were all deleted after the test failed. Two leaked: a create with no expectTitle (the pattern of 'a whitespace-only owner/description blocks saving', whose non-title fields make the row '[e2e] blank <token>', and '5.2 A network failure keeps the draft') and a create whose stored title differed from the registered one. Both leaked rows (7061, 7062) were deleted by hand. Not observed in the real suite: 0 [e2e] rows after the lead's run and mine.",
+      "repro": "RESIDUE_TOKEN=x npx playwright test -c quality-reports/2026-09-22T230611Z/evidence/data/residue/residue.config.ts --workers=1; tests 4 and 5 leave rows.",
+      "fix": "Call bugApi.expectTitle(title) in those two tests, and have cleanup() also delete rows from findContaining(uid token) that carry the [e2e] prefix."
+    },
+    {
+      "id": "data-11",
+      "title": "Other invisible-only values (LRM/RLM, soft hyphen, Hangul fillers, braille blank, bidi controls) still pass the blank check",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "06-create-bug: each field is required and cannot be left blank.",
+      "location": "backend/src/bugService.ts:52, frontend/src/CreateBugModal.tsx:17",
+      "evidence": "API 201 in title, owner and description for each of U+200E, U+200F, U+00AD, U+034F, U+180E, U+2061, U+2063, U+202E, U+2066, U+3164, U+115F, U+FFA0, U+2800, U+FE0F, U+E0020 alone. UI: New Bug with title U+200E -> POST 201, DB title cps '200e', and the board shows a row with a visually empty title for every user. evidence/data/api-retest.log 'data-05', ui-retest.log.",
+      "repro": "curl -s -XPOST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"\\u200e\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}' -> 201 (delete it afterwards).",
+      "fix": "Share one rule: const INVISIBLE = /[\\p{Cf}\\p{Mn}\\u115F\\u1160\\u3164\\uFFA0\\u2800]/gu; used only to test blankness, so stored values stay unchanged. Apply it in bugService, CreateBugModal and EditBugModal."
+    },
+    {
+      "id": "data-12",
+      "title": "Edit modal enables Save for a zero-width-only field that the API then rejects",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "09-edit-bug: the save button is disabled if any of the fields are changed to be blank.",
+      "location": "frontend/src/EditBugModal.tsx:123-127, frontend/src/EditBugModal.tsx:133-135",
+      "evidence": "Changing the title to U+200B in the edit modal leaves Save enabled; Save -> PUT 400, alert 'Title is required.', DB title unchanged. The create modal uses the zero-width-aware isBlank and blocks this with no request, so the two modals disagree. No data is lost. evidence/data/ui-retest.log 'data-05 / invisible-only via the UI'.",
+      "repro": "Open a [data] bug, replace Title with U+200B, Save is enabled; click it -> 'Title is required.' from the server.",
+      "fix": "Use the same isBlank as CreateBugModal in EditBugModal's hasBlank and validate()."
+    }
+  ],
+  "notTested": [
+    "Persistence across backend restart (restart forbidden; data-08)",
+    "Schema migration safety and backup/restore (no mechanism by design)",
+    "Editing a legacy multi-line title in the modal: no such rows exist and the DB is read-only to me, so it cannot be set up (the API now normalises every write)",
+    "A second browser session as vanny for concurrency (parallel API clients were used)",
+    "Display spoofing with bidi controls or look-alike padding: stored and rendered verbatim, which is an integrity pass; the spoofing question belongs to security",
+    "Titles with invisible characters only (data-05/11 probes) could not carry the [data] prefix; each was deleted straight after its request and 0 remained"
+  ]
+}

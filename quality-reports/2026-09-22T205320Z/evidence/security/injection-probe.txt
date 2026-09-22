@@ -1,0 +1,19 @@
+### XSS/SQL payload bug create (via proxy)
+{"id":5,"title":"[security] XSS <img src=x onerror=\"window.__xss=1;document.title='PWNED-title'\"> <script>window.__xss=2</script>","severity":"HIGH","owner":"<img src=x onerror=\"window.__xss=3\">'; DROP TABLE bugs;--","description":"<script>window.__xss=4</script><img src=x onerror=\"window.__xss=5\"> ' OR '1'='1 \"); DELETE FROM bugs; -- <svg onload=\"window.__xss=6\"></svg> [javascript link](javascript:alert(1))","state":"OPEN"}
+HTTP 201
+### SQL metachar in id path
+{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimming is intended and consistent.","state":"OPEN"}
+HTTP 200
+{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimming is intended and consistent.","state":"OPEN"}
+HTTP 200
+### id edge cases
+id=0 -> 404
+id=-1 -> 404
+id=1.9 -> 200
+id=1e3 -> 200
+id=99999999999999999999 -> 404
+id=abc -> 400
+id=0x10 -> 404
+id= 2 -> 200
+### health after SQL payloads
+{"ok":true,"message":"BuggyBoard API is running","database":"connected"}

@@ -1,0 +1,15 @@
+      97 |
+      98 |   async openBug(title: string) {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:95:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/accessibility/accessibility.spec.ts:21:19
+
+    Error Context: quality-reports/2026-09-22T222029Z/evidence/a11y/test-results/accessibility-accessibility-Escape-closes-the-create-modal-chromium/error-context.md
+
+
+[3/6] [chromium] › tests/accessibility/accessibility.spec.ts:28:1 › the search field is exposed as a text box
+[4/6] [chromium] › tests/accessibility/accessibility.spec.ts:34:1 › bug rows are exposed as table rows
+[5/6] [chromium] › tests/accessibility/accessibility.spec.ts:43:1 › the selected state filter is announced as pressed
+[6/6] [chromium] › tests/accessibility/accessibility.spec.ts:49:1 › Tab stays inside the create modal
+  1 failed
+    [chromium] › tests/accessibility/accessibility.spec.ts:20:1 › Escape closes the create modal ───
+  5 passed (10.0s)

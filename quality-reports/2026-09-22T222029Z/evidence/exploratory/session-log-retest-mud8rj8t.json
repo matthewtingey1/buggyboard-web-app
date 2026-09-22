@@ -1,0 +1,39 @@
+{
+  "R01": [
+    "after buggy close: state=CLOSED",
+    "after vanny description save: state=OPEN description=vanny edit -> REPRODUCES"
+  ],
+  "R02": [
+    "save after delete: modal open=true text has 'Bug not found.'=true",
+    "stale row after Cancel: 1",
+    "click stale row opens dialog: false"
+  ],
+  "R03": [
+    "tab2 URL after tab1 logout: http://localhost:5173/board; localStorage user=null",
+    "tab2 New Bug still opens, owner prefilled='' -> REPRODUCES"
+  ],
+  "R04": [
+    "120k description -> 413, body JSON? false (\"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>E)",
+    "UI alert: 'Failed to save bug.'"
+  ],
+  "R05": [
+    "20k title POST -> 201",
+    "table scrollWidth=4529 container=894 -> REPRODUCES"
+  ],
+  "R06": [
+    "two synchronous clicks created 0 bugs -> fixed"
+  ],
+  "R07": [
+    "owner nobody-such-user stored='nobody-such-user', 'Buggy' stored='Buggy' -> REPRODUCES"
+  ],
+  "R08": [
+    "/board/1 -> http://localhost:5173/board dialogs=0",
+    "after Back with draft: url=http://localhost:5173/board",
+    "after Forward: dialogs=0 -> draft lost"
+  ],
+  "P1": [
+    "click reopen frames: [{\"tag\":\"mutation\",\"title\":\"previous draft\",\"alert\":\"Description is required.\"},{\"tag\":\"rAF-before-first-paint\",\"title\":\"previous draft\",\"alert\":\"Description is required.\"},{\"tag\":\"rAF-2\",\"title\":\"\",\"alert\":null}]",
+    "keyboard reopen frames: [{\"tag\":\"mutation\",\"title\":\"previous draft\",\"alert\":\"Description is required.\"},{\"tag\":\"rAF-before-first-paint\",\"title\":\"previous draft\",\"alert\":\"Description is required.\"},{\"tag\":\"rAF-2\",\"title\":\"\",\"alert\":null}]",
+    "type during first frame: {\"valueAtFirstFrame\":\"previous draft\",\"valueAfterSettle\":\"typed-in-first-frame\"}"
+  ]
+}

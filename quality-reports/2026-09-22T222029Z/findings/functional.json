@@ -1,0 +1,105 @@
+{
+  "agent": "functional",
+  "run": "2026-09-22T222029Z",
+  "scope": "Every Scenario / Scenario Outline in specs/features/01-13 on the working tree (baseline origin/main cce584c), headless Chromium, 1 worker, http://localhost:5173. Re-ran the previous run's 86 atomic functional tests (copied to evidence/functional/prev; two harness-only fixes: users.json path depth and reading the matt password from users.json at runtime). Added 26 scratch tests in evidence/functional/gaps for the specs/testing/*.md '❌ gap' rows and for spec clauses the shipped suite misses. Spot-checked the assertions in tests/login, logout, title-bar, create-bug, bug-board, board-severity, edit-bug, sort, search, delete-bug, bug-status, favicon, user-accounts, and ran tests/title-bar, tests/login/session.spec.ts, tests/logout and tests/create-bug against a bug whose title contains 'New Bug Logout'.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "cd quality-reports/2026-09-22T222029Z/evidence/functional/prev && BUGGY_PW=<from users.json> npx playwright test --config=playwright.functional.config.ts --project=chromium --reporter=line --workers=1 --output=<abs>/quality-reports/2026-09-22T222029Z/evidence/functional/test-results/prev > ../prev-run-log.txt",
+    "cd quality-reports/2026-09-22T222029Z/evidence/functional/prev && BUGGY_PW=<from users.json> MATT_PW=<from users.json> npx playwright test specs/01-02-static.spec.ts specs/03-login.spec.ts --config=playwright.functional.config.ts --project=chromium --reporter=line --workers=1 --output=<abs>/.../test-results/prev-rerun > ../prev-rerun-log.txt",
+    "npx playwright test tests/logout tests/login/session.spec.ts tests/title-bar --project=chromium --reporter=line --workers=1 --output=quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-logout",
+    "curl -s -X POST http://localhost:5173/api/bugs -d '{\"title\":\"[functional] New Bug Logout collision probe\",...}'; npx playwright test tests/title-bar tests/login/session.spec.ts tests/logout tests/create-bug/create-bug.spec.ts --project=chromium --reporter=line --workers=1 --output=quality-reports/2026-09-22T222029Z/evidence/functional/test-results/suite-collision > evidence/functional/suite-locator-collision-log.txt; curl -s -X DELETE http://localhost:5173/api/bugs/3309",
+    "cd quality-reports/2026-09-22T222029Z/evidence/functional/gaps && npx playwright test --config=playwright.gaps.config.ts --project=chromium --reporter=line --workers=1 --output=<abs>/.../test-results/gaps > ../gaps-run-log.txt",
+    "curl -s http://localhost:5173/api/bugs (checked that no [functional] bugs were left behind: 0)"
+  ],
+  "findings": [
+    {
+      "id": "functional-01",
+      "title": "Search for \"login\" does not match \"Issue with log-in\": punctuation becomes a space instead of being removed",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "specs/features/11-search-board.md Scenario: Search matching is case insensitive and normalizes whitespace and punctuation (\"login\" must match \"Login fails\" and \"Issue with log-in\")",
+      "location": "frontend/src/BoardPage.tsx:44",
+      "evidence": "Still reproduces. Re-run of prev/specs/11-search.spec.ts: 11-S3 and 11-S3c fail (row count 0 for the log-in title; query \"log-in\" does not match \"Login fails\"). Screenshots and traces: evidence/functional/test-results/prev/11-search-11-search-11-S3--*/ and .../11-search-11-search-punctu-*/. Log: evidence/functional/prev-run-log.txt. The shipped tests/search/search.spec.ts:30 guards it with test.fail, which records the defect but does not cover the fix.",
+      "repro": "Create a bug titled \"Issue with log-in\", log in as buggy, type \"login\" in the search field: the bug is not shown.",
+      "fix": "In normalizeForSearch, remove punctuation instead of replacing it: lower.replace(/\\p{P}/gu, \"\")"
+    },
+    {
+      "id": "functional-02",
+      "title": "No feature in specs/features/ has automated product coverage in tests/",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "specs/engineering/test-automation-patterns.md; all Scenarios in specs/features/01-13",
+      "location": "tests/",
+      "evidence": "tests/ now holds POM specs for every feature 01-13 (page objects in tests/pages, fixtures in tests/fixtures). Every scenario in the inventory maps to a shipped test, except the ones listed under functional-03 and functional-07. The lead's run shows 410 passed and 0 failed.",
+      "repro": "ls tests/*/",
+      "fix": "None needed"
+    },
+    {
+      "id": "functional-03",
+      "title": "Empty-board and all-open-board scenarios cannot be run against the shared database",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "specs/features/07-bug-board.md Scenario: Board page shows an empty table when there are no bugs; specs/features/13-bug-status.md Scenario: No bugs matched message when selected state has no bugs",
+      "location": "frontend/src/BoardPage.tsx:249-260; tests/bug-board/bug-board.spec.ts:39; tests/bug-status/bug-status.spec.ts:113",
+      "evidence": "Still a gap. The shipped suite says so in comments: bug-board has no empty-board test, and bug-status uses a Closed plus search proxy, which passes. The \"No bugs.\" placeholder row (BoardPage.tsx:258) was not observed in this run either.",
+      "repro": "Needs an isolated database",
+      "fix": "Provide an isolated test database (for example a per-run DB file) so these scenarios can run deterministically"
+    },
+    {
+      "id": "functional-04",
+      "title": "Create-bug modal first renders the previous draft (and a blank Owner), then resets after paint, so early input is overwritten",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "specs/features/06-create-bug.md Scenario: Create-bug modal defaults owner to the current user; specs/testing/create-bug-test-plan.md 1.5 (P-1)",
+      "location": "frontend/src/CreateBugModal.tsx:32-42",
+      "evidence": "Still reproduces. (a) Open New Bug and clear Owner at once: 500ms later Owner reads \"buggy\" (gaps/specs/create-gaps.spec.ts:38). (b) Type \"stale draft\", blank Owner, Escape, reopen: in the first read after the click, Title is \"stale draft\" and Owner is \"\" (create-gaps.spec.ts:23). The component stays mounted, so its state survives closing, and the reset runs in a passive useEffect after paint. Screenshots: evidence/functional/test-results/gaps/create-gaps-C1-5-*/ and create-gaps-functional-04-*/.",
+      "repro": "npx playwright test specs/create-gaps.spec.ts -g \"functional-04\" --config=playwright.gaps.config.ts --project=chromium --workers=1 (from evidence/functional/gaps)",
+      "fix": "Render the modal only when it is open ({createModalOpen && <CreateBugModal .../>}) and initialise with useState(defaultOwner), so the first paint is already clean"
+    },
+    {
+      "id": "functional-05",
+      "title": "Shipped BoardPage 'Logout' and 'New Bug' locators are not exact, so any bug whose title contains those words breaks 20 tests",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "specs/engineering/test-automation-patterns.md (independent tests, no shared state); run rule: other agents change data concurrently",
+      "location": "tests/pages/board-page.ts:44-45",
+      "evidence": "Board rows are role=button, and their accessible name is the row text. getByRole('button', { name: 'Logout' }) is a substring match, so it also resolves to rows. While an exploratory agent's bug \"[exploratory] R03 after-logout ...\" was on the board, 4 of 9 tests in tests/logout, tests/login/session.spec.ts and tests/title-bar failed with a strict-mode violation. With my own bug \"[functional] New Bug Logout collision probe\" present, 20 of 26 tests in tests/title-bar, tests/login/session.spec.ts, tests/logout and tests/create-bug failed: 16 on 'New Bug' resolving to 2 elements, and the rest on 'Logout'. Log: evidence/functional/suite-locator-collision-log.txt. The lead's green run depends on no such title existing at the time.",
+      "repro": "POST a bug titled \"[x] New Bug Logout\", then npx playwright test tests/title-bar tests/create-bug --project=chromium --workers=1",
+      "fix": "Scope and pin both locators: this.header.getByRole('button', { name: 'New Bug', exact: true }) and this.header.getByRole('button', { name: 'Logout', exact: true })"
+    },
+    {
+      "id": "functional-06",
+      "title": "Two shipped tests assert less than their titles or scenarios claim",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "specs/features/02-user-accounts.md (default user buggy with password 1970beetle); specs/features/12-delete-bug.md Scenario: Canceling the confirmation modal leaves the bug intact (\"And the board still displays the bug\")",
+      "location": "tests/user-accounts/users-file.spec.ts:16; tests/delete-bug/delete-bug.spec.ts:42",
+      "evidence": "users-file 'the default buggy account exists' checks only the username, not the password the spec names. delete-bug 'cancelling the confirmation...' checks the edit modal and the API but never checks the board row. I checked the board row myself (gaps/specs/edit-delete-gaps.spec.ts '12-S4', pass). The other sampled tests assert what their titles say.",
+      "repro": "Read the two tests",
+      "fix": "Add expect(users.find(u => u.username === 'buggy')?.password).toBe('1970beetle'), and after cancelling, close the edit modal and expect boardPage.rowCount(bug.title) to be 1"
+    },
+    {
+      "id": "functional-07",
+      "title": "The test-plan '❌ gap' rows behave correctly today but are still not guarded in tests/",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "specs/testing/create-bug-test-plan.md 1.2, 1.3 (default MID), 2.4, 2.5, 2.6, 4.4, 5.1, 5.2, 6.1, 6.2; edit-bug-test-plan.md 1.2, 2.3, 2.4, 3.4, 5.1 (UI); delete-bug-test-plan.md 1.3, 1.4, 2.3; spec 13 design (sorting/search unchanged across state filters)",
+      "location": "tests/create-bug, tests/edit-bug, tests/delete-bug, tests/bug-status",
+      "evidence": "Every scratch test for these rows passes. Of the 26 gap tests, 24 pass and the 2 failures are functional-04 (evidence/functional/gaps-run-log.txt). They cover Title focus, MID default, Enter to submit or save, Enter in Description adding a line, UI trimming, \"Saving…\" with the form locked, errors cleared on reopen, the oversize-body alert with the draft kept, the network-failure message, create from Closed saving as OPEN, search kept after create, trailing-space Save disabled, \"Bug not found.\" on edit after delete, Escape and backdrop on the confirmation, delete from Closed keeping Closed, sort and search kept across state switches, and sort kept after clearing search. None of them is in tests/, so a regression would not be caught.",
+      "repro": "cd evidence/functional/gaps && npx playwright test --config=playwright.gaps.config.ts --project=chromium --workers=1",
+      "fix": "Promote evidence/functional/gaps/specs into tests/<feature>/ using the shipped fixtures (and the functional-05 locator fix)"
+    }
+  ],
+  "notTested": [
+    "Firefox and WebKit: only Chromium was run (--workers=1)",
+    "01 favicon art style (tan cartoon 1970 Beetle) and the 08 'HIGH more prominent' visual judgement",
+    "07 empty board and the exact precondition of 13-S7 (every bug open): shared DB, see functional-03",
+    "06/09 blank-severity outline rows through the UI: the dropdown has no blank option (API 400 checked by the shipped suite)",
+    "Search performance while typing (11 design note)",
+    "Board counts and totals were never asserted, because other agents write to the same DB",
+    "Test-plan rows marked 'fails today' (create 5.3 double submit, delete 1.5 focus, delete 3.1 stale row, edit 2.5 multi-line title) and hold rows (create 2.7, edit 5.2): owned by exploratory, a11y and data, and not re-measured here",
+    "Full shipped suite: not re-run (the lead owns it); only the four spec folders above were run, for functional-05"
+  ]
+}

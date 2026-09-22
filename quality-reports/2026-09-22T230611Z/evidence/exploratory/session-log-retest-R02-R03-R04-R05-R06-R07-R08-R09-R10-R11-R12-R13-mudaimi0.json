@@ -1,0 +1,39 @@
+{
+  "R02": [
+    "save after delete: modal open=true alert='Bug not found.'",
+    "row behind modal after save 404: 0",
+    "stale row after Cancel: 0",
+    "click deleted row: dialogs=0 status='That bug no longer exists. No bugs matched.' row left=0",
+    "delete already-deleted: edit modal open=true alert='Bug not found.' row left=0"
+  ],
+  "R03": [
+    "tab2 URL after tab1 logout: http://localhost:5173/login -> fixed"
+  ],
+  "R04": [
+    "120k description -> 413, body={\"error\":\"payload_too_large\",\"message\":\"The request body is too large.\"}",
+    "malformed JSON -> 400 body={\"error\":\"invalid_json\",\"message\":\"The request body is not valid JSON.\"}",
+    "UI alert: 'The request body is too large.'; title maxLength=null desc maxLength=null"
+  ],
+  "R05": [
+    "20k title POST -> 201",
+    "table scrollWidth=894 container=894 -> layout fixed",
+    "20k-title row height=9649px"
+  ],
+  "R06": [
+    "two synchronous clicks created 1 bugs -> fixed"
+  ],
+  "R07": [
+    "owner nobody-such-user stored='nobody-such-user', 'Buggy' stored='Buggy' -> still open"
+  ],
+  "R08": [
+    "/board/1 -> http://localhost:5173/board dialogs=0",
+    "after Back with draft: url=http://localhost:5173/board",
+    "after Forward: dialogs=0 -> draft lost, REPRODUCES"
+  ],
+  "R09": [
+    "reopen+type 'new' x5: [{\"value\":\"new\",\"frames\":[{\"t\":\"mut\",\"title\":\"\",\"alert\":null},{\"t\":\"raf1\",\"title\":\"new\",\"alert\":null}]},{\"value\":\"new\",\"frames\":[{\"t\":\"mut\",\"title\":\"\",\"alert\":null},{\"t\":\"raf1\",\"title\":\"new\",\"alert\":null}]},{\"value\":\"new\",\"frames\":[{\"t\":\"mut\",\"title\":\"\",\"alert\":null},{\"t\":\"raf1\",\"title\":\"new\",\"alert\":null}]},{\"value\":\"new\",\"frames\":[{\"t\":\"mut\",\"title\":\"\",\"alert\":null},{\"t\":\"raf1\",\"title\":\"new\",\"alert\":null}]},{\"value\":\"new\",\"frames\":[{\"t\":\"mut\",\"title\":\"\",\"alert\":null},{\"t\":\"raf1\",\"title\":\"new\",\"alert\":null}]}]"
+  ],
+  "R10": [
+    "(a) Escape during Saving: dialog still open=true -> Escape path fixed"
+  ]
+}

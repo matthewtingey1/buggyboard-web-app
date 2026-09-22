@@ -1,0 +1,158 @@
+{
+  "agent": "contract",
+  "run": "2026-09-22T222029Z",
+  "scope": "Re-test of contract-01..08 from run 2026-09-22T205320Z, then the classes nothing in tests/api guards: PUT with malformed ids, unsupported methods (PATCH, PUT/DELETE on collection, GET login, DELETE health), HEAD and OPTIONS/CORS preflight on proxy (:5173) and direct (:3002), content types (none, text/plain, vnd.api+json, form, multipart, charset=latin1, Content-Encoding gzip/br), non-object JSON bodies, 200 KB bodies and long fields, routing edges (trailing slash, upper-case path, extra segment, zero/huge id), response headers. 65 probe rows plus header captures; scoped run of tests/api (53 tests) and a review of what those tests assert.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "quality-reports/2026-09-22T222029Z/evidence/contract/probe.sh http://localhost:5173",
+    "node quality-reports/2026-09-22T222029Z/evidence/contract/table.cjs > quality-reports/2026-09-22T222029Z/evidence/contract/table.md",
+    "curl -s -i -X OPTIONS {http://localhost:5173,http://localhost:3002}/api/bugs/1 -H 'Origin: http://localhost:5173' -H 'Access-Control-Request-Method: PUT'  (headers.txt)",
+    "curl -s -o /dev/null -w '%{http_code} %{content_type}' {http://localhost:5173,http://localhost:3002}/API/BUGS  (headers.txt)",
+    "npx playwright test tests/api --project=api --reporter=line --workers=1 --output=quality-reports/2026-09-22T222029Z/evidence/contract/test-results",
+    "cleanup: DELETE /api/bugs/{3081,3084,3085,3086,3087} (all [contract]-prefixed, 204)"
+  ],
+  "findings": [
+    {
+      "id": "contract-01",
+      "title": "POST /api/login returns 500 HTML with a stack trace when username is a number, array or object",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Contract break: a client input error must produce a 4xx JSON {error,message} body like every other login failure; the bug routes already coerce non-strings.",
+      "location": "backend/src/index.ts:38-39; backend/src/authService.ts:19",
+      "evidence": "Still reproduces. username 123 / [\"buggy\"] / {} -> 500 text/html 'TypeError: username.trim is not a function' (probe R01a-c). A non-string password (123) does not crash but returns 401 invalid_credentials rather than a 400 (R01d). Guarded by test.fail in tests/api/login.spec.ts:43 and error-bodies.spec.ts:26.",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":123,\"password\":\"x\"}'",
+      "fix": "In index.ts: const username = typeof req.body?.username === \"string\" ? req.body.username : \"\"; likewise for password."
+    },
+    {
+      "id": "contract-02",
+      "title": "Every body-parser failure (malformed JSON, non-object JSON, 413 too large, 415 charset/encoding, bad gzip) returns Express's HTML error page with a stack trace",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Contract break: every /api error response is JSON {error,message}; express.json() errors bypass that shape.",
+      "location": "backend/src/index.ts:11 (express.json(), no error middleware before app.listen at :184)",
+      "evidence": "Still reproduces, and wider than last run: malformed JSON on POST /api/login, POST /api/bugs, PUT /api/bugs/:id -> 400 HTML (R02a, R02b, N08); body null or \"x\" -> 400 HTML (R02d, C10); DELETE /api/bugs/abc with body '{bad' -> 400 HTML before the id check runs (N11); 200 KB body on POST and PUT -> 413 HTML 'PayloadTooLargeError' (L01, L02); charset=latin1 -> 415 HTML (C05); Content-Encoding br -> 415 HTML (C07); Content-Encoding gzip with a plain body -> 400 HTML 'incorrect header check' (C06). tests/api guards only malformed JSON on the two POSTs (test.fail).",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":'",
+      "fix": "One final error middleware: app.use((err, _req, res, _next) => res.status(err.status ?? 500).json({ error: err.type === \"entity.parse.failed\" ? \"invalid_json\" : err.status === 413 ? \"payload_too_large\" : err.status === 415 ? \"unsupported_media_type\" : \"internal_error\", message: err.expose ? err.message : \"Unexpected server error.\" }));"
+    },
+    {
+      "id": "contract-03",
+      "title": "Bug id parsing accepts trailing garbage: /api/bugs/<id>abc, <id>.5, <id>e5 and %20<id> act on the real bug, including PUT and DELETE",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Contract break: the route documents 400 invalid_id for a non-numeric id; parseInt accepts a numeric prefix. Negative, zero and hex ids return 404 not_found instead of 400.",
+      "location": "backend/src/index.ts:81, :95, :140",
+      "evidence": "Still reproduces. GET <id>abc / <id>.9 / %20<id> -> 200 with bug <id> (R03a-c). PUT /api/bugs/<id>abc -> 200 and overwrote the title of bug <id> to '[contract] via 1abc' (N02, verified N02v); PUT <id>.5 and <id>e5 -> 200 writes (N03, N04). GET/PUT/DELETE -1 and 0x1 -> 404 (R03d, R03e, N05, N06, N10); /api/bugs/0 -> 404 (E06). tests/api guards GET and DELETE with test.fail; nothing guards PUT.",
+      "repro": "ID=$(curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[contract] x\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}' | node -pe 'JSON.parse(require(\"fs\").readFileSync(0)).id'); curl -s -X PUT http://localhost:5173/api/bugs/${ID}abc -H 'Content-Type: application/json' -d '{\"title\":\"[contract] via 1abc\",\"severity\":\"mid\",\"owner\":\"buggy\",\"description\":\"d\",\"state\":\"open\"}'; curl -s http://localhost:5173/api/bugs/$ID",
+      "fix": "One helper used by all three routes: if (!/^[1-9]\\d*$/.test(req.params.id)) return res.status(400).json({ error: \"invalid_id\", ... }); const id = Number(req.params.id);"
+    },
+    {
+      "id": "contract-04",
+      "title": "Unknown /api/* paths and unsupported methods return Express's HTML 404 page, not JSON (and not 405)",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: api-conventions.md reserves /api for the API; responses under it should be JSON. Wrong method on a known path is 404 rather than 405.",
+      "location": "backend/src/index.ts:184 (no /api fallback before app.listen)",
+      "evidence": "Still reproduces. GET /api/nope, POST /api/health, PATCH /api/bugs/<id>, PUT and DELETE /api/bugs, GET /api/login, DELETE /api/health, GET /api/bugs/<id>/extra, HEAD /api/nope -> 404 text/html '<pre>Cannot METHOD path</pre>' (R04a, R04b, M01-M05, M08, E04). tests/api guards only GET on an unknown path (test.fail); no test covers wrong methods.",
+      "repro": "curl -s -i -X PATCH http://localhost:5173/api/bugs/1",
+      "fix": "Before app.listen: app.use(\"/api\", (_req, res) => res.status(404).json({ error: \"not_found\", message: \"Route not found.\" })); optionally app.all on known paths returning 405 with an Allow header."
+    },
+    {
+      "id": "contract-05",
+      "title": "Invalid severity reports error code `blank_severity`; wrong-type fields report `blank_*`",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: a client cannot tell 'critical' from ''. Non-string values are coerced to \"\" and reported as blank.",
+      "location": "backend/src/index.ts:123-125, :171-173; backend/src/bugService.ts:66, :114",
+      "evidence": "Still reproduces: severity 'critical' -> 400 blank_severity (R05a); title 42 -> 400 blank_title (R05b). Correction to last run's fix: bugService never returns BLANK_SEVERITY (lines 66/114 return INVALID_SEVERITY for '' too), so mapping INVALID_SEVERITY to invalid_severity alone would turn a missing severity into invalid_severity and break tests/api/bugs.spec.ts 'POST /api/bugs without severity returns 400 blank_severity'. Guarded by test.fail at bugs.spec.ts:54.",
+      "repro": "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[contract] x\",\"severity\":\"critical\",\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "In bugService createBug/updateBug: if (input.severity.trim() === \"\") return { success: false, code: \"BLANK_SEVERITY\" } before normalising; in index.ts give INVALID_SEVERITY its own case returning invalid_severity."
+    },
+    {
+      "id": "contract-06",
+      "title": "A JSON body sent without Content-Type: application/json is silently read as empty and reported as blank fields",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "Contract break (minor): a body the server will not parse should be 415, not a misleading validation error.",
+      "location": "backend/src/index.ts:11",
+      "evidence": "Still reproduces: valid login JSON with no Content-Type -> 400 missing_credentials (R06a); text/plain, application/vnd.api+json, form-urlencoded and multipart on POST /api/bugs -> 400 blank_title (R06b, C02-C04); PUT without Content-Type -> 400 blank_title (N09). Not covered by tests/api.",
+      "repro": "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: text/plain' -d '{\"title\":\"[contract] tp\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "For POST/PUT under /api: if (!req.is(\"application/json\")) return res.status(415).json({ error: \"unsupported_media_type\", message: \"Send application/json.\" });"
+    },
+    {
+      "id": "contract-07",
+      "title": "Whitespace-only password is treated as a real password (401) rather than blank (400 blank_password)",
+      "status": "potential",
+      "severity": "low",
+      "requirement": "Business rule, ambiguous: 03-login.md requires a blank-password error and specifies trimming only for the username.",
+      "location": "backend/src/authService.ts:21, :27",
+      "evidence": "Behaviour still reproduces: password '   ' -> 401 invalid_credentials (R07). Status stays potential because whether it counts as blank is a product decision. Not covered by tests/api.",
+      "repro": "curl -s -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":\"buggy\",\"password\":\"   \"}'",
+      "fix": "Ask product. If blank: use password.trim() === \"\" for the blank checks only, still comparing the untrimmed password."
+    },
+    {
+      "id": "contract-08",
+      "title": "API tests now exist, but there is still no written API contract",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Every endpoint's statuses and body shapes should be documented; api-conventions.md states only the /api prefix.",
+      "location": "specs/engineering/api-conventions.md",
+      "evidence": "Half-addressed. tests/api has 53 tests (53/53 pass in this run), 18 of them test.fail guards on known defects. No spec lists the endpoints, status codes or error vocabulary, so the tests are the only statement of the contract, and backward compatibility still cannot be judged. The contract reconstructed in contract.md is not committed anywhere.",
+      "repro": "cat specs/engineering/api-conventions.md; grep -c \"test(\" tests/api/*.spec.ts",
+      "fix": "Add the endpoint table from contract.md (method, path, request, statuses, error codes) to specs/engineering/api-conventions.md."
+    },
+    {
+      "id": "contract-09",
+      "title": "tests/api leaves several reproducible contract breaks unguarded, including PUT /api/bugs/<id>abc overwriting a real bug",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Every known break should have a test (a test.fail guard at minimum) so a fix or a regression is noticed.",
+      "location": "tests/api/id-parsing.spec.ts; tests/api/error-bodies.spec.ts; tests/api/login.spec.ts",
+      "evidence": "Reproduced in this run with no test covering them: PUT with <id>abc/.5/e5 (N02-N04; id-parsing.spec only tests GET and DELETE); malformed JSON on PUT and DELETE (N08, N11); 413 and 415 bodies (L01, L02, C05, C07); wrong methods on known paths (M01-M05); missing/other Content-Type (R06a, R06b, N09); non-string and whitespace-only passwords (R01d, R07); zero id (E06).",
+      "repro": "grep -n \"PUT\" tests/api/id-parsing.spec.ts   # only the non-numeric loop",
+      "fix": "Add test.fail guards to id-parsing.spec.ts for PUT <id>abc (assert the bug is unchanged) and to error-bodies.spec.ts for PUT malformed JSON, a 413 body and PATCH /api/bugs/:id."
+    },
+    {
+      "id": "contract-10",
+      "title": "bugs.spec.ts pins blank and missing state as `invalid_state`, fixing the inconsistent error vocabulary as correct",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break (vocabulary): other fields report missing/blank as blank_<field>; a test that pins the inconsistency makes it the contract.",
+      "location": "tests/api/bugs.spec.ts:99-107; backend/src/index.ts:133-134",
+      "evidence": "The loop at bugs.spec.ts:99 asserts that state missing, 'pending' and '' all return 400 invalid_state, and it passes. The same file asserts blank_title/blank_owner/blank_description/blank_severity for a missing field. Minor quality point in the same area: id-parsing.spec.ts:3 checks GET, PUT and DELETE in one test, against the one-behaviour-per-test rule.",
+      "repro": "npx playwright test tests/api/bugs.spec.ts --project=api --reporter=line --workers=1 -g 'state returns 400 invalid_state'",
+      "fix": "Decide the vocabulary. If blank_state is wanted, return BLANK_STATE when state.trim() === \"\" and change the missing/blank cases in the test; keep 'pending' -> invalid_state."
+    },
+    {
+      "id": "contract-11",
+      "title": "The contract differs between the Vite proxy and the backend for OPTIONS and path case",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: the same request should get the same status and shape on http://localhost:5173/api and on :3002.",
+      "location": "frontend/vite.config.ts:7-12; backend/src/index.ts:13-21",
+      "evidence": "OPTIONS /api/bugs/1 through the proxy -> 204 answered by Vite, Access-Control-Allow-Methods 'GET,HEAD,PUT,PATCH,POST,DELETE' (PATCH is not implemented; M01 returns 404). The same request direct to :3002 -> 200 text/html body 'GET,HEAD,PUT,DELETE'. GET /API/BUGS through the proxy -> 200 SPA index.html; direct -> 200 JSON (Express routing is case-insensitive). Saved in evidence/contract/headers.txt.",
+      "repro": "curl -s -i -X OPTIONS http://localhost:5173/api/bugs/1 -H 'Origin: http://localhost:5173' -H 'Access-Control-Request-Method: PUT'; curl -s -i -X OPTIONS http://localhost:3002/api/bugs/1 -H 'Origin: http://localhost:5173' -H 'Access-Control-Request-Method: PUT'",
+      "fix": "In the CORS middleware: if (req.method === \"OPTIONS\") return res.sendStatus(204); and app.set(\"case sensitive routing\", true)."
+    },
+    {
+      "id": "contract-12",
+      "title": "No length limit on title or description: a 10,000-character title and a 90 KB description are accepted with 201",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "Business rule (not specified): 06-create-bug.md sets no maximum. The only limit is body-parser's 100 KB, which answers with an HTML 413.",
+      "location": "backend/src/bugService.ts:60-68, :107-117",
+      "evidence": "POST with a 10k-char title -> 201 (L04); 90 KB description -> 201 (L03); 200 KB body -> 413 HTML (L01). Created bugs were deleted.",
+      "repro": "curl -s -o /dev/null -w '%{http_code}\\n' -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d \"{\\\"title\\\":\\\"[contract] $(printf 't%.0s' $(seq 1 10000))\\\",\\\"severity\\\":\\\"low\\\",\\\"owner\\\":\\\"buggy\\\",\\\"description\\\":\\\"d\\\"}\"",
+      "fix": "Ask product for limits; then return 400 {error:\"title_too_long\"} (etc.) from the service."
+    }
+  ],
+  "notTested": [
+    "Baseline origin/main was not run. The diff has no backend change, so every finding is attributed as pre-existing by reading the code.",
+    "Authentication on bug routes and X-Powered-By: owned by security; tests/api/auth.spec.ts guards them with test.fail. Not re-filed here.",
+    "The security rating for stack traces in error pages (contract-01/02) belongs to security.",
+    "Concurrent writes, unicode/control characters in fields, and ETag/If-None-Match conditional requests (ETag is present on GET).",
+    "Backward compatibility: there is no versioned contract or consumer to compare against.",
+    "No new Playwright tests were written. The dispatch forbids changes under tests/; contract-09 lists the guards to add."
+  ]
+}

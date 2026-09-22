@@ -1,0 +1,4 @@
+POST /api/bugs b150 KB body -> {"error":"payload_too_large","message":"The request body is too large."} 413 application/json; charset=utf-8
+POST /api/bugs b1100 KB body -> {"error":"payload_too_large","message":"The request body is too large."} 413 application/json; charset=utf-8
+POST /api/bugs 90,016-char title -> id 7091, stored title length 90015
+cleanup DELETE 7091 -> 204

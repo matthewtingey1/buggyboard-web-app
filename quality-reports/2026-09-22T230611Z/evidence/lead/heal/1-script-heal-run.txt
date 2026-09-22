@@ -1,0 +1,13 @@
+
+Running 9 tests using 6 workers
+
+[1/9] [chromium] › tests/resilience/resilience.spec.ts:8:1 › Escape during a pending save does not close the modal
+[2/9] [firefox] › tests/resilience/resilience.spec.ts:8:1 › Escape during a pending save does not close the modal
+[3/9] [firefox] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form
+[4/9] [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form
+[5/9] [firefox] › tests/resilience/resilience.spec.ts:61:1 › the header Close button is disabled while a save is pending
+[6/9] [chromium] › tests/resilience/resilience.spec.ts:61:1 › the header Close button is disabled while a save is pending
+[7/9] [webkit] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form
+[8/9] [webkit] › tests/resilience/resilience.spec.ts:8:1 › Escape during a pending save does not close the modal
+[9/9] [webkit] › tests/resilience/resilience.spec.ts:61:1 › the header Close button is disabled while a save is pending
+  9 passed (8.4s)

@@ -1,0 +1,22 @@
+{
+  "C4": [
+    "dblclick: bugs created = 1",
+    "enterRepeat: bugs created = 1",
+    "syncDoubleClick: bugs created = 2",
+    "doubleRequestSubmit: bugs created = 2"
+  ],
+  "C7": [
+    "created long-title bugs #146 (400-char unbroken word), #147 (1000+ chars with spaces)",
+    "20k-char title accepted by API: 201",
+    "created 200 bulk bugs in 695 ms",
+    "unbroken 400-char title: table scrollWidth=4529 vs container=894, viewport=1280",
+    "20k-char title row height=73px",
+    "search to 200 bulk rows rendered in 13 ms; rows=200; no pagination control present=true"
+  ],
+  "C8": [
+    "create with 120k description: modal open=true; message=\"Failed to save bug.\"",
+    "direct POST 120k -> 413, body starts: \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>E",
+    "malformed JSON -> 400, body starts: \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>E",
+    "edit with 120k description: message=\"Failed to save bug.\""
+  ]
+}

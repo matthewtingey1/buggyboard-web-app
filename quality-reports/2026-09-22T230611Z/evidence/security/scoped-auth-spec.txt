@@ -1,0 +1,10 @@
+
+Running 6 tests using 1 worker
+
+[1/6] [api] › tests/api/auth.spec.ts:4:1 › GET /api/bugs without a session returns 401
+[2/6] [api] › tests/api/auth.spec.ts:12:1 › POST /api/bugs without a session returns 401
+[3/6] [api] › tests/api/auth.spec.ts:20:1 › DELETE /api/bugs/:id without a session leaves the bug in place
+[4/6] [api] › tests/api/auth.spec.ts:29:1 › responses do not advertise the server framework
+[5/6] [api] › tests/api/auth.spec.ts:35:1 › responses carry basic security headers
+[6/6] [api] › tests/api/auth.spec.ts:42:1 › repeated failed logins for one username are refused with 429
+  6 passed (781ms)

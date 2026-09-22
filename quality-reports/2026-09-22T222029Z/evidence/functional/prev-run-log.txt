@@ -1,0 +1,237 @@
+
+Running 86 tests using 1 worker
+
+[1/86] [chromium] › specs/01-02-static.spec.ts:5:1 › 01-AC1 app references /favicon.ico and it is served
+[2/86] [chromium] › specs/01-02-static.spec.ts:14:1 › 02-AC1..4 users.json at root, unique usernames, default buggy user present
+  1) [chromium] › specs/01-02-static.spec.ts:14:1 › 02-AC1..4 users.json at root, unique usernames, default buggy user present 
+
+    Error: ENOENT: no such file or directory, open '~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/users.json'
+
+      13 |
+      14 | test('02-AC1..4 users.json at root, unique usernames, default buggy user present', async () => {
+    > 15 |   const users = JSON.parse(readFileSync(resolve(new URL('.', import.meta.url).pathname, '../../../../../users.json'), 'utf8')) as Array<{ username: string; password: string }>;
+         |                            ^
+      16 |   const names = users.map((u) => u.username);
+      17 |   expect(users.every((u) => typeof u.username === 'string' && typeof u.password === 'string')).toBe(true);
+      18 |   expect(new Set(names).size).toBe(names.length);
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T222029Z/evidence/functional/prev/specs/01-02-static.spec.ts:15:28
+
+    Error Context: ../test-results/prev/01-02-static-02-AC1-4-user-d6c09--default-buggy-user-present-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/prev/01-02-static-02-AC1-4-user-d6c09--default-buggy-user-present-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/prev/01-02-static-02-AC1-4-user-d6c09--default-buggy-user-present-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[3/86] [chromium] › specs/03-login.spec.ts:5:3 › 03 login › 03-S1 login page displays username, masked password, login button
+[4/86] [chromium] › specs/03-login.spec.ts:14:5 › 03 login › 03-S2 unauthenticated visit to /board redirects to /login
+[5/86] [chromium] › specs/03-login.spec.ts:14:5 › 03 login › 03-S2 unauthenticated visit to / redirects to /login
+[6/86] [chromium] › specs/03-login.spec.ts:14:5 › 03 login › 03-S2 unauthenticated visit to /nope/xyz redirects to /login
+[7/86] [chromium] › specs/03-login.spec.ts:20:3 › 03 login › 03-S3 valid login lands on /board
+[8/86] [chromium] › specs/03-login.spec.ts:27:3 › 03 login › 03-S3b valid login as second user vanny
+[9/86] [chromium] › specs/03-login.spec.ts:33:3 › 03 login › 03-S3c valid login as new user matt (diff slice)
+  2) [chromium] › specs/03-login.spec.ts:33:3 › 03 login › 03-S3c valid login as new user matt (diff slice) 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/board$/
+    Received string:  "http://localhost:5173/login"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 5000ms
+        14 × locator resolved to <html lang="en">…</html>
+           - unexpected value "http://localhost:5173/login"
+
+
+      34 |     await loginPage.goto();
+      35 |     await loginPage.submit('matt', '<redacted>');
+    > 36 |     await expect(page).toHaveURL(/\/board$/);
+         |                        ^
+      37 |   });
+      38 |
+      39 |   for (const field of ['username', 'password'] as const) {
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T222029Z/evidence/functional/prev/specs/03-login.spec.ts:36:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/prev/03-login-03-login-03-S3c-v-37fb6-s-new-user-matt-diff-slice--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/prev/03-login-03-login-03-S3c-v-37fb6-s-new-user-matt-diff-slice--chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/prev/03-login-03-login-03-S3c-v-37fb6-s-new-user-matt-diff-slice--chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/prev/03-login-03-login-03-S3c-v-37fb6-s-new-user-matt-diff-slice--chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[10/86] [chromium] › specs/03-login.spec.ts:40:5 › 03 login › 03-S4 Enter on username field submits login
+[11/86] [chromium] › specs/03-login.spec.ts:40:5 › 03 login › 03-S4 Enter on password field submits login
+[12/86] [chromium] › specs/03-login.spec.ts:48:3 › 03 login › 03-S5 invalid username shows generic error
+[13/86] [chromium] › specs/03-login.spec.ts:56:3 › 03 login › 03-S6 invalid password shows same generic error
+[14/86] [chromium] › specs/03-login.spec.ts:64:3 › 03 login › 03-S7 blank username shows blank-username error
+[15/86] [chromium] › specs/03-login.spec.ts:71:3 › 03 login › 03-S8 blank password shows blank-password error
+[16/86] [chromium] › specs/03-login.spec.ts:78:3 › 03 login › 03-S9 blank username and password shows missing-credentials error
+[17/86] [chromium] › specs/03-login.spec.ts:85:3 › 03 login › 03-S10 username whitespace is trimmed and login succeeds
+[18/86] [chromium] › specs/03-login.spec.ts:92:3 › 03 login › 03-S11 authenticated user visiting /login is redirected to /board
+[19/86] [chromium] › specs/03-login.spec.ts:97:3 › 03 login › 03-S12 session persists across reload
+[20/86] [chromium] › specs/04-05-titlebar-logout.spec.ts:3:1 › 04-AC1 title bar has left logo in rounded box, title right of logo, right-justified logout
+[21/86] [chromium] › specs/04-05-titlebar-logout.spec.ts:15:1 › 05-S1 logout clears auth and redirects to /login
+[22/86] [chromium] › specs/04-05-titlebar-logout.spec.ts:21:1 › 05-S2 after logout navigating to /board redirects to /login
+[23/86] [chromium] › specs/04-05-titlebar-logout.spec.ts:27:1 › 05-S3 browser Back after logout does not restore session
+[24/86] [chromium] › specs/04-05-titlebar-logout.spec.ts:41:1 › 05-S4 logged-out user landing on /board via Back is redirected to login
+[25/86] [chromium] › specs/06-create-bug.spec.ts:7:3 › 06 create bug › 06-S1 New Bug opens modal with all fields and buttons
+[26/86] [chromium] › specs/06-create-bug.spec.ts:16:3 › 06 create bug › 06-S2 owner defaults to the current user
+[27/86] [chromium] › specs/06-create-bug.spec.ts:21:3 › 06 create bug › 06-S3 save with all fields persists the bug and closes the modal
+[28/86] [chromium] › specs/06-create-bug.spec.ts:32:3 › 06 create bug › 06-S3b created bug appears on the board without reload
+[29/86] [chromium] › specs/06-create-bug.spec.ts:43:5 › 06 create bug › 06-S4 closing via cancel does not save
+[30/86] [chromium] › specs/06-create-bug.spec.ts:43:5 › 06 create bug › 06-S5 closing via X does not save
+[31/86] [chromium] › specs/06-create-bug.spec.ts:43:5 › 06 create bug › 06-S6 closing via Escape does not save
+[32/86] [chromium] › specs/06-create-bug.spec.ts:55:3 › 06 create bug › 06-S7 backdrop click keeps modal open and preserves data
+[33/86] [chromium] › specs/06-create-bug.spec.ts:67:3 › 06 create bug › 06-S8 save with blank fields is blocked and required fields are named
+[34/86] [chromium] › specs/06-create-bug.spec.ts:79:5 › 06 create bug › 06-S9 blank title blocks save
+[35/86] [chromium] › specs/06-create-bug.spec.ts:79:5 › 06 create bug › 06-S9 blank owner blocks save
+[36/86] [chromium] › specs/06-create-bug.spec.ts:79:5 › 06 create bug › 06-S9 blank description blocks save
+[37/86] [chromium] › specs/06-create-bug.spec.ts:94:3 › 06 create bug › 06-S9 blank severity cannot be chosen in UI; API rejects it
+[38/86] [chromium] › specs/06-create-bug.spec.ts:102:3 › 06 create bug › 06-design selected severity in create dropdown uses severity colour token
+[39/86] [chromium] › specs/07-08-board.spec.ts:6:1 › 07-S1 table columns ordered ID, Severity, Title, Owner
+[40/86] [chromium] › specs/07-08-board.spec.ts:11:1 › 07-S2 each own bug is shown once with ID, severity, title, owner
+[41/86] [chromium] › specs/07-08-board.spec.ts:22:1 › 07-S4 lower-case "high" severity is stored and displayed as HIGH
+[42/86] [chromium] › specs/07-08-board.spec.ts:29:1 › 08-S1/S2/S4 severity badges use the token colours with a tint and bold label
+[43/86] [chromium] › specs/07-08-board.spec.ts:49:1 › 08-S3 severity colours are distinct
+[44/86] [chromium] › specs/09-edit-bug.spec.ts:18:3 › 09 edit bug › 09-S1 row click opens "Edit bug #<id>" with all data and buttons
+[45/86] [chromium] › specs/09-edit-bug.spec.ts:30:3 › 09 edit bug › 09-S2 ID is read-only, other fields editable
+[46/86] [chromium] › specs/09-edit-bug.spec.ts:38:3 › 09 edit bug › 09-S3 severity dropdown has HIGH/MID/LOW and colours match the board
+[47/86] [chromium] › specs/09-edit-bug.spec.ts:48:3 › 09 edit bug › 09-S4 backdrop click keeps modal open and preserves edits
+[48/86] [chromium] › specs/09-edit-bug.spec.ts:56:3 › 09 edit bug › 09-S5 save persists edits and closes modal
+[49/86] [chromium] › specs/09-edit-bug.spec.ts:70:5 › 09 edit bug › 09-S6 closing via cancel discards edits
+[50/86] [chromium] › specs/09-edit-bug.spec.ts:70:5 › 09 edit bug › 09-S7 closing via X discards edits
+[51/86] [chromium] › specs/09-edit-bug.spec.ts:70:5 › 09 edit bug › 09-S8 closing via Escape discards edits
+[52/86] [chromium] › specs/09-edit-bug.spec.ts:84:3 › 09 edit bug › 09-S9 save disabled with no changes
+[53/86] [chromium] › specs/09-edit-bug.spec.ts:89:3 › 09 edit bug › 09-S9b save disabled again after reverting an edit
+[54/86] [chromium] › specs/09-edit-bug.spec.ts:98:5 › 09 edit bug › 09-S10 save disabled when title is blanked
+[55/86] [chromium] › specs/09-edit-bug.spec.ts:98:5 › 09 edit bug › 09-S10 save disabled when owner is blanked
+[56/86] [chromium] › specs/09-edit-bug.spec.ts:98:5 › 09 edit bug › 09-S10 save disabled when description is blanked
+[57/86] [chromium] › specs/09-edit-bug.spec.ts:110:3 › 09 edit bug › 09-S10 severity cannot be blanked in the edit dropdown
+[58/86] [chromium] › specs/10-sort.spec.ts:28:3 › 10 sort › 10-S1 default sort is Severity descending with only a down arrow on Severity
+[59/86] [chromium] › specs/10-sort.spec.ts:35:3 › 10 sort › 10-S2 clicking Title sorts ascending with only Title showing up arrow
+[60/86] [chromium] › specs/10-sort.spec.ts:43:3 › 10 sort › 10-S3 clicking Title again toggles to descending
+[61/86] [chromium] › specs/10-sort.spec.ts:51:3 › 10 sort › 10-S4 switching from Owner to Severity moves the indicator
+[62/86] [chromium] › specs/10-sort.spec.ts:60:3 › 10 sort › 10-S5 Severity ascending is LOW, MID, HIGH
+[63/86] [chromium] › specs/10-sort.spec.ts:68:3 › 10 sort › 10-S6 Severity descending after ascending is HIGH, MID, LOW
+[64/86] [chromium] › specs/10-sort.spec.ts:77:5 › 10 sort › 10-S7 ID column is clickable and sorts both directions
+[65/86] [chromium] › specs/10-sort.spec.ts:77:5 › 10 sort › 10-S7 Severity column is clickable and sorts both directions
+[66/86] [chromium] › specs/10-sort.spec.ts:77:5 › 10 sort › 10-S7 Title column is clickable and sorts both directions
+[67/86] [chromium] › specs/10-sort.spec.ts:77:5 › 10 sort › 10-S7 Owner column is clickable and sorts both directions
+[68/86] [chromium] › specs/11-search.spec.ts:17:3 › 11 search › 11-S1 blank search shows all bugs and no "no bugs matched" message
+[69/86] [chromium] › specs/11-search.spec.ts:24:3 › 11 search › 11-S2 typing "login" hides titles without login
+[70/86] [chromium] › specs/11-search.spec.ts:32:3 › 11 search › 11-S3 "login" matches both "Login fails" and "Issue with log-in"
+  3) [chromium] › specs/11-search.spec.ts:32:3 › 11 search › 11-S3 "login" matches both "Login fails" and "Issue with log-in" 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('table', { name: 'Bugs' }).locator('tbody tr[role="button"]').filter({ has: locator('td:nth-child(3)').filter({ hasText: /^\[functional\] Issue with log-in mud8sdbptx4x$/ }) })
+    Expected: 1
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('table', { name: 'Bugs' }).locator('tbody tr[role="button"]').filter({ has: locator('td:nth-child(3)').filter({ hasText: /^\[functional\] Issue with log-in mud8sdbptx4x$/ }) }) with timeout 5000ms
+      - waiting for getByRole('table', { name: 'Bugs' }).locator('tbody tr[role="button"]').filter({ has: locator('td:nth-child(3)').filter({ hasText: /^\[functional\] Issue with log-in mud8sdbptx4x$/ }) })
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      33 |     await board.search('login');
+      34 |     await expect(board.rowFor(`[functional] Login fails ${t}`)).toHaveCount(1);
+    > 35 |     await expect(board.rowFor(`[functional] Issue with log-in ${t}`)).toHaveCount(1);
+         |                                                                       ^
+      36 |   });
+      37 |
+      38 |   test('11-S3b case and whitespace are normalised ("  LOGIN   FAILS ")', async ({ board }) => {
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T222029Z/evidence/functional/prev/specs/11-search.spec.ts:35:71
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/prev/11-search-11-search-11-S3--64c4d-ails-and-Issue-with-log-in--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/prev/11-search-11-search-11-S3--64c4d-ails-and-Issue-with-log-in--chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/prev/11-search-11-search-11-S3--64c4d-ails-and-Issue-with-log-in--chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/prev/11-search-11-search-11-S3--64c4d-ails-and-Issue-with-log-in--chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[71/86] [chromium] › specs/11-search.spec.ts:38:3 › 11 search › 11-S3b case and whitespace are normalised ("  LOGIN   FAILS ")
+[72/86] [chromium] › specs/11-search.spec.ts:43:3 › 11 search › 11-S4 X clears the search and restores all bugs
+[73/86] [chromium] › specs/11-search.spec.ts:53:3 › 11 search › 11-S5 sort order and indicator are preserved while searching
+[74/86] [chromium] › specs/11-search.spec.ts:62:3 › 11 search › 11-S6 no-match search shows "No bugs matched." and no rows
+[75/86] [chromium] › specs/11-search.spec.ts:70:3 › 11 search punctuation probe › 11-S3c query "log-in" matches title "Login fails" (both sides normalised)
+  4) [chromium] › specs/11-search.spec.ts:70:3 › 11 search punctuation probe › 11-S3c query "log-in" matches title "Login fails" (both sides normalised) 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('table', { name: 'Bugs' }).locator('tbody tr[role="button"]').filter({ has: locator('td:nth-child(3)').filter({ hasText: /^\[functional\] Login fails mud8skognhgg$/ }) })
+    Expected: 1
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('table', { name: 'Bugs' }).locator('tbody tr[role="button"]').filter({ has: locator('td:nth-child(3)').filter({ hasText: /^\[functional\] Login fails mud8skognhgg$/ }) }) with timeout 5000ms
+      - waiting for getByRole('table', { name: 'Bugs' }).locator('tbody tr[role="button"]').filter({ has: locator('td:nth-child(3)').filter({ hasText: /^\[functional\] Login fails mud8skognhgg$/ }) })
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      74 |     await board.waitLoaded();
+      75 |     await board.search('log-in');
+    > 76 |     await expect(board.rowFor(bug.title)).toHaveCount(1);
+         |                                           ^
+      77 |   });
+      78 | });
+      79 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T222029Z/evidence/functional/prev/specs/11-search.spec.ts:76:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/prev/11-search-11-search-punctu-12058-ails-both-sides-normalised--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/prev/11-search-11-search-punctu-12058-ails-both-sides-normalised--chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/prev/11-search-11-search-punctu-12058-ails-both-sides-normalised--chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/prev/11-search-11-search-punctu-12058-ails-both-sides-normalised--chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[76/86] [chromium] › specs/12-delete-bug.spec.ts:16:3 › 12 delete bug › 12-S1 edit modal shows a Delete button
+[77/86] [chromium] › specs/12-delete-bug.spec.ts:20:3 › 12 delete bug › 12-S2 Delete opens confirmation naming bug id and title
+[78/86] [chromium] › specs/12-delete-bug.spec.ts:30:3 › 12 delete bug › 12-S3 confirming removes bug and closes both modals
+[79/86] [chromium] › specs/12-delete-bug.spec.ts:40:3 › 12 delete bug › 12-S4 cancelling confirmation returns to edit modal with bug intact
+[80/86] [chromium] › specs/13-state.spec.ts:5:3 › 13 bug state › 13-S1 bug created via New Bug modal is Open and listed under Open
+[81/86] [chromium] › specs/13-state.spec.ts:19:3 › 13 bug state › 13-S2 edit modal shows state and saving a change persists it
+[82/86] [chromium] › specs/13-state.spec.ts:33:3 › 13 bug state › 13-S3 filter defaults to Open, visibly selected, and hides closed bugs
+[83/86] [chromium] › specs/13-state.spec.ts:47:3 › 13 bug state › 13-S4 selecting Closed shows only closed bugs
+[84/86] [chromium] › specs/13-state.spec.ts:62:3 › 13 bug state › 13-S5 sorting applies within the selected state
+[85/86] [chromium] › specs/13-state.spec.ts:77:3 › 13 bug state › 13-S6 search and state filter apply together
+[86/86] [chromium] › specs/13-state.spec.ts:90:3 › 13 bug state › 13-S7 (proxy) selected state with no matching bugs shows "No bugs matched."
+  4 failed
+    [chromium] › specs/01-02-static.spec.ts:14:1 › 02-AC1..4 users.json at root, unique usernames, default buggy user present 
+    [chromium] › specs/03-login.spec.ts:33:3 › 03 login › 03-S3c valid login as new user matt (diff slice) 
+    [chromium] › specs/11-search.spec.ts:32:3 › 11 search › 11-S3 "login" matches both "Login fails" and "Issue with log-in" 
+    [chromium] › specs/11-search.spec.ts:70:3 › 11 search punctuation probe › 11-S3c query "log-in" matches title "Login fails" (both sides normalised) 
+  82 passed (1.4m)

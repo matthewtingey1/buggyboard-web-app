@@ -1,0 +1,51 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search "Search bugs by title": "[a11y] walk chromium 1790115959872"
+  - button "Clear search"
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed"
+  - table "Bugs":
+    - rowgroup:
+      - row "ID Severity Title Owner":
+        - columnheader "ID":
+          - button "ID"
+        - columnheader "Severity":
+          - button "Severity"
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Owner":
+          - button "Owner"
+    - rowgroup:
+      - button "3308 MID [a11y] walk chromium 1790115959872 buggy":
+        - cell "3308"
+        - cell "MID"
+        - cell "[a11y] walk chromium 1790115959872"
+        - cell "buggy"
+- 'dialog "Edit bug #3308"':
+  - 'heading "Edit bug #3308" [level=2]'
+  - button "Close"
+  - text: ID
+  - textbox "ID": "3308"
+  - text: Title
+  - textbox "Title": "[a11y] walk chromium 1790115959872"
+  - text: Severity
+  - combobox "Severity":
+    - option "HIGH"
+    - option "MID" [selected]
+    - option "LOW"
+  - text: State
+  - combobox "State":
+    - option "Open" [selected]
+    - option "Closed"
+  - text: Owner
+  - textbox "Owner": buggy
+  - text: Description
+  - textbox "Description": Created by a11y keyboard walk
+  - button "Delete"
+  - button "Cancel"
+  - button "Save" [disabled]
