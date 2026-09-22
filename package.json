@@ -20,10 +20,13 @@
     "start:backend": "npm run start -w backend",
     "start:frontend": "npm run preview -w frontend",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "quality:run": "sh $HOME/.claude/skills/quality-agent-team/scripts/quality-run.sh --project .",
+    "quality:summary": "node $HOME/.claude/skills/quality-agent-team/scripts/quality-summary.js --project ."
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^25.6.0",
     "concurrently": "^9.1.0",
     "eslint": "^9.14.0",
