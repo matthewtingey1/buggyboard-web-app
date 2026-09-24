@@ -1,0 +1,15 @@
+{
+  "N1": [
+    "a) during pending POST: button='Saving…', Cancel disabled=true",
+    "a) Escape while saving closes modal: true",
+    "a) after first POST resolves: second-draft modal still open=false; first bug saved=1",
+    "b) Escape during pending POST that then fails: dialog visible=false, any alert on page=0, bug exists=0",
+    "b) reopened modal after failed first save shows alert='Simulated server error', title='unrelated new draft'",
+    "c) Escape during pending PUT closes edit modal: true",
+    "c) after A's PUT resolves: B's edit modal still open=false; B description on server='exploratory charter'",
+    "d) during pending DELETE: confirm label='Deleting…'",
+    "d) Escape #1 during pending DELETE: confirm open=false, edit open=true, edit fields enabled=true",
+    "d) while delete pending, user could edit title; Save enabled=false",
+    "d) after DELETE resolves: dialogs=0, bug GET=404"
+  ]
+}

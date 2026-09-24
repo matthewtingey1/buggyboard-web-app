@@ -1,0 +1,113 @@
+{
+  "agent": "exploratory",
+  "run": "2026-09-22T205320Z",
+  "scope": "Eight time-boxed charters on unspecified paths, run headless in Chromium against the live app (UI :5173, API via proxy to :3002): two users side by side (buggy + vanny) editing and deleting the same bug, a lost update, logout and user switch across tabs, double submit on Create, deep links and Back/Forward with modals open, owner/username variants, long titles plus 200 bulk bugs, and backend rejection (413/400) while a modal is open. All records carried the [exploratory] prefix; all 227 were deleted afterwards (0 remain).",
+  "verdict": "ready-with-known-risk",
+  "confidence": "medium",
+  "commands": [
+    "curl -s localhost:5173/api/health",
+    "node quality-reports/2026-09-22T205320Z/evidence/exploratory/explore.mjs c1 c2 c3 c4",
+    "node quality-reports/2026-09-22T205320Z/evidence/exploratory/explore.mjs c1 c2 c5 c6",
+    "node quality-reports/2026-09-22T205320Z/evidence/exploratory/explore.mjs c1 c2 c5",
+    "node quality-reports/2026-09-22T205320Z/evidence/exploratory/recheck-c6.mjs",
+    "node quality-reports/2026-09-22T205320Z/evidence/exploratory/explore.mjs c7 c8 c4",
+    "node quality-reports/2026-09-22T205320Z/evidence/exploratory/cleanup.mjs"
+  ],
+  "findings": [
+    {
+      "id": "exploratory-01",
+      "title": "Concurrent edits silently overwrite: saving a stale edit modal reverts another user's change (lost update)",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "Charter C2: two users editing one bug. Vision: every user has full access to all bugs, so concurrent edits are expected, yet no spec says what happens when they collide.",
+      "location": "frontend/src/EditBugModal.tsx:160 (PUT sends the whole record); backend/src/bugService.ts:120 (unconditional UPDATE)",
+      "evidence": "Bug #139: buggy and vanny both opened the edit modal. buggy set State=Closed and saved (server state CLOSED). vanny then changed only the description and saved. Server afterwards: state=OPEN, description=\"vanny's description edit\". buggy's close was reverted and nobody was told. Screenshot C2-after-vanny-save-bug-reopened.png.",
+      "repro": "Create a bug. Open its edit modal in context A (buggy) and in context B (vanny). In A set State=Closed and Save. In B change the Description and Save. GET /api/bugs/:id returns state OPEN.",
+      "fix": "Smallest fix: have the edit modal PUT only the fields the user changed (diff against `initial`). Proper fix: add an updated_at/version column, send it with PUT, and return 409 when it doesn't match. The modal then shows 'This bug changed since you opened it'."
+    },
+    {
+      "id": "exploratory-02",
+      "title": "After another session deletes a bug, the board keeps the dead row: Save/Delete show 'Bug not found.' and clicking the row does nothing",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Charter C1: delete in one session while the bug is open in another. Spec 12 covers only the deleting user's board.",
+      "location": "frontend/src/EditBugModal.tsx:176,210 (404 path keeps the modal open, no refetch); frontend/src/BoardPage.tsx:118-127 (handleRowClick ignores !res.ok)",
+      "evidence": "vanny had #137 open; buggy deleted it (GET 404). vanny's Save showed 'Bug not found.' and the modal stayed open with Save enabled. Cancel closed it, but the #137 row stayed on vanny's board. Clicking the row again opened nothing and gave no message. Deleting an already-deleted bug (#138) also left the modal open with 'Bug not found.'. Screenshots: C1-save-after-delete-error.png, C1-stale-row-after-cancel.png, C1-stale-row-click-no-feedback.png, C1-delete-already-deleted.png.",
+      "repro": "Open bug X's edit modal as vanny. Delete X as buggy (UI or DELETE /api/bugs/X). As vanny click Save, then Cancel, then click X's row again.",
+      "fix": "In EditBugModal, when PUT/DELETE returns 404, call onSaved() (it refetches) and close with a 'This bug was deleted' notice; a DELETE 404 can count as success. In handleRowClick, when the response is not ok, refetch the list and show a message."
+    },
+    {
+      "id": "exploratory-03",
+      "title": "Logging out or switching user in one tab doesn't reach other tabs: they keep creating bugs, and default the owner to the old user",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Charter C3: two tabs, one session. Spec 05 says that after logout 'the user is ... no longer authenticated', but multi-tab behaviour isn't specified.",
+      "location": "frontend/src/auth.tsx:46-55 (user read from localStorage once on mount, no 'storage' event listener)",
+      "evidence": "Tab 1 logged out, so localStorage buggyboard_user was null, yet tab 2 stayed on /board and created bug #90 as owner=buggy. Tab 1 then logged in as vanny; tab 2's Create modal still pre-filled owner=\"buggy\". Screenshots: C3-tab2-still-active-after-logout.png, C3-tab2-default-owner-after-user-switch.png.",
+      "repro": "Log in as buggy and open /board in a second tab of the same context. Log out in tab 1. In tab 2 click New Bug and save: the bug is created. Log in as vanny in tab 1; tab 2's New Bug modal shows owner buggy.",
+      "fix": "In AuthProvider, add a window 'storage' event listener that re-runs loadStoredUser() and calls setUser. ProtectedRoute then redirects the stale tab to /login. Hand-off: the API has no server-side session at all, so any client can write bugs without logging in. That belongs to security."
+    },
+    {
+      "id": "exploratory-04",
+      "title": "Oversized or malformed body gets an HTML error page from the API; the modal shows only a generic 'Failed to save bug.'",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter C8: the backend rejects a request while a modal is open. No field length limits are specified.",
+      "location": "backend/src/index.ts:10 (express.json() default 100kb limit, no JSON error handler); frontend/src/CreateBugModal.tsx and EditBugModal.tsx (no maxLength)",
+      "evidence": "A 120,000-char description in Create or Edit gets a 413 with an HTML <!DOCTYPE html> body. The modal says 'Failed to save bug.' and gives no hint that the text is too long. Malformed JSON gets a 400 with an HTML body. Screenshots: C8-create-413-message.png, C8-edit-413-message.png.",
+      "repro": "Paste 120k characters into Description and click Save. Or run: curl -X POST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{not json'",
+      "fix": "Add an Express error middleware that returns JSON {error:'payload_too_large'|'invalid_json', message} for body-parser errors, and add maxLength to the title and description inputs. Hand-off: the non-JSON error body is a contract issue, for the contract agent."
+    },
+    {
+      "id": "exploratory-05",
+      "title": "No title length limit, and a long unbroken title pushes the Owner column off-screen",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter C7: long titles in the table layout.",
+      "location": "frontend/src/BoardPage.tsx:292 (title <td> has no wrapping rule); backend/src/bugService.ts:61 (no max length)",
+      "evidence": "A 400-char unbroken title made the table 4529px wide in an 894px container. Owner went off-screen behind a horizontal scroll. The API accepted a 20,000-char title (201). Titles with spaces wrap correctly. Screenshots: C7-long-unbroken-title.png, C7-20k-title-row.png, C7-20k-title-edit-modal.png.",
+      "repro": "POST /api/bugs with title '[exploratory] ' + 'X'.repeat(400), then view the board at 1280px width.",
+      "fix": "Add `break-words [overflow-wrap:anywhere]` to the title cell, and have createBug/updateBug reject titles over a limit (for example 200 chars) with a matching input maxLength."
+    },
+    {
+      "id": "exploratory-06",
+      "title": "Create submit handler has no in-flight guard; two submits in one task create duplicate bugs",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "Charter C4: rapid double-click on Save, or Enter held down.",
+      "location": "frontend/src/CreateBugModal.tsx:56 (handleSubmit doesn't check `loading`; only the button's disabled attribute protects it)",
+      "evidence": "A real Playwright dblclick on Save, and 8 queued Enter presses, each created exactly 1 bug. Two synchronous button.click() calls, or form.requestSubmit() twice in one task, created 2 bugs. The only guard is the re-render that disables the button. EditBugModal checks saveDisabled; Create doesn't. Screenshot: C4-duplicates.png.",
+      "repro": "With the Create modal filled, run in the console: const b=document.querySelector('[role=dialog] button[type=submit]'); b.click(); b.click();",
+      "fix": "Add a useRef in-flight flag at the top of handleSubmit (`if (submittingRef.current) return; submittingRef.current = true;` and reset it in finally)."
+    },
+    {
+      "id": "exploratory-07",
+      "title": "Owner is free text: non-existent users and case variants ('Buggy' vs 'buggy') are stored as different owners",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Charter C6. Spec 06 defines owner as 'the name of the user who owns the bug' but doesn't say whether it must be a real user or how case is handled.",
+      "location": "backend/src/bugService.ts:62 (owner only trimmed)",
+      "evidence": "The API accepted owner values 'nobody-such-user', 'Buggy', 'bug gy' and a 300-char string (all 201); '  buggy  ' was trimmed to 'buggy'. Sorted by owner, 'buggy' and 'Buggy' appear as separate owners. Login is case-sensitive: 'Buggy' and 'BUGGY' get 401, ' buggy ' gets 200. Screenshot: C6-owner-variants-and-long-owner.png.",
+      "repro": "POST /api/bugs with owner 'Buggy' and another with owner 'buggy', then sort the board by Owner.",
+      "fix": "Decide in the spec whether owner must be a known username. If yes, validate it against users.json in createBug/updateBug and offer a picker instead of free text."
+    },
+    {
+      "id": "exploratory-08",
+      "title": "No bug URL, and browser Back with a modal open leaves the board and silently discards the draft",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter C5: deep links and Back/Forward through modals. Vision lists a 'Bug view' but it has no route.",
+      "location": "frontend/src/App.tsx:22-34 (only /, /login, /board; modal and search state not in the URL); frontend/src/LoginPage.tsx:35 (ignores location.state.from)",
+      "evidence": "Logged in, /board/1, /bugs/1 and /nope all redirect to /board with no modal and no message. Back with a half-filled Create modal went to the previous history entry and lost the typed title without warning. Search text and the Closed filter reset on reload. An anonymous deep link to /board?search=foo lost its query after login. Screenshot: C5-back-with-modal-open.png.",
+      "repro": "On /board, click New Bug, type a title, press browser Back.",
+      "fix": "Add a /board/:id route that opens the edit modal, so Back closes the modal instead of leaving the page. Keep the search and filter in useSearchParams, and have LoginPage navigate to location.state.from."
+    }
+  ],
+  "notTested": [
+    "Browsers other than headless Chromium (Firefox, WebKit, mobile viewports), slow or flaky networks, and screen readers.",
+    "True concurrent write races at the SQLite level: C2 tested sequential stale writes only.",
+    "Editing a bug another user closed (state filter interplay) beyond the lost-update case; session expiry (none exists).",
+    "Delete-confirm dialog rendering with a 20k-char title (created the data, did not screenshot the confirm dialog).",
+    "Hand-offs, not filed here: absence of server-side authentication on /api/bugs (security); HTML error bodies for 400/413 (contract); spec 05 multi-tab logout expectations (functional)."
+  ]
+}

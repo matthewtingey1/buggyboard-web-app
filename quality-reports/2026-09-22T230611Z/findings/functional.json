@@ -1,0 +1,139 @@
+{
+  "agent": "functional",
+  "run": "2026-09-22T230611Z",
+  "scope": "Every Scenario / Scenario Outline in specs/features/01-13 on the working tree (baseline origin/main cce584c), headless Chromium, 1 worker, http://localhost:5173. Re-ran last run's 86 atomic functional tests (evidence/functional/prev; page object updated for the new row markup: rows are tbody tr with a title button, header buttons exact) and 26 gap tests (evidence/functional/gaps). Added 14 tests (gaps/specs/diff-regressions.spec.ts) for scenarios this diff could break and nothing in tests/ guards: Escape after using a select, zero-width blanks in the edit modal, row clicks on non-title cells, search punctuation variants, sort across state switch plus clear. Re-ran tests/title-bar, tests/login/session.spec.ts, tests/logout, tests/create-bug/create-bug.spec.ts and tests/search with a bug titled 'New Bug Logout Clear search' on the board. One headless node probe for the zero-width Save path.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "cd evidence/functional/prev && BUGGY_PW=<from users.json> MATT_PW=<redacted, from users.json> npx playwright test --config=playwright.functional.config.ts --project=chromium --reporter=line --workers=1 --output=<abs>/evidence/functional/test-results/prev > ../prev-run-log.txt",
+    "cd evidence/functional/gaps && npx playwright test --config=playwright.gaps.config.ts --project=chromium --reporter=line --workers=1 --output=<abs>/evidence/functional/test-results/gaps > ../gaps-run-log.txt",
+    "cd evidence/functional/gaps && npx playwright test specs/diff-regressions.spec.ts --config=playwright.gaps.config.ts --project=chromium --reporter=line --workers=1 --output=<abs>/evidence/functional/test-results/diff > ../diff-run-log.txt",
+    "curl -X POST /api/bugs '[functional] New Bug Logout Clear search collision probe'; npx playwright test tests/title-bar tests/login/session.spec.ts tests/logout tests/create-bug/create-bug.spec.ts tests/search --project=chromium --reporter=line --workers=1 --output=quality-reports/2026-09-22T230611Z/evidence/functional/test-results/suite-collision > evidence/functional/suite-locator-collision-log.txt; curl -X DELETE /api/bugs/<id> (204)",
+    "node evidence/functional/zw-save-probe.mjs > evidence/functional/zw-save-probe.txt",
+    "curl -s http://localhost:5173/api/bugs (0 [functional] bugs left)"
+  ],
+  "findings": [
+    {
+      "id": "functional-01",
+      "title": "Search for \"login\" does not match \"Issue with log-in\": punctuation becomes a space instead of being removed",
+      "status": "fixed",
+      "severity": "high",
+      "requirement": "specs/features/11-search-board.md Scenario: Search matching is case insensitive and normalizes whitespace and punctuation",
+      "location": "frontend/src/BoardPage.tsx:44",
+      "evidence": "prev 11-S3 (\"login\" matches \"Login fails\" and \"Issue with log-in\") and 11-S3c (query \"log-in\" matches \"Login fails\") pass (evidence/functional/prev-run-log.txt). The shipped tests/search test is no longer test.fail and passes. The fix introduced functional-10.",
+      "repro": "cd evidence/functional/prev && npx playwright test specs/11-search.spec.ts --config=playwright.functional.config.ts --project=chromium --workers=1",
+      "fix": "None needed"
+    },
+    {
+      "id": "functional-02",
+      "title": "No feature in specs/features/ has automated product coverage in tests/",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "specs/engineering/test-automation-patterns.md; all Scenarios in specs/features/01-13",
+      "location": "tests/",
+      "evidence": "Fixed last run and still fixed: tests/ has POM specs for features 01-13 plus the *-plan and resilience specs.",
+      "repro": "ls tests/*/",
+      "fix": "None needed"
+    },
+    {
+      "id": "functional-03",
+      "title": "Empty-board and all-open-board scenarios cannot be run against the shared database",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "specs/features/07-bug-board.md Scenario: Board page shows an empty table when there are no bugs; specs/features/13-bug-status.md Scenario: No bugs matched message when selected state has no bugs",
+      "location": "tests/bug-board/bug-board.spec.ts; tests/bug-status/bug-status.spec.ts:113",
+      "evidence": "Still a gap. The page object now has noBugsMessage, but the only use is tests/resilience (asserting it is absent on a load error). No test shows the empty table, and 13-S7 is still a Closed-plus-search proxy.",
+      "repro": "Needs an isolated database",
+      "fix": "Provide an isolated per-run database, or stub GET /api/bugs with page.route to return [] for the empty-board scenario"
+    },
+    {
+      "id": "functional-04",
+      "title": "Create-bug modal first renders the previous draft (and a blank Owner), then resets after paint, so early input is overwritten",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "specs/features/06-create-bug.md Scenario: Create-bug modal defaults owner to the current user; specs/testing/create-bug-test-plan.md 1.5",
+      "location": "frontend/src/CreateBugModal.tsx:42",
+      "evidence": "gaps create-gaps 'functional-04' and 'C1.5' pass (evidence/functional/gaps-run-log.txt: 26/26). The reset is now a useLayoutEffect. Guarded by tests/create-bug/create-bug-plan.spec.ts:29.",
+      "repro": "cd evidence/functional/gaps && npx playwright test specs/create-gaps.spec.ts --config=playwright.gaps.config.ts --project=chromium --workers=1",
+      "fix": "None needed"
+    },
+    {
+      "id": "functional-05",
+      "title": "Shipped BoardPage 'Logout' and 'New Bug' locators are not exact, so any bug whose title contains those words breaks 20 tests",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "specs/engineering/test-automation-patterns.md (independent tests); run rule: other agents change data concurrently",
+      "location": "tests/pages/board-page.ts:49-50",
+      "evidence": "Both locators are now header-scoped and exact. With '[functional] New Bug Logout Clear search collision probe' on the board, tests/title-bar, login/session, logout, create-bug/create-bug.spec.ts and search: 33/33 passed (evidence/functional/suite-locator-collision-log.txt). Last run: 20 of 26 failed.",
+      "repro": "See suite-locator-collision-log.txt",
+      "fix": "None needed"
+    },
+    {
+      "id": "functional-06",
+      "title": "Two shipped tests assert less than their titles or scenarios claim",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "specs/features/02-user-accounts.md; specs/features/12-delete-bug.md Scenario: Canceling the confirmation modal leaves the bug intact",
+      "location": "tests/user-accounts/users-file.spec.ts:19; tests/delete-bug/delete-bug.spec.ts:51",
+      "evidence": "users-file now asserts the buggy password named in spec 02; delete-bug cancel now asserts rowCount(bug.title) is 1. Both passed in the lead's run.",
+      "repro": "Read the two tests",
+      "fix": "None needed"
+    },
+    {
+      "id": "functional-07",
+      "title": "Spec behaviours with no guard in tests/: sort kept across a state switch and after clearing search, and query-side punctuation (\"log-in\" matching \"Login fails\")",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "specs/features/13-bug-status.md design (sorting and search apply within the selected state); specs/features/11-search-board.md (normalisation on both sides; sorting preserved)",
+      "location": "tests/bug-status, tests/search",
+      "evidence": "Narrowed. Every specs/testing/*.md row this finding listed is now ✅ and in tests/*-plan.spec.ts. Still unguarded, though passing in my scratch tests: sort kept across Open->Closed->Open and after clearing search (diff-regressions '13 sort is kept...', gaps board-gaps), and query-side punctuation (prev 11-S3c, diff-regressions '11 query \"log-in\"...').",
+      "repro": "cd evidence/functional/gaps && npx playwright test specs/board-gaps.spec.ts specs/diff-regressions.spec.ts -g \"13 sort|log-in\" --config=playwright.gaps.config.ts --project=chromium --workers=1",
+      "fix": "Add the two cases to tests/bug-status/bug-status.spec.ts and tests/search/search.spec.ts"
+    },
+    {
+      "id": "functional-08",
+      "title": "Escape does not close the create or edit modal when focus is on the Severity or State dropdown",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "specs/features/06-create-bug.md Scenario: User can close the create-bug modal with the Escape key; specs/features/09-edit-bug.md Scenario: User can close the edit-bug modal with the Escape key",
+      "location": "frontend/src/CreateBugModal.tsx:63; frontend/src/EditBugModal.tsx:85; tests/accessibility/accessibility.spec.ts:62",
+      "evidence": "New in this diff. After choosing a value with the dropdown (focus stays on the closed select), Escape leaves the modal open: create (Severity), edit (Severity) and edit (State) all fail toBeHidden. Screenshots: evidence/functional/test-results/diff/diff-regressions-06-Escape-*/, diff-regressions-09-Escape-*/, diff-regressions-09-13-Esc-*/. Nothing is saved, so no data is lost, but the spec says Escape anywhere in the open modal acts like Cancel. tests/accessibility/accessibility.spec.ts:62 asserts this non-spec behaviour; Playwright's press() does not open the popup, so the test proves the closed-select case.",
+      "repro": "Log in, New Bug, type a title, choose HIGH in Severity, press Escape: the modal stays open.",
+      "fix": "Drop the tagName === 'SELECT' condition from both Escape handlers (the native popup consumes its own Escape) and change the a11y test to expect the modal to close. If the team wants Escape to be ignored on a select, spec 06/09 must say so first."
+    },
+    {
+      "id": "functional-09",
+      "title": "Edit modal enables Save when a field holds only a zero-width space; the server then rejects it",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "specs/features/09-edit-bug.md Scenario: Save button is disabled when any required field is blank",
+      "location": "frontend/src/EditBugModal.tsx:123-127",
+      "evidence": "The backend (bugService.ts isBlank) and the create modal now treat zero-width-only values as blank, but the edit modal's hasBlank only trims. Changing title, owner or description to U+200B leaves Save enabled (diff-regressions '09 Save is disabled when ... zero-width space', 3 failures). Clicking Save: PUT 400 {\"error\":\"blank_description\"}, modal shows \"Description is required.\", stored value unchanged (evidence/functional/zw-save-probe.txt, zw-save-probe.png). The create modal blocks it correctly (diff-regressions '06 a zero-width-only title', pass).",
+      "repro": "Open a bug, replace Description with a single U+200B: Save is enabled.",
+      "fix": "In EditBugModal, reuse the create modal's isBlank (strip [\\u200B-\\u200D\\u2060\\uFEFF] and then trim) for hasBlank and validate()"
+    },
+    {
+      "id": "functional-10",
+      "title": "Search regression: removing punctuation means \"log in\" no longer finds \"log-in\" and \"save load\" no longer finds \"save/load\"",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "specs/features/11-search-board.md Design: normalize punctuation on both sides of the match; Scenario: Typing in the search field filters bugs by title",
+      "location": "frontend/src/BoardPage.tsx:44-45",
+      "evidence": "The functional-01 fix deletes punctuation, so \"save/load broken\" becomes \"saveload broken\". Query \"save load broken <token>\" and query \"log in <token>\" (for \"Issue with log-in <token>\") return 0 rows (diff-regressions '11 search ...', screenshots in test-results/diff/diff-regressions-11-search-*). Both matched on baseline, where punctuation became a space. The spec's example still passes; the regression is in cases the old rule handled.",
+      "repro": "Create \"save/load broken\", search \"save load\": no rows.",
+      "fix": "Normalise both sides by removing punctuation and whitespace together, text.toLowerCase().replace(/[\\p{P}\\s]/gu, \"\"), so login, log-in, log in and save/load, save load all match"
+    }
+  ],
+  "notTested": [
+    "Firefox and WebKit: Chromium only, --workers=1",
+    "01 favicon art style and the 08 'HIGH more prominent' visual judgement",
+    "07 empty board and the exact 13-S7 precondition: shared DB (functional-03)",
+    "06/09 blank-severity outline rows through the UI: the dropdown has no blank option (API 400 is guarded by tests/api)",
+    "Escape while a native select popup is actually open: headless Playwright cannot open the native popup, so whether the SELECT guard is needed for that case is not established",
+    "Search performance while typing",
+    "Board counts and totals: never asserted (shared DB)",
+    "Cross-tab logout, stale row-click responses, load-error state, 404-on-open refresh: guarded by tests/resilience and delete-bug-plan 3.1 (passing in the lead's run), not re-measured",
+    "Full shipped suite: the lead's; only the folders listed in commands were run"
+  ]
+}

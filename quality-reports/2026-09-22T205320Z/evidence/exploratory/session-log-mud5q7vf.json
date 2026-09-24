@@ -1,0 +1,26 @@
+{
+  "C1": [
+    "vanny opened edit modal for #137",
+    "buggy deleted #137; GET now -> 404",
+    "vanny save result: modal still open=true; contains 'Bug not found.'=true",
+    "after Cancel, stale row still on vanny board: 1",
+    "clicking stale row opens a dialog? false (no feedback if false)",
+    "second delete of already-deleted #138: edit modal visible=true, text has 'Bug not found.'=true"
+  ],
+  "C2": [
+    "buggy closed #139; server state=CLOSED",
+    "vanny saved description only; server now state=OPEN description=\"vanny's description edit\" (buggy's close silently reverted: true)"
+  ],
+  "C5": [
+    "logged in: /board?x=1 -> /board?x=1; dialog open=false",
+    "logged in: /board/1 -> /board; dialog open=false",
+    "logged in: /bugs/1 -> /board; dialog open=false",
+    "logged in: /nope -> /board; dialog open=false",
+    "logged in: /login?next=/board/1 -> /board; dialog open=false",
+    "logged in: /BOARD -> /BOARD; dialog open=false",
+    "Back with Create modal open (url stays false) -> now at http://localhost:5173/BOARD; typed draft lost; dialog open=false",
+    "Logout then Back -> /login",
+    "anon deep link /board?search=foo -> login -> /board; search box=\"\"",
+    "after setting search+Closed filter and reload: search=\"\", url=http://localhost:5173/board"
+  ]
+}

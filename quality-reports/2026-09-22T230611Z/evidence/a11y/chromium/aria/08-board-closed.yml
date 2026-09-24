@@ -1,0 +1,32 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search:
+    - textbox "Search bugs by title":
+      - /placeholder: Search bugs…
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed" [pressed]
+  - status: 1 closed bug shown.
+  - region "Bug table":
+    - table "Bugs":
+      - rowgroup:
+        - row "ID Severity Title Owner":
+          - columnheader "ID":
+            - button "ID"
+          - columnheader "Severity":
+            - button "Severity"
+          - columnheader "Title":
+            - button "Title"
+          - columnheader "Owner":
+            - button "Owner"
+      - rowgroup:
+        - row "7002 LOW [a11y] walk chromium 1790118808271 close buggy":
+          - cell "7002"
+          - cell "LOW"
+          - cell "[a11y] walk chromium 1790118808271 close":
+            - button "[a11y] walk chromium 1790118808271 close"
+          - cell "buggy"

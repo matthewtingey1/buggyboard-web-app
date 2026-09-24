@@ -1,0 +1,46 @@
+### login error status codes
+{"username":123,"password":"x"} -> 500 text/html; charset=utf-8
+{"username":["buggy"],"password":"x"} -> 500 text/html; charset=utf-8
+{bad -> 400 text/html; charset=utf-8
+### unknown user vs wrong password messages
+{"error":"invalid_credentials","message":"Invalid username or password."} HTTP 401
+{"error":"invalid_credentials","message":"Invalid username or password."} HTTP 401
+### rate limit: 30 wrong passwords for buggy then correct (password <redacted>)
+401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 
+HTTP/1.1 200 OK
+{"username":"buggy"}
+### body size: 150 KB and 1.1 MB descriptions
+150000 -> 413 text/html; charset=utf-8
+
+
+
+
+Error
+
+
+PayloadTooLargeE
+1100000 -> 413 text/html; charset=utf-8
+
+
+
+
+Error
+
+
+PayloadTooLargeE
+### 90 KB title accepted?
+created id 3162, title length 90016
+cleanup DELETE 3162 -> 204
+### listeners
+lsof: WARNING: can't stat() hfs file system /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/33CE89AF-3A7B-4028-BDD2-7539B98775B8
+      Output information may be incomplete.
+      assuming "dev=1000015" from mount table
+lsof: WARNING: can't stat() hfs file system /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/A9C4FDC5-033A-4BE7-BEC5-FF25466D14BD
+      Output information may be incomplete.
+      assuming "dev=1000017" from mount table
+lsof: WARNING: can't stat() hfs file system /private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/T/B02754A2-504E-4EAC-AC8F-4E0030E5CB80
+      Output information may be incomplete.
+      assuming "dev=1000019" from mount table
+COMMAND  PID        USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    4244 <user>   27u  IPv6 0x3ada3f52173cfb65      0t0  TCP [::1]:5173 (LISTEN)
+node    5305 <user>   21u  IPv6 0x7d0a34c8b275c785      0t0  TCP *:3002 (LISTEN)

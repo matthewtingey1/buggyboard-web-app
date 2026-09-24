@@ -1,0 +1,27 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search "Search bugs by title"
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed"
+  - table "Bugs":
+    - rowgroup:
+      - row "ID Severity Title Owner":
+        - columnheader "ID":
+          - button "ID"
+        - columnheader "Severity":
+          - button "Severity"
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Owner":
+          - button "Owner"
+    - rowgroup:
+      - button "13 MID [contract] target edited vanny":
+        - cell "13"
+        - cell "MID"
+        - cell "[contract] target edited"
+        - cell "vanny"

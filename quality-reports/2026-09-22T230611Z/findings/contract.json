@@ -1,0 +1,208 @@
+{
+  "agent": "contract",
+  "run": "2026-09-22T230611Z",
+  "scope": "Re-test of contract-01..12 from run 2026-09-22T222029Z, then every endpoint (GET /api/health, POST /api/login, GET/POST /api/bugs, GET/PUT/DELETE /api/bugs/:id) against every input class: valid, each missing field, number/null/array/object/boolean types, blank, whitespace-only, zero-width-only, lowercase/invalid severity and state, non-numeric/missing/<id>abc/negative/zero/leading-zero/huge/percent-malformed ids, malformed and non-object JSON, missing and wrong Content-Type, charset and Content-Encoding, 150-200 KB bodies, HEAD, OPTIONS, wrong methods, unknown and case-variant paths, line separators and invisible characters in titles, login rate limit (throwaway username). 161 probe rows sent through the Vite proxy and again direct to 127.0.0.1:3002 and diffed; header captures for OPTIONS/CORS; scoped run of tests/api (59 tests) and a review of what they assert; frontend error handling read against the new statuses.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "quality-reports/2026-09-22T230611Z/evidence/contract/probe.sh http://localhost:5173 probe-proxy.tsv",
+    "quality-reports/2026-09-22T230611Z/evidence/contract/probe.sh http://127.0.0.1:3002 probe-direct.tsv",
+    "node (inline) diff of probe-proxy.tsv vs probe-direct.tsv > proxy-vs-direct.txt",
+    "bash: curl -s -i -X OPTIONS {http://localhost:5173,http://127.0.0.1:3002}/api/{bugs/1,nope} [+ Origin/Access-Control-Request-Method], GET /API/BUGS, /API/NOPE, /api  > headers.txt",
+    "bash: 21 x POST /api/login for probe-contract-rl-<random>, plus case/padding variant, blank password and direct variants > rate-limit.txt",
+    "curl -s http://127.0.0.1:3002/api/bugs/{6971,6972,6973,6974} | code-point dump > invisible-titles.txt",
+    "npx playwright test tests/api --project=api --reporter=line --workers=1 --output=quality-reports/2026-09-22T230611Z/evidence/contract/test-results",
+    "node quality-reports/2026-09-22T230611Z/evidence/contract/table.cjs > table.md",
+    "cleanup: successful login for buggy (resets its failure counter); DELETE 16 [contract] bugs and 4 unprefixed invisible-title bugs this run created (6972, 6973, 7009, 7010), all 204 (cleanup.txt)"
+  ],
+  "findings": [
+    {
+      "id": "contract-01",
+      "title": "POST /api/login returns 500 HTML with a stack trace when username is a number, array or object",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "Contract break: a client input error must produce a 4xx JSON {error,message} body.",
+      "location": "backend/src/index.ts:41-47, :78-83",
+      "evidence": "No longer reproduces. username 123 / [\"buggy\"] / {} / true -> 400 application/json {\"error\":\"invalid_username\",\"message\":\"username must be text.\"} (R01a-c, L09); password 123 / [\"x\"] -> 400 invalid_password (R01d, L08); null -> treated as blank (L06, L07). Same on proxy and direct. Guarded by login.spec.ts:42 (now a normal test).",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":123,\"password\":\"x\"}'",
+      "fix": "None needed."
+    },
+    {
+      "id": "contract-02",
+      "title": "Every body-parser failure returns Express's HTML error page with a stack trace",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "Contract break: every /api error response is JSON {error,message}.",
+      "location": "backend/src/index.ts:268-283",
+      "evidence": "No longer reproduces. Malformed JSON on login/bugs/PUT, body null, body \"x\", trailing garbage -> 400 invalid_json (R02a,b,d,e, L21, I36); 200 KB POST, 150 KB login and PUT -> 413 payload_too_large (R02f, L17, I38); charset=latin1 and Content-Encoding br -> 415 unsupported_media_type (R02g,h); gzip header with a plain body -> 400 bad_request (R02i); malformed percent-encoding -> 400 bad_request (I09, U06); DELETE /api/bugs/abc with '{bad' -> 400 invalid_json (I53). All application/json with no stack trace; real gzip body is accepted (B31). The 500 internal_error branch could not be triggered from outside (code reading only).",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":'",
+      "fix": "None needed."
+    },
+    {
+      "id": "contract-03",
+      "title": "Bug id parsing accepts trailing garbage: /api/bugs/<id>abc, <id>.5, <id>e5 and %20<id> act on the real bug, including PUT and DELETE",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "Contract break: 400 invalid_id for any id that is not a positive whole number.",
+      "location": "backend/src/index.ts:33-39",
+      "evidence": "No longer reproduces. GET <id>abc/.9/%20<id>/<id>%20, -1, 0x1, 0, 0<id>, Arabic-Indic digit -> 400 invalid_id (R03a-f, I06, I07, I10); PUT <id>abc/.5/e5, abc, -1, 0 -> 400 invalid_id (R03g-i, I32-I34); DELETE <id>abc, abc, -1 -> 400 (R03j, I50, I51). Target bug verified unchanged afterwards (R03v). Behaviour change to note: a leading-zero id such as /api/bugs/01 now returns 400 where it used to resolve to bug 1; the frontend never sends one.",
+      "repro": "curl -s -X PUT http://localhost:5173/api/bugs/1abc -H 'Content-Type: application/json' -d '{\"title\":\"[contract] x\",\"severity\":\"mid\",\"owner\":\"buggy\",\"description\":\"d\",\"state\":\"open\"}'",
+      "fix": "None needed."
+    },
+    {
+      "id": "contract-04",
+      "title": "Bare /api still returns Express's HTML 404 (unknown /api/* paths and wrong methods are fixed)",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: api-conventions.md reserves /api for the API; responses under it should be JSON.",
+      "location": "backend/src/index.ts:261 (app.all(\"/api/*\") does not match \"/api\" itself)",
+      "evidence": "Narrowed. Fixed: GET/DELETE/HEAD /api/nope, /api/, /api/bugs/<id>/extra, /api/bugs//1 -> 404 JSON not_found (R04a,h,i, U02, U04, U07); POST /api/health, PATCH /api/bugs/<id>, PUT/DELETE /api/bugs, GET /api/login, DELETE /api/health, POST /api/bugs/1, HEAD /api/login -> 405 JSON with a correct Allow header (R04b-g, B34, L19). Still reproduces: GET /api -> 404 text/html '<pre>Cannot GET /api</pre>' on proxy and direct (U01, headers.txt).",
+      "repro": "curl -s -i http://localhost:5173/api",
+      "fix": "app.all([\"/api\", \"/api/*\"], ...) for the JSON 404 fallback."
+    },
+    {
+      "id": "contract-05",
+      "title": "Invalid severity reports error code `blank_severity`; wrong-type fields report `blank_*`",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "Contract break: a client must be able to tell 'critical' from ''.",
+      "location": "backend/src/bugService.ts:72-74; backend/src/index.ts:186-188, :231-233",
+      "evidence": "No longer reproduces. severity 'critical'/'Medium' -> 400 invalid_severity (R05a, B23, I30); missing, '' and '   ' -> 400 blank_severity (R05c-e, I2-severity-miss/ws); title 42 -> 400 invalid_title (R05b). Lowercase 'high' -> 201 HIGH (B22). See contract-13 for the remaining overlap in invalid_severity.",
+      "repro": "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[contract] x\",\"severity\":\"critical\",\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "None needed."
+    },
+    {
+      "id": "contract-06",
+      "title": "A JSON body sent without Content-Type: application/json is silently read as empty and reported as blank fields",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "Contract break (minor): a body the server will not parse should be 415.",
+      "location": "backend/src/index.ts:22-29",
+      "evidence": "No longer reproduces. Login JSON with no Content-Type, text/plain, form-urlencoded, multipart, application/vnd.api+json, chunked with no Content-Type, and PUT with no Content-Type -> 415 JSON unsupported_media_type (R06a-f, L14, B32). application/json; charset=utf-8 and APPLICATION/JSON still accepted (L15, L16, B30). A request with no body at all still gets field validation (B33, I39, L20), which is reasonable. The ordering side effect is contract-14.",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/bugs -H 'Content-Type: text/plain' -d '{\"title\":\"[contract] tp\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "None needed."
+    },
+    {
+      "id": "contract-07",
+      "title": "Whitespace-only password is treated as a real password (401) rather than blank (400 blank_password)",
+      "status": "potential",
+      "severity": "low",
+      "requirement": "Business rule, open decision: 03-login.md requires a blank-password error and specifies trimming only for the username.",
+      "location": "backend/src/authService.ts:19-29",
+      "evidence": "Still reproduces: password '   ' (throwaway username) -> 401 invalid_credentials (R07). Related in the same decision: a username made only of U+200B -> 401 invalid_credentials and counts toward the rate limit (L11), while bug fields now treat zero-width-only values as blank. Left open by the lead as a contract decision; not a release blocker.",
+      "repro": "curl -s -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":\"probe-contract-x\",\"password\":\"   \"}'",
+      "fix": "Ask product. If blank: use password.trim() === \"\" for the blank checks only (still compare the untrimmed password), and reuse bugService's isBlank for the username."
+    },
+    {
+      "id": "contract-08",
+      "title": "API tests now exist, but there is still no written API contract",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Every endpoint's statuses and body shapes should be documented; api-conventions.md states only the /api prefix.",
+      "location": "specs/engineering/api-conventions.md",
+      "evidence": "Still reproduces: api-conventions.md is unchanged since cce584c. This run added eight new error codes (invalid_json, payload_too_large, unsupported_media_type, bad_request, internal_error, method_not_allowed, too_many_attempts, invalid_<field>) that exist only in code and tests. The contract reconstructed in contract.md is not committed anywhere, so backward compatibility cannot be judged.",
+      "repro": "cat specs/engineering/api-conventions.md",
+      "fix": "Add the endpoint table and error vocabulary from contract.md to specs/engineering/api-conventions.md."
+    },
+    {
+      "id": "contract-09",
+      "title": "tests/api still leaves claimed fixes unguarded, including PUT /api/bugs/<id>abc, stored-row responses and one-line titles",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Every fixed break should have a test so a regression is noticed.",
+      "location": "tests/api/id-parsing.spec.ts; tests/api/error-bodies.spec.ts; tests/api/bugs.spec.ts",
+      "evidence": "Narrowed: 59/59 pass; the test.fail guards on contract defects were turned into normal tests (only three security test.fail remain in auth.spec.ts). Still unguarded, each shown working in this run with no test: PUT <id>abc/.5/e5 leaving the bug unchanged (the defect that overwrote data; id-parsing.spec only sends PUT /api/bugs/abc); id 0; malformed JSON on PUT and DELETE; 415 for a missing Content-Type, charset and Content-Encoding; invalid_password; invalid_<field> for any field but title; zero-width-only blank; one-line title; the create/PUT response equalling the stored row (bugs.spec.ts:30 uses toMatchObject and :85 checks only the GET); OPTIONS 204 + Allow; bare /api; missing state vs blank state vocabulary. Weak assertions: id-parsing.spec.ts:19 and :36 check only the status, not error:'invalid_id'; error-bodies.spec.ts:10-11 check only status and content-type, not error:'invalid_json' or a message; error-bodies.spec.ts:23-28 ('never include a stack trace') sends username 123, which now returns 400 invalid_username from the route and never reaches the error handler, so it no longer tests the handler; error-bodies.spec.ts:47 posts an unprefixed title 'big'. id-parsing.spec.ts:3 still checks three methods in one test.",
+      "repro": "grep -n \"PUT\" tests/api/id-parsing.spec.ts; grep -n \"toMatchObject\" tests/api/bugs.spec.ts",
+      "fix": "Add: PUT /api/bugs/<id>abc -> 400 and bug unchanged; expect(await res.json()).toEqual(await bugApi.get(id)) on create and PUT; a title with \\r\\n stored as one line; assert error codes in the id and malformed-JSON tests; drive the stack-trace test through the error handler (malformed JSON or 413); prefix 'big' with PREFIX."
+    },
+    {
+      "id": "contract-10",
+      "title": "bugs.spec.ts pins blank and missing state as `invalid_state`, fixing the inconsistent error vocabulary as correct",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break (vocabulary): every other field reports missing/blank as blank_<field>.",
+      "location": "tests/api/bugs.spec.ts:97-106; backend/src/bugService.ts:129-130",
+      "evidence": "Still reproduces: PUT with state missing, '' or '  ' -> 400 invalid_state 'State must be Open or Closed.' (R10a, R10b, I2-state-miss, I2-state-ws), while missing/blank severity now returns blank_severity. The test loop still pins it. Left open by the lead as a contract decision; not a release blocker.",
+      "repro": "curl -s -X PUT http://localhost:5173/api/bugs/<id> -H 'Content-Type: application/json' -d '{\"title\":\"[contract] s\",\"severity\":\"mid\",\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "Decide the vocabulary. For consistency with severity: return BLANK_STATE (blank_state) when state.trim() === \"\" and update the missing/blank cases in the test."
+    },
+    {
+      "id": "contract-11",
+      "title": "The contract differs between the Vite proxy and the backend for OPTIONS and path case",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: the same request should get the same status and shape on http://localhost:5173/api and on :3002.",
+      "location": "frontend/vite.config.ts:5-13 (Vite's own CORS middleware answers OPTIONS before the proxy); backend/src/index.ts:249-259",
+      "evidence": "Still reproduces, narrowed. The backend now answers OPTIONS with 204 and the right Allow header, but the proxy never forwards OPTIONS: through :5173 every OPTIONS (including /api/nope) -> 204 from Vite with no Allow header and Access-Control-Allow-Methods 'GET,HEAD,PUT,PATCH,POST,DELETE' (PATCH is 405); direct -> 204 'Allow: GET, PUT, DELETE, OPTIONS' and /api/nope -> 404 JSON (H03, L18, B03, I03, U05, headers.txt). GET /API/BUGS and /API/NOPE through the proxy -> 200 SPA index.html; direct -> 200 JSON and 404 JSON. These are the only 6 of 161 rows that differ (proxy-vs-direct.txt). No same-origin browser client is affected.",
+      "repro": "curl -s -i -X OPTIONS http://localhost:5173/api/nope; curl -s -i -X OPTIONS http://127.0.0.1:3002/api/nope",
+      "fix": "In vite.config.ts set server.cors: false so OPTIONS reaches the backend; app.set(\"case sensitive routing\", true) in index.ts so /API/* is 404 on both."
+    },
+    {
+      "id": "contract-12",
+      "title": "No length limit on title or description: a 10,000-character title is accepted with 201",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "Business rule (not specified): 06-create-bug.md sets no maximum; the only limit is body-parser's 100 KB (now a JSON 413).",
+      "location": "backend/src/bugService.ts:65-78",
+      "evidence": "Still reproduces: POST with a 10,000-char title -> 201 (R12a); bodies over 100 KB -> 413 JSON payload_too_large (R02f, I38).",
+      "repro": "curl -s -o /dev/null -w '%{http_code}\\n' -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d \"{\\\"title\\\":\\\"[contract] $(printf 't%.0s' $(seq 1 10000))\\\",\\\"severity\\\":\\\"low\\\",\\\"owner\\\":\\\"buggy\\\",\\\"description\\\":\\\"d\\\"}\"",
+      "fix": "Ask product for limits; then return 400 title_too_long (etc.) from validateFields."
+    },
+    {
+      "id": "contract-13",
+      "title": "`invalid_severity` and `invalid_state` mean two different things: a wrong type and a wrong value",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break (vocabulary): one error code should have one meaning. The type check uses invalid_<field> for every field, which collides with the existing value codes for severity and state.",
+      "location": "backend/src/index.ts:41-47 (readText), :186-196, :231-233",
+      "evidence": "severity 3 or [\"low\"] -> 400 {\"error\":\"invalid_severity\",\"message\":\"severity must be text.\"} (B20, B21, I2-severity-num), while severity 'critical' -> 400 {\"error\":\"invalid_severity\",\"message\":\"Severity must be high, mid, or low.\"} (R05a). Same for state: 7 -> invalid_state 'state must be text.' vs 'pending' -> invalid_state 'State must be Open or Closed.' (I2-state-num, I31). The type messages also use the raw lower-case field name ('title must be text.'), unlike every other message. The frontend never sends non-strings, so no user sees it.",
+      "repro": "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[contract] t\",\"severity\":3,\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "Either use one type code for all fields (e.g. {error:\"invalid_type\", field}) or accept the overlap and document it; capitalise the field in the message."
+    },
+    {
+      "id": "contract-14",
+      "title": "Media-type and JSON checks run before routing, so a wrong method or unknown path can get 415 or 400 instead of 405 or 404",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break (minor): the new 405/404 answers depend on the body. The method and path are wrong whatever the body is.",
+      "location": "backend/src/index.ts:22-31 (global 415 middleware and express.json() ahead of every route)",
+      "evidence": "POST /api/health with a text/plain body -> 415 unsupported_media_type (H05); with malformed JSON -> 400 invalid_json (H06); the same path with no body -> 405 (R04b). POST /api/nope with a text/plain body -> 415, not 404 (B35). PUT /api/bugs/abc with '{bad' -> 400 invalid_json, not invalid_id (I40). Not a regression of a previously-correct response: before this diff those requests returned HTML 404/400. The frontend is unaffected.",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/health -H 'Content-Type: text/plain' -d x",
+      "fix": "Mount the checks per route: const jsonBody = [requireJson, express.json()]; app.post(\"/api/login\", jsonBody, ...); app.post(\"/api/bugs\", jsonBody, ...); app.put(\"/api/bugs/:id\", jsonBody, ...)."
+    },
+    {
+      "id": "contract-15",
+      "title": "One-line and blank title rules miss Unicode line separators and other invisible characters",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Business rule: 06-create-bug.md says the title is a one-line summary and every field is required; the diff claims line breaks become a space and zero-width-only values are blank.",
+      "location": "backend/src/bugService.ts:52 (INVISIBLE), :59-61 (oneLine)",
+      "evidence": "\\r\\n is joined as claimed (B25, I20). But a title with U+2028 is stored with the U+2028 intact (B26, invisible-titles.txt: 6971 ends 'U+2028 ...'). A title of only U+00AD+U+200E (soft hyphen, LRM) -> 201 and stored (B27, bug 6972); a title of only U+2800 (braille blank) -> 201 (B28, bug 6973). Both render as an empty title on the board. Related: a lone surrogate \\ud800 is silently stored as U+FFFD (B29).",
+      "repro": "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"\\u00ad\\u200e\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}'   # delete the created bug afterwards",
+      "fix": "oneLine: s.replace(/\\s*[\\r\\n\\u0085\\u2028\\u2029\\v\\f]+\\s*/g, \" \"); INVISIBLE: /[\\p{Cf}\\u2800\\u3164\\u115F\\u1160\\uFFA0]/gu."
+    },
+    {
+      "id": "contract-16",
+      "title": "429 too_many_attempts carries no Retry-After header",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "Contract (RFC 6585 section 4): a 429 MAY say how long to wait. Clients, including the login page, can only say 'try again later'.",
+      "location": "backend/src/index.ts:88-91",
+      "evidence": "After 20 failed logins for probe-contract-rl-<random>, the 21st -> 429 JSON {error:'too_many_attempts',message:'Too many failed attempts. Try again later.'} with no Retry-After (rate-limit.txt). The username key is trimmed and lower-cased (the padded upper-case variant is also 429), and it applies before the blank check and on proxy and direct alike. The frontend shows the message correctly.",
+      "repro": "U=probe-contract-rl-$RANDOM; for i in $(seq 1 21); do curl -s -i -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d \"{\\\"username\\\":\\\"$U\\\",\\\"password\\\":\\\"wrong\\\"}\"; done | tail -8",
+      "fix": "res.setHeader(\"Retry-After\", String(Math.ceil((record.since + LOCKOUT_MS - Date.now()) / 1000))) before the 429."
+    }
+  ],
+  "notTested": [
+    "Baseline origin/main was not run. Pre-existing behaviour comes from last run's evidence (quality-reports/2026-09-22T222029Z) and git diff cce584c.",
+    "The 500 internal_error branch of the error handler: no external input reached it. It is covered by code reading only, and nothing in tests/api reaches it (contract-09).",
+    "Lockout as denial of service, and security properties of the rate limit: 20 bad passwords lock a real user out for 15 minutes even with the right password, because the check comes before the credential check (index.ts:88); the window runs from the first failure, not the last; the failedLogins map grows without bound with throwaway usernames. From code reading only (a real account was not locked to prove it), and it belongs to security. Passed on to the lead.",
+    "Note for the suite owner: login.spec.ts 'wrong password' and 'username in the wrong case' each add a failure to buggy's shared counter (the key is lower-cased). Repeated runs without a successful buggy login in between (e.g. --repeat-each 10) would lock buggy out for every agent. This run reset the counter with one successful login.",
+    "Authentication on bug routes: owned by security, guarded by test.fail in auth.spec.ts.",
+    "Frontend behaviour with the new statuses was checked by reading the code only: LoginPage, CreateBugModal and EditBugModal read `message` from any non-OK JSON body, send Content-Type: application/json on POST/PUT, and DELETE sends no body, so none of them can hit 415. The lead's full suite (504 passed, 0 failed) exercises the UI paths.",
+    "Concurrent writes, ETag/If-None-Match and the lone-surrogate replacement (B29) as a data-integrity question: left to data.",
+    "Backward compatibility: there is no versioned contract or consumer to compare against. The leading-zero id change (/api/bugs/01 200 -> 400) is the only change I found that alters a response that used to succeed.",
+    "No Playwright tests were written; the dispatch forbids changes under tests/. contract-09 lists the guards to add."
+  ]
+}

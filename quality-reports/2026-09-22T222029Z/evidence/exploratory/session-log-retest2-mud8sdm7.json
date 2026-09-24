@@ -1,0 +1,18 @@
+{
+  "P1b": [
+    "title after fill right after open (10 runs): [\"abc\",\"abc\",\"abc\",\"abc\",\"abc\",\"abc\",\"abc\",\"abc\",\"abc\",\"abc\"]",
+    "title after keyboard.type right after open (10 runs): [\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\",\"abcabc\"]",
+    "vanny first open: owner immediately='', after 150ms='vanny'"
+  ],
+  "R03": [
+    "logged-out tab2 created bug: #3249 owner=buggy"
+  ],
+  "R06": [
+    "two synchronous clicks created 2 bugs"
+  ],
+  "R08": [
+    "history length after login: 2",
+    "after Back with draft: url=about:blank dialogs=0",
+    "after Forward: url=http://localhost:5173/board dialogs=0"
+  ]
+}

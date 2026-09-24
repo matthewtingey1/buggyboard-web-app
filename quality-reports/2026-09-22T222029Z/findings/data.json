@@ -1,0 +1,136 @@
+{
+  "agent": "data",
+  "run": "2026-09-22T222029Z",
+  "scope": "Re-test of data-01..08 from run 2026-09-22T205320Z. New input classes not guarded by tests/data/round-trip.spec.ts, for title/owner/description on create AND update, compared across POST/PUT response, GET :id, GET list and a read-only SQLite connection: NUL, NBSP (padding and inner), leading BOM, U+3000 padding, bidi override U+202E, bidi isolates U+2067/2069, U+2028, CR-only, C0 controls BEL/ESC, NFD vs NFC, lone high/low surrogates, astral + ZWJ, U+200B/U+2060-only. UI path (headless chromium): multi-line title edit (data-01), NBSP/bidi/NUL/lone-surrogate create -> DB -> board -> edit modal, stale edit after delete (data-06), Open->Closed lifecycle via filter. Concurrency: 20 rounds of parallel full-row PUTs, stale overwrite, PUT/DELETE race, PUT and DELETE after delete. Suite hygiene: residue in the shared DB after the lead's and my runs, and whether the bugApi fixture cleans up on assertion failure, timeout, and create-before-track.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s localhost:5173/api/health",
+    "cd quality-reports/2026-09-22T222029Z/evidence/data && node api-retest.mjs > api-retest.log 2>&1",
+    "cd quality-reports/2026-09-22T222029Z/evidence/data && node ui-retest.mjs > ui-retest.log 2>&1",
+    "npx playwright test tests/data/round-trip.spec.ts --project=api --reporter=line --workers=1 --output=quality-reports/2026-09-22T222029Z/evidence/data/test-results",
+    "RESIDUE_TOKEN=res1790115928 npx playwright test -c quality-reports/2026-09-22T222029Z/evidence/data/residue/residue.config.ts --reporter=line --workers=1 --output=quality-reports/2026-09-22T222029Z/evidence/data/test-results/residue",
+    "curl -s -XDELETE localhost:5173/api/bugs/3306",
+    "sqlite3 -readonly backend/data/buggyboard.db \"select id, hex(title), description from bugs where title not like '[%'; select count(*) from bugs where title like '[e2e]%'; select * from sqlite_sequence; pragma journal_mode;\""
+  ],
+  "findings": [
+    {
+      "id": "data-01",
+      "title": "Edit modal silently strips newlines from a stored title; any title edit persists the joined text",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "09-edit-bug: modal shows the bug's title; save persists only the user's modifications. 06-create-bug: title is a one-line summary (not enforced server-side).",
+      "location": "backend/src/bugService.ts:60, backend/src/bugService.ts:107, frontend/src/EditBugModal.tsx:249",
+      "evidence": "Still reproduces. API title \"[data] ml line1\\nline2\": board cell \"[data] ml line1 line2\", modal input \"[data] ml line1line2\". Type X + Backspace enables Save; PUT body title \"[data] ml line1line2\"; DB.title \"[data] ml line1line2\". Nothing in tests/ guards this. evidence/data/ui-retest.log section data-01.",
+      "repro": "POST a [data] bug with title 'a\\nb'; in the UI open it, type a character in Title and delete it, Save; GET /api/bugs/<id> -> title 'ab'.",
+      "fix": "In createBug/updateBug: const title = input.title.replace(/[\\r\\n]+/g, ' ').trim(); (or reject with 400)."
+    },
+    {
+      "id": "data-02",
+      "title": "Path ids with trailing junk (Nabc, N.5, Ne5) resolve to bug N on GET, PUT and DELETE",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "06-create-bug: ID is a unique integer identifier; index.ts intends to reject non-numeric ids with 400 invalid_id.",
+      "location": "backend/src/index.ts:81, backend/src/index.ts:95, backend/src/index.ts:140",
+      "evidence": "Still reproduces. GET /api/bugs/3141abc, /3141.9, /3141e5, /3141%20junk -> 200 id=3141. PUT /api/bugs/3141abc -> 200, DB row 3141 became {title:'[data] idparse MODIFIED via 3141abc', severity:HIGH, state:CLOSED}. DELETE /api/bugs/3141.5 -> 204, row gone. evidence/data/api-retest.log 'data-02'.",
+      "repro": "Create a [data] bug (id N); curl -XDELETE localhost:5173/api/bugs/N.5 -> 204; GET /api/bugs/N -> 404.",
+      "fix": "const id = /^\\d+$/.test(req.params.id) ? Number(req.params.id) : NaN; in the three :id handlers."
+    },
+    {
+      "id": "data-03",
+      "title": "Create/update responses echo the input instead of the stored row; lone surrogates read back as U+FFFD",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "A bug reads back exactly as written; the 201/200 body should reflect what was persisted.",
+      "location": "backend/src/bugService.ts:76, backend/src/bugService.ts:123",
+      "evidence": "Still reproduces, and on update as well as create. For U+D800 and U+DC00 in title/owner/description: POST 201 and PUT 200 bodies echo the lone surrogate; GET :id, GET list and DB hold U+FFFD (cps 0078 fffd 0079). API-only: in the UI, chromium's input already replaces a lone surrogate with U+FFFD before the request, so UI response, DB, board and modal agree. evidence/data/api-retest.log, ui-retest.log.",
+      "repro": "curl -s -XPOST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[data] x\\ud800y\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}' then GET the id and compare title.",
+      "fix": "Return getBug(id) after INSERT/UPDATE, or reject strings where !s.isWellFormed() with 400."
+    },
+    {
+      "id": "data-04",
+      "title": "No field length limits; oversize body fails with an HTML 413 the UI reports as a generic error",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "06-create-bug: title is a concise one-line summary; errors should tell the user what is wrong.",
+      "location": "backend/src/bugService.ts:59, backend/src/index.ts:11, frontend/src/CreateBugModal.tsx:94",
+      "evidence": "Still reproduces at the API: 90,007-char title -> 201 and stored intact; 120k description -> 413 text/html '<!DOCTYPE html>...'. UI message ('Failed to save bug.', modal keeps text) not re-driven this run; no application change since the previous run (git diff cce584c touches only the port).",
+      "repro": "In the New Bug modal paste 120,000 characters into Description and Save.",
+      "fix": "maxLength on inputs (e.g. title 200, owner 64, description 10000) and matching checks in createBug/updateBug returning a JSON 400."
+    },
+    {
+      "id": "data-05",
+      "title": "Invisible-only values (U+200B, U+2060) pass the required-field check for every field",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "06-create-bug: each field is required and cannot be left blank.",
+      "location": "backend/src/bugService.ts:60-68",
+      "evidence": "Still reproduces and widened: title, owner and description of only U+200B or only U+2060 (word joiner) -> 201. The suite's test.fail guard covers only U+200B in title; it records the defect, it does not cover a fix. NBSP, BOM and U+3000 padding are trimmed correctly (String.prototype.trim).",
+      "repro": "curl -s -XPOST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[data] zw\",\"severity\":\"low\",\"owner\":\"\\u2060\",\"description\":\"\\u200b\"}' -> 201.",
+      "fix": "Blank-check on s.replace(/[\\u200B-\\u200D\\u2060\\uFEFF]/g, '').trim() === ''."
+    },
+    {
+      "id": "data-06",
+      "title": "After a 404 on save (bug deleted elsewhere) the board keeps listing the deleted row",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Board reflects stored data; 09-edit-bug save/cancel semantics.",
+      "location": "frontend/src/EditBugModal.tsx:159",
+      "evidence": "Still reproduces. Other client DELETE 204; UI Save -> PUT 404, alert 'Bug not found.', no resurrection in DB. After Escape the board still has 1 row for the deleted id. The API side is guarded by round-trip.spec.ts; the board refresh is not. evidence/data/ui-06-stale-edit.png, ui-retest.log.",
+      "repro": "Open a [data] bug's edit modal, DELETE it via curl, change Description and Save, press Escape; row still shown.",
+      "fix": "On res.status === 404 in handleSubmit/handleConfirmDelete, call onSaved() so the board refetches."
+    },
+    {
+      "id": "data-07",
+      "title": "Concurrent edits: last write wins with silent lost update",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "09-edit-bug Out of Scope: conflict detection (last write wins).",
+      "location": "backend/src/bugService.ts:119",
+      "evidence": "Re-tested with 20 rounds of two parallel full-row PUTs: all 200, A won 6, B won 14, 0 mixed rows (each statement is atomic). Stale read-then-write overwrote the other client's description. PUT racing DELETE: PUT 404 / DELETE 204, no resurrection. Matches spec.",
+      "repro": "evidence/data/api-retest.mjs 'data-07 concurrency' section.",
+      "fix": "Out of scope per spec; if wanted later, a version column with WHERE id=? AND version=? returning 409."
+    },
+    {
+      "id": "data-08",
+      "title": "Persistence across a backend restart not demonstrated",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "tech-stack: single SQLite file at backend/data/buggyboard.db; 13-bug-status: state is stored in the database.",
+      "location": "backend/src/db.ts:14-15",
+      "evidence": "Could not be re-tested: restart forbidden this run. Every write this run was visible to an independent read-only connection immediately after the API response (journal_mode=delete). sqlite_sequence.bugs=3306 with rows dating from earlier runs (ids 1965..2786) still present, i.e. data has survived across whatever restarts happened between runs, but no controlled restart was observed.",
+      "repro": "With a restart window: create a [data] bug, restart backend, GET /api/bugs/<id>.",
+      "fix": "Run the restart check in a window the lead grants."
+    },
+    {
+      "id": "data-09",
+      "title": "Suite leaves a prefix-less U+200B bug in the shared DB on every api run; cleanup refuses to delete it",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Run rules: every record a test creates carries its prefix and is deleted afterwards (tests/fixtures/bug-api.ts:5 comment; REPORT-CONTRACT 'delete only your own').",
+      "location": "tests/data/round-trip.spec.ts:80-81, tests/fixtures/bug-api.ts:96-99",
+      "evidence": "The zero-width-title test creates title '\\u200B' (no [e2e] prefix possible), tracks it, and cleanup() skips it because !title.startsWith('[e2e]'). Before my scoped run the DB held 5 such rows (ids 1965, 2009, 2099, 2437, 2786; hex E2808B, description 'zero width'); after one run of tests/data/round-trip.spec.ts (30 passed) a 6th appeared (id 3287). They show on the Open board as blank-title rows for every user and agent. Other [e2e] residue after the lead's run: 0 rows.",
+      "repro": "npx playwright test tests/data/round-trip.spec.ts --project=api --workers=1; sqlite3 -readonly backend/data/buggyboard.db \"select id from bugs where hex(title)='E2808B'\" -> one more row.",
+      "fix": "In that test delete by id unconditionally: if (res.ok()) await bugApi.send('DELETE', `/api/bugs/${(await res.json()).id}`); and have the lead remove the 6 existing U+200B rows."
+    },
+    {
+      "id": "data-10",
+      "title": "Bugs created before track() (UI creates, negative POSTs) leak if the test fails first",
+      "status": "potential",
+      "severity": "low",
+      "requirement": "tests/fixtures/bug-api.ts:5: every bug tests create is deleted afterwards.",
+      "location": "tests/create-bug/create-bug.spec.ts:38-41, tests/create-bug/create-bug.spec.ts:56-59, tests/bug-status/bug-status.spec.ts:13-15, tests/api/bugs.spec.ts:38,46,57, tests/create-bug/create-bug.spec.ts:73,88,121,132",
+      "evidence": "Fixture teardown itself is sound: my probe spec (evidence/data/residue/) showed bugApi.create rows deleted after an assertion failure and after a test timeout. But a row created with createRaw and failed before track() stayed in the DB (id 3306, which I then deleted). The UI-create tests only track after expect(dialog).toBeHidden(), and the expect-400/expect-not-saved tests never track, so a regression (slow close, validation broken) leaves [e2e] rows. Not observed in the real suite: 0 [e2e] rows after the lead's 0-failure run.",
+      "repro": "RESIDUE_TOKEN=x npx playwright test -c quality-reports/2026-09-22T222029Z/evidence/data/residue/residue.config.ts --workers=1; third test leaves '[e2e] [data]probe untracked x'.",
+      "fix": "Register the title before acting (bugApi.expectTitle(title)) and have cleanup() also delete findContaining(token) rows with the [e2e] prefix; in negative POST tests track the id when res.ok()."
+    }
+  ],
+  "notTested": [
+    "Persistence across backend restart (restart forbidden; data-08)",
+    "Schema migration safety and backup/restore (no mechanism by design)",
+    "data-04 UI error message re-drive (API re-tested; no app change since last run)",
+    "Second browser session as vanny for concurrency (parallel API clients used)",
+    "Bidi override U+202E and C0 controls are stored and rendered verbatim at all layers (integrity OK); display spoofing is a security question, left to security",
+    "Which full-suite run created the pre-existing U+200B rows (lead's full-suite.txt in evidence/lead is empty)"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "N8": [
+    "back while request held in the browser: beforeunload prompt=false, url=about:blank, reqs=[\"POST\"], bug saved=0",
+    "forward: url=http://localhost:5173/board, dialogs=0",
+    "reload while request held in the browser: beforeunload prompt=false, url=http://localhost:5173/board, reqs=[\"POST\"], bug saved=0"
+  ]
+}

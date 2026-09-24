@@ -1,0 +1,3 @@
+Error context: waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true }); page snapshot showed: button "Report Bug" in the header.
+Heal: tests/pages/board-page.ts newBugButton name 'New Bug' -> 'Report Bug' (intentional app change, one page-object edit fixes every test).
+Restored: the app label back to 'New Bug' (specs 04 and 06) and the page-object locator with it.

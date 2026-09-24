@@ -1,0 +1,43 @@
+### POST /api/bugs with 90k-char title (   90096 bytes)
+{"id":6,"title":"[security] big-90k AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+HTTP 201
+### POST /api/bugs with 150k-char title (  150097 bytes)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>PayloadTooLargeError: request entity too large<br> &nbsp; &nbsp;at readStream (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/raw-body/index.js:163:17)<br> &nbsp; &nbsp;at getRawBody (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/raw-body/index.js:116:12)<br> &nbsp; &nbsp;at read (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/bo
+</body>
+</html>
+
+HTTP 413
+### POST /api/bugs with 1100k-char title ( 1100098 bytes)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>PayloadTooLargeError: request entity too large<br> &nbsp; &nbsp;at readStream (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/raw-body/index.js:163:17)<br> &nbsp; &nbsp;at getRawBody (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/raw-body/index.js:116:12)<br> &nbsp; &nbsp;at read (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/bo
+</body>
+</html>
+
+HTTP 413
+### malformed JSON
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nbsp;at JSON.parse (&lt;anonymous&gt;)<br> &nbsp; &nbsp;at parse (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/body-parser/lib/types/json.js:96:19)<br> &nbsp; &nbsp;at ~/DEV/IdeaProjects/buggyboard-web
+</body>
+</html>
+
+HTTP 400
+{"ok":true,"message":"BuggyBoard API is running","database":"connected"}

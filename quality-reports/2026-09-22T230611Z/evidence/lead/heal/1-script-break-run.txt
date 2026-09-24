@@ -1,0 +1,62 @@
+
+Running 3 tests using 3 workers
+
+[1/3] [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form
+[2/3] [chromium] › tests/resilience/resilience.spec.ts:61:1 › the header Close button is disabled while a save is pending
+[3/3] [chromium] › tests/resilience/resilience.spec.ts:8:1 › Escape during a pending save does not close the modal
+  1) [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: 'Create bug' }).getByRole('button', { name: 'Saving...' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: 'Create bug' }).getByRole('button', { name: 'Saving...' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: 'Create bug' }).getByRole('button', { name: 'Saving...' })
+
+
+      72 |   await createBugModal.save();
+      73 |
+    > 74 |   await expect(createBugModal.savingButton).toBeVisible();
+         |                                             ^
+      75 |   await expect(createBugModal.titleInput).toBeDisabled();
+      76 |   await expect(createBugModal.dialog).toBeHidden({ timeout: 10_000 });
+      77 | });
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:74:45
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/script-break/create-bug-create-bug-plan-66821-progress-and-locks-the-form-chromium/error-context.md
+
+
+  2) [chromium] › tests/resilience/resilience.spec.ts:8:1 › Escape during a pending save does not close the modal 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: 'Create bug' }).getByRole('button', { name: 'Saving...' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: 'Create bug' }).getByRole('button', { name: 'Saving...' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: 'Create bug' }).getByRole('button', { name: 'Saving...' })
+
+
+      14 |   await createBugModal.fill({ title, description: 'd' });
+      15 |   await createBugModal.save();
+    > 16 |   await expect(createBugModal.savingButton).toBeVisible();
+         |                                             ^
+      17 |
+      18 |   await createBugModal.pressEscape();
+      19 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/resilience/resilience.spec.ts:16:45
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/script-break/resilience-resilience-Esca-70f17-ve-does-not-close-the-modal-chromium/error-context.md
+
+
+  2 failed
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form 
+    [chromium] › tests/resilience/resilience.spec.ts:8:1 › Escape during a pending save does not close the modal 
+  1 passed (8.1s)

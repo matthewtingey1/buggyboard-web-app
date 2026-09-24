@@ -1,0 +1,281 @@
+{
+  "agent": "a11y",
+  "run": "2026-09-22T222029Z",
+  "scope": "Re-test of all 17 findings from run 2026-09-22T205320Z (no frontend source changed vs cce584c), then new checks. Headless keyboard-only walk in Chromium AND Firefox: login (bad and good password), board tab order, New Bug trap (Tab and Shift+Tab), Escape and Close X, validation, select keyboard use, save, search and clear, open row with Enter and Space, edit and save, Delete -> confirm -> Escape -> confirm, Open/Closed toggle, sort header twice, logout. ariaSnapshot for every view in both engines, live-region inventory after each action, computed contrast (22 pairs), reflow at 320 and 640 CSS px, 1.4.12 text-spacing injection, forced-colors emulation, target sizes. Scoped run of tests/accessibility/accessibility.spec.ts (Chromium). Each walk created one [a11y] bug and deleted it by keyboard; none remain.",
+  "verdict": "not-ready",
+  "confidence": "medium",
+  "commands": [
+    "curl -s localhost:5173/api/health",
+    "BROWSER=chromium node quality-reports/2026-09-22T222029Z/evidence/a11y/walk.cjs",
+    "BROWSER=firefox node quality-reports/2026-09-22T222029Z/evidence/a11y/walk.cjs",
+    "node quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.cjs",
+    "node quality-reports/2026-09-22T222029Z/evidence/a11y/forced-colors.cjs",
+    "node quality-reports/2026-09-22T222029Z/evidence/a11y/target-size.cjs",
+    "npx playwright test tests/accessibility/accessibility.spec.ts --project=chromium --reporter=line --workers=1 --output=quality-reports/2026-09-22T222029Z/evidence/a11y/test-results",
+    "curl -s localhost:5173/api/bugs (verify no [a11y] bugs remain)"
+  ],
+  "findings": [
+    {
+      "id": "a11y-01",
+      "title": "Specs contain no accessibility requirement",
+      "status": "gap",
+      "severity": "medium",
+      "requirement": "specs/design/theme.md 'Other UI/UX' (accessibility placeholder); WCAG 2.2 AA used as authority",
+      "location": "specs/design/theme.md:20",
+      "evidence": "Re-tested: theme.md:20 still a placeholder; grep of specs/ finds no WCAG or accessibility criterion (only PROGRESS.md:148 noting Chromium-only guards). tests/accessibility/ now exists but asserts two behaviours and four known defects; it encodes no requirement.",
+      "repro": "grep -ri 'accessib\\|wcag\\|aria' specs/",
+      "fix": "Add an accessibility section to theme.md committing to WCAG 2.2 AA (contrast, focus management in modals, keyboard operation, reflow at 320px) and an a11y acceptance criterion per feature."
+    },
+    {
+      "id": "a11y-02",
+      "title": "Search input has role=\"search\", so it is exposed as a landmark, not a textbox",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "WCAG 4.1.2 Name, Role, Value; 1.3.1 Info and Relationships",
+      "location": "frontend/src/TitleBar.tsx:48",
+      "evidence": "Still reproduces. quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/aria/03-board.yml line 4: `search \"Search bugs by title\"` (no textbox). Same in firefox/aria/03-board.yml. Guarded by test.fail in tests/accessibility/accessibility.spec.ts:28 (expected-fail passed this run).",
+      "repro": "Log in, run page.locator('header').ariaSnapshot(); the input appears as `search`, not `textbox`/`searchbox`.",
+      "fix": "Remove role=\"search\" from the <input>, use type=\"search\" (searchbox role), and put role=\"search\" on the wrapping <div>."
+    },
+    {
+      "id": "a11y-03",
+      "title": "Bug table rows have role=\"button\", destroying row semantics",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "WCAG 1.3.1 Info and Relationships; 4.1.2 Name, Role, Value",
+      "location": "frontend/src/BoardPage.tsx:263-273",
+      "evidence": "Still reproduces in Chromium and Firefox: rows exposed as `button \"3308 MID [a11y] walk ... buggy\"` (quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/aria/03-board.yml). New consequence: any bug whose title contains a control name creates a duplicate accessible name. This run, a row titled '[functional] New Bug ...' made getByRole('button', {name: 'New Bug'}) match 2 elements, and the scoped spec 'Escape closes the create modal' FAILED on that strict-mode violation (scoped-chromium.txt). My walk hit the same collision on 'Logout' in Firefox. Voice-control users ('click New Bug') get the same ambiguity (2.5.3). Keyboard activation works: Enter and Space both open Edit.",
+      "repro": "Log in; page.getByRole('table').ariaSnapshot() -> rows listed as button.",
+      "fix": "Remove role/tabIndex/onKeyDown from <tr>; render the Title (or ID) cell content as a <button> that calls handleRowClick; keep the <tr> onClick for mouse users."
+    },
+    {
+      "id": "a11y-04",
+      "title": "Open/Closed toggle selected state is conveyed only visually",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "WCAG 4.1.2 Name, Role, Value; 1.4.1 Use of Color",
+      "location": "frontend/src/BoardPage.tsx:163-184",
+      "evidence": "Still reproduces in Chromium and Firefox: after Space on Closed, aria-pressed Open=null Closed=null (quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/keyboard-path.log, firefox/keyboard-path.log). Guarded by test.fail at accessibility.spec.ts:43.",
+      "repro": "Tab to Closed, press Space, read getAttribute('aria-pressed') on both buttons.",
+      "fix": "Add aria-pressed={stateFilter === \"OPEN\"} and aria-pressed={stateFilter === \"CLOSED\"} to the two buttons."
+    },
+    {
+      "id": "a11y-05",
+      "title": "Create and Edit modals do not trap focus; Tab walks into the page behind",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 2.4.3 Focus Order; 2.1.2 (aria-modal=\"true\" contract); theme.md modal consistency",
+      "location": "frontend/src/CreateBugModal.tsx:106-111; frontend/src/EditBugModal.tsx:207-212",
+      "evidence": "Still reproduces. Chromium: Tab 6 from title -> BODY, Tab 7 -> search, 8 New Bug. Shift+Tab 2 from title -> a table row behind the overlay. Firefox: Tab stays on Save at the end of the DOM, but Shift+Tab 2 from title -> a table row behind the overlay (firefox/keyboard-path.log). So the trap fails in both engines. Guarded by test.fail at accessibility.spec.ts:49 (Chromium only).",
+      "repro": "Open New Bug with Enter, press Tab 7 times, check document.activeElement.closest('[role=dialog]') is null.",
+      "fix": "Use native <dialog>.showModal(), or set `inert` on #root content while a modal is open, or add a Tab/Shift+Tab wrap handler on the panel."
+    },
+    {
+      "id": "a11y-06",
+      "title": "Focus is dropped to <body> after closing a modal, saving, deleting, or clearing search",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 2.4.3 Focus Order",
+      "location": "frontend/src/BoardPage.tsx:296-309; frontend/src/TitleBar.tsx:55-59",
+      "evidence": "Still reproduces in Chromium and Firefox, and nothing guards it. Focus ends on BODY after: Escape from Create; Close X; Save (create); Escape from Edit; Save (edit), not back on the row; confirm Delete; Escape on the delete confirm (should return to Delete); Enter on Clear search; Logout (/login loads with focus on BODY). quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/keyboard-path.log, firefox/keyboard-path.log.",
+      "repro": "Focus New Bug, Enter, Escape; document.activeElement === document.body.",
+      "fix": "Store the trigger element when opening and call .focus() on it in onClose (New Bug, or the row's button); after delete focus the table or next row; after Clear search focus the search input."
+    },
+    {
+      "id": "a11y-07",
+      "title": "Delete confirmation dialog does not receive focus; focus stays behind it in the Edit dialog",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 2.4.3 Focus Order; 4.1.2 (two simultaneous aria-modal dialogs)",
+      "location": "frontend/src/EditBugModal.tsx:358-364",
+      "evidence": "Still reproduces in Chromium and Firefox, and nothing guards it. Enter on Delete -> focus stays on `button \"Delete\" (in dialog \"Edit bug #N\")`; 2 elements have aria-modal=true at once. Tab 1 -> Edit Cancel (under the overlay), Tab 2 -> 'Delete bug' Close. Escape on confirm -> BODY. quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/aria/07-confirm-delete.yml, screenshots/07-confirm-delete.png.",
+      "repro": "Open a bug, focus Delete, press Enter, read document.activeElement.",
+      "fix": "Focus the confirm dialog's Cancel button when showConfirmDelete becomes true, make the Edit dialog inert while it is shown, and return focus to Delete on cancel."
+    },
+    {
+      "id": "a11y-08",
+      "title": "Severity badge text fails 4.5:1 on its own tint (HIGH 3.77, MID 2.93, LOW 4.32)",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.3 Contrast (Minimum); spec 08 colours",
+      "location": "frontend/src/index.css:8-10,22-33",
+      "evidence": "Re-measured this run, unchanged: HIGH #b84a2e on #efd7d1 3.77:1 (3.66 hovered); MID #a67c47 on #ebe2d7 2.93:1 (2.85); LOW #4a6b5e on #d7dedc 4.32:1 (4.20). 14px/600 is not large text. quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.json.",
+      "repro": "node quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.cjs",
+      "fix": "Darken the text colours (e.g. HIGH #a24128, MID #7e5e36, LOW #47675a reach ~4.6:1 on white rows; go slightly darker for hovered rows) or lighten the tint; update spec 08 hex values to match."
+    },
+    {
+      "id": "a11y-09",
+      "title": "Login 'Log in' subtitle in #b8ae76 on white is 2.25:1",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.3 Contrast (Minimum)",
+      "location": "frontend/src/LoginPage.tsx:71",
+      "evidence": "Re-measured: #b8ae76 on #ffffff = 2.25:1 at 16px/500. stone-800 on the #b8ae76 primary passes at 6.76:1. quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.json.",
+      "repro": "node quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.cjs",
+      "fix": "Use text-stone-700, or add a darker brand shade for text (e.g. #7a7040, 4.98:1)."
+    },
+    {
+      "id": "a11y-10",
+      "title": "Search placeholder text is 2.41:1",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.3 Contrast (Minimum)",
+      "location": "frontend/src/TitleBar.tsx:53",
+      "evidence": "Re-measured: computed placeholder rgb(168,162,158) on #fafaf9 = 2.41:1; on white when focused 2.52:1. quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.json.",
+      "repro": "node quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.cjs",
+      "fix": "placeholder-stone-500 (#78716c: 4.59:1 on stone-50)."
+    },
+    {
+      "id": "a11y-11",
+      "title": "Focus ring, input borders and selected toggle fail 3:1 non-text contrast",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.11 Non-text Contrast (2.4.7 relies on it)",
+      "location": "frontend/src/*.tsx focus:ring-primary classes; input border-stone-300; BoardPage.tsx:168",
+      "evidence": "Re-measured: focus ring #b8ae76 vs white 2.25:1, vs stone-100 2.06:1; input border #d6d3d1 vs white 1.49:1; selected toggle fill vs track 2.25:1. quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.json.",
+      "repro": "node quality-reports/2026-09-22T222029Z/evidence/a11y/contrast.cjs",
+      "fix": "Use a darker ring (e.g. focus:ring-stone-700, or a #7a7040 brand shade), border-stone-500 on inputs, and add a border or check to the selected toggle."
+    },
+    {
+      "id": "a11y-12",
+      "title": "Board header does not reflow at 320 CSS px (400% zoom); Logout is off-screen",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.10 Reflow",
+      "location": "frontend/src/TitleBar.tsx:28,43,45",
+      "evidence": "Still reproduces: at 320x640, scrollWidth 524 vs clientWidth 320; New Bug at x 313-413, Logout at x 438-524; h1 width 0. The create modal itself fits (x 16-304). /login reflows (320=320). quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/screenshots/10-board-320.png.",
+      "repro": "Open /board with viewport 320x640 and compare document.documentElement.scrollWidth to clientWidth.",
+      "fix": "Add flex-wrap to the header, drop flex-shrink-0 on the button group, and make the search w-full below sm (e.g. `w-full sm:w-80`)."
+    },
+    {
+      "id": "a11y-13",
+      "title": "Clear-search button is 22x36 px, next to the input",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 2.5.8 Target Size (Minimum)",
+      "location": "frontend/src/TitleBar.tsx:59",
+      "evidence": "Re-measured: Clear search 22x36 px, next to the input; modal Close 18x32 px with no adjacent target (passes on spacing). quality-reports/2026-09-22T222029Z/evidence/a11y/target-size.txt.",
+      "repro": "node quality-reports/2026-09-22T222029Z/evidence/a11y/target-size.cjs",
+      "fix": "p-2 or min-w-6 min-h-6 on the clear button (and on the Close X for consistency)."
+    },
+    {
+      "id": "a11y-14",
+      "title": "Submitting login drops focus to <body> because the fields are disabled while loading",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 2.4.3 Focus Order",
+      "location": "frontend/src/LoginPage.tsx:89,107,119",
+      "evidence": "Still reproduces in Chromium and Firefox: Enter with a wrong password -> BODY, and focus is still BODY after the alert. #password aria-invalid=null aria-describedby=null.",
+      "repro": "On /login type a bad password, press Enter, read document.activeElement.",
+      "fix": "Use readOnly/aria-disabled instead of disabled during submit, or focus the username field when setting error; add aria-invalid and aria-describedby pointing at the error."
+    },
+    {
+      "id": "a11y-15",
+      "title": "Page title is 'BuggyBoard' on every route",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 2.4.2 Page Titled",
+      "location": "frontend/index.html:7",
+      "evidence": "Still reproduces: document.title on /board = \"BuggyBoard\" in Chromium and Firefox, the same as /login.",
+      "repro": "Log in and read page.title().",
+      "fix": "Set document.title per route, e.g. 'Log in - BuggyBoard' and 'Board - BuggyBoard'."
+    },
+    {
+      "id": "a11y-16",
+      "title": "Login page has no main landmark and 'Log in' is a paragraph, not a heading",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "WCAG 1.3.1 Info and Relationships (best practice)",
+      "location": "frontend/src/LoginPage.tsx:58-71",
+      "evidence": "Still reproduces: quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/aria/01-login.yml has no landmark and `paragraph: Log in`.",
+      "repro": "page.locator('body').ariaSnapshot() on /login.",
+      "fix": "Wrap the card in <main> and make 'Log in' an <h2> (or wrap it in a labelled <form>)."
+    },
+    {
+      "id": "a11y-17",
+      "title": "No status live region: search results, filter, save and delete are not announced",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 4.1.3 Status Messages; 4.1.2",
+      "location": "frontend/src/BoardPage.tsx:243-259; frontend/src/BoardPage.tsx:148-186",
+      "evidence": "Measured in Chromium and Firefox: the only live regions are the role=alert error lists. Zero [aria-live]/[role=status] elements on the board, after typing a search that narrows to 1 row, after the Closed filter, after save and after delete. The visible 'No bugs matched.' / 'No bugs.' text sits in a plain <td>, so it is a status message not exposed per 4.1.3. aria-sort is still correct (ascending/descending on the active header, arrow aria-hidden). What a screen reader actually says is unverified.",
+      "repro": "BROWSER=chromium node quality-reports/2026-09-22T222029Z/evidence/a11y/walk.cjs; grep 'live regions' quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/keyboard-path.log",
+      "fix": "Add a visually hidden role=status region announcing e.g. 'Sorted by Title ascending', 'Showing 3 closed bugs', 'Bug saved'."
+    },
+    {
+      "id": "a11y-18",
+      "title": "Open/Closed selected state disappears in forced-colors (Windows High Contrast) mode",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "WCAG 1.4.11 Non-text Contrast; 1.4.1 Use of Color",
+      "location": "frontend/src/BoardPage.tsx:163-184",
+      "evidence": "With forcedColors 'active' emulated in Chromium, both buttons compute to black text with no border or outline. The selected one is bg rgb(255,255,255) and the other is transparent over the same white. Screenshots 14-forced-colors-selected-Open.png and -Closed.png look the same. Together with a11y-04, nothing tells the user which filter is active.",
+      "repro": "node quality-reports/2026-09-22T222029Z/evidence/a11y/forced-colors.cjs",
+      "fix": "aria-pressed (a11y-04) plus a forced-colors-safe indicator on the selected button, e.g. a 2px border/underline, or `forced-colors:outline` on the selected one."
+    },
+    {
+      "id": "a11y-19",
+      "title": "Escape meant for a native <select> popup closes the whole Create/Edit modal and discards input",
+      "status": "potential",
+      "severity": "medium",
+      "requirement": "WCAG 2.1.1 Keyboard; 3.3.4 Error Prevention (data loss)",
+      "location": "frontend/src/CreateBugModal.tsx:44-54; frontend/src/EditBugModal.tsx:73-86",
+      "evidence": "Headless Chromium and Firefox: typed a title, Tab to Severity, ArrowDown (value stayed 'mid', which suggests the popup opened), then Escape. The Create dialog closed and reopened with an empty title. The handler is on window and does not check e.target or e.defaultPrevented. Whether real desktop browsers keep Escape inside an open native popup was not verified; headless popups may behave differently.",
+      "repro": "BROWSER=chromium node quality-reports/2026-09-22T222029Z/evidence/a11y/walk.cjs; grep 'CLOSED the Create dialog' quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/keyboard-path.log",
+      "fix": "In the Escape handler, return early if (e.target as HTMLElement).tagName === 'SELECT' or e.defaultPrevented; optionally confirm before discarding a dirty form."
+    },
+    {
+      "id": "a11y-20",
+      "title": "Create/Edit validation errors are not programmatically tied to their fields",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 1.3.1 Info and Relationships; 3.3.1 Error Identification",
+      "location": "frontend/src/CreateBugModal.tsx:190; frontend/src/EditBugModal.tsx:322",
+      "evidence": "Empty submit in Create: the error list appears in role=alert and focus stays on #bug-title, but #bug-title has aria-invalid=null and aria-describedby=null. Same pattern as login (a11y-14). quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/aria/05-create-validation.yml.",
+      "repro": "Open New Bug, press Enter on the empty form, read #bug-title aria-invalid/aria-describedby.",
+      "fix": "Set aria-invalid on each failing field and aria-describedby to an id on its error message."
+    },
+    {
+      "id": "a11y-21",
+      "title": "'BuggyBoard' heading collapses to 0 px at 640 CSS px (200% zoom)",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "WCAG 1.4.4 Resize Text",
+      "location": "frontend/src/TitleBar.tsx:28-45",
+      "evidence": "At 640x900 the page does not scroll sideways (640=640), but header h1 width is 0 and the visible 'BuggyBoard' text is gone; only the logo shows. quality-reports/2026-09-22T222029Z/evidence/a11y/chromium/screenshots/10-board-640.png. Screen readers still get the heading.",
+      "repro": "Open /board at a 640 px wide viewport; header h1 getBoundingClientRect().width === 0.",
+      "fix": "Give the h1 min-w-fit or shrink-0 and let the header wrap (same change as a11y-12)."
+    },
+    {
+      "id": "a11y-22",
+      "title": "Route changes (login -> board, logout -> login) are silent and leave focus on <body>",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "WCAG 2.4.3 Focus Order; 4.1.3 (best practice for SPAs)",
+      "location": "frontend/src/App.tsx; frontend/src/LoginPage.tsx",
+      "evidence": "After a successful login and after Logout, activeElement is BODY in Chromium and Firefox. document.title does not change (a11y-15), so nothing tells a screen-reader user that the view changed.",
+      "repro": "grep -n 'Enter with correct password\\|Focus on /login after logout' quality-reports/2026-09-22T222029Z/evidence/a11y/*/keyboard-path.log",
+      "fix": "On route change, set document.title and move focus to the page h1 (tabIndex=-1) or the username field."
+    },
+    {
+      "id": "a11y-23",
+      "title": "Firefox: table scroll container is an unnamed Tab stop",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "WCAG 4.1.2 Name, Role, Value; 2.4.3",
+      "location": "frontend/src/BoardPage.tsx:188",
+      "evidence": "Firefox Tab stop 6 is `div \"ID Severity ↓ Title Owner ...\"`, the overflow-x-auto wrapper. Firefox makes scrollable containers focusable. It has no role or name. Chromium does not stop there. quality-reports/2026-09-22T222029Z/evidence/a11y/firefox/keyboard-path.log.",
+      "repro": "BROWSER=firefox node quality-reports/2026-09-22T222029Z/evidence/a11y/walk.cjs; see 'First 12 Tab stops'.",
+      "fix": "Add role=\"region\" aria-label=\"Bugs table\" tabIndex={0} to the wrapper so the stop is named, keyboard scrolling works in every engine, and Firefox users are not left guessing."
+    }
+  ],
+  "notTested": [
+    "axe-core: not installed (@axe-core/playwright absent), so not run; no packages added",
+    "Real screen readers (VoiceOver, NVDA, JAWS): announcement wording, virtual-cursor behaviour with two aria-modal dialogs, whether role=alert errors are read",
+    "WebKit/Safari keyboard behaviour (Tab skips buttons by default); the Firefox walk is headless Playwright Firefox, not a desktop profile",
+    "Real browser zoom (320/640 CSS px viewports emulated instead); 1.4.12 was checked only for clipping at 1280 px",
+    "Real Windows High Contrast (forced-colors only emulated in Chromium)",
+    "Native <select> popups in headed browsers (a11y-19 needs a manual check)",
+    "Mobile touch and screen-reader gestures; speech-input (voice control) name collisions only inferred from the accessibility tree"
+  ]
+}

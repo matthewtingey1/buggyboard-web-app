@@ -1,0 +1,113 @@
+case	method	path	status	content-type	body
+H1-valid	GET	/api/health	200	application/json; charset=utf-8	{"ok":true,"message":"BuggyBoard API is running","database":"connected"}
+H2-post	POST	/api/health	404	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot POST /api/health</pre></body></html>
+U1-unknown	GET	/api/nope	404	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot GET /api/nope</pre></body></html>
+U2-unknown-post	POST	/api/nope	404	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot POST /api/nope</pre></body></html>
+U3-bugs-trailing	GET	/api/bugs/	200	application/json; charset=utf-8	[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimmin
+U4-patch	PATCH	/api/bugs/1	404	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot PATCH /api/bugs/1</pre></body></html>
+U5-login-get	GET	/api/login	404	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot GET /api/login</pre></body></html>
+L01-valid	POST	/api/login	200	application/json; charset=utf-8	{"username":"buggy"}
+L02-valid-2nd	POST	/api/login	200	application/json; charset=utf-8	{"username":"vanny"}
+L03-new-user-matt	POST	/api/login	200	application/json; charset=utf-8	{"username":"matt"}
+L04-ws-username	POST	/api/login	200	application/json; charset=utf-8	{"username":"buggy"}
+L05-missing-username	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_username","message":"Username cannot be blank."}
+L06-missing-password	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_password","message":"Password cannot be blank."}
+L07-empty-body	POST	/api/login	400	application/json; charset=utf-8	{"error":"missing_credentials","message":"Please enter your username and password."}
+L08-blank-username	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_username","message":"Username cannot be blank."}
+L09-ws-only-username	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_username","message":"Username cannot be blank."}
+L10-blank-password	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_password","message":"Password cannot be blank."}
+L11-ws-only-password	POST	/api/login	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+L12-both-blank	POST	/api/login	400	application/json; charset=utf-8	{"error":"missing_credentials","message":"Please enter your username and password."}
+L13-wrong-password	POST	/api/login	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+L14-unknown-user	POST	/api/login	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+L15-username-number	POST	/api/login	500	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>TypeError: username.trim is not a function<br> &nbsp; &nbsp;at 
+L16-username-null	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_username","message":"Username cannot be blank."}
+L17-username-array	POST	/api/login	500	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>TypeError: username.trim is not a function<br> &nbsp; &nbsp;at 
+L18-password-number	POST	/api/login	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+L19-password-null	POST	/api/login	400	application/json; charset=utf-8	{"error":"blank_password","message":"Password cannot be blank."}
+L20-password-array	POST	/api/login	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+L21-username-object	POST	/api/login	500	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>TypeError: username.trim is not a function<br> &nbsp; &nbsp;at 
+L22-malformed-json	POST	/api/login	400	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nbsp;at J
+L23-no-content-type	POST	/api/login	400	application/json; charset=utf-8	{"error":"missing_credentials","message":"Please enter your username and password."}
+L24-text-plain	POST	/api/login	400	application/json; charset=utf-8	{"error":"missing_credentials","message":"Please enter your username and password."}
+L25-body-array	POST	/api/login	400	application/json; charset=utf-8	{"error":"missing_credentials","message":"Please enter your username and password."}
+L26-body-null	POST	/api/login	400	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>SyntaxError: Unexpected token &#39;n&#39;, &quot;null&quot; is 
+L27-case-username	POST	/api/login	401	application/json; charset=utf-8	{"error":"invalid_credentials","message":"Invalid username or password."}
+G1-list	GET	/api/bugs	200	application/json; charset=utf-8	[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimmin
+G2-list-query	GET	/api/bugs?state=closed	200	application/json; charset=utf-8	[{"id":1,"title":"Login page accepts username with trailing spaces","severity":"LOW","owner":"matt","description":"Username \"matt   \" logs in; confirm trimmin
+C01-valid-lower	POST	/api/bugs	201	application/json; charset=utf-8	{"id":7,"title":"[contract] C01 valid","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+C02-valid-upper	POST	/api/bugs	201	application/json; charset=utf-8	{"id":8,"title":"[contract] C02 upper","severity":"LOW","owner":"buggy","description":"probe","state":"OPEN"}
+C03-severity-mixed	POST	/api/bugs	201	application/json; charset=utf-8	{"id":9,"title":"[contract] C03 mixed","severity":"MID","owner":"buggy","description":"probe","state":"OPEN"}
+C04-severity-padded	POST	/api/bugs	201	application/json; charset=utf-8	{"id":10,"title":"[contract] C04 padded","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+C05-state-ignored	POST	/api/bugs	201	application/json; charset=utf-8	{"id":11,"title":"[contract] C05 state","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+C06-missing-title	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C07-missing-severity	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+C08-missing-owner	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_owner","message":"Owner is required."}
+C09-missing-description	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_description","message":"Description is required."}
+C10-empty-body	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C11-blank-title	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C12-ws-title	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C13-ws-owner	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_owner","message":"Owner is required."}
+C14-ws-description	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_description","message":"Description is required."}
+C15-blank-severity	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+C16-invalid-severity	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+C17-title-number	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C18-title-null	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C19-title-array	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C20-severity-number	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+C21-severity-null	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+C22-severity-array	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+C23-owner-number	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_owner","message":"Owner is required."}
+C24-description-null	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_description","message":"Description is required."}
+C25-malformed-json	POST	/api/bugs	400	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nbsp;at J
+C26-no-content-type	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C27-all-blank	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C28-body-array	POST	/api/bugs	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+C29-owner-nonuser	POST	/api/bugs	201	application/json; charset=utf-8	{"id":12,"title":"[contract] C29 owner not a user","severity":"LOW","owner":"nobody-at-all","description":"probe","state":"OPEN"}
+R01-valid	GET	/api/bugs/13	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+R02-missing	GET	/api/bugs/999999999	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R03-non-numeric	GET	/api/bugs/abc	400	application/json; charset=utf-8	{"error":"invalid_id","message":"Bug ID must be a number."}
+R04-1abc	GET	/api/bugs/13abc	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+R05-negative	GET	/api/bugs/-1	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R06-zero	GET	/api/bugs/0	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R07-decimal	GET	/api/bugs/13.9	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+R08-huge	GET	/api/bugs/99999999999999999999999	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R09-hex	GET	/api/bugs/0x1	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+R10-leading-ws	GET	/api/bugs/%2013	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target","severity":"HIGH","owner":"buggy","description":"probe","state":"OPEN"}
+P01-valid	PUT	/api/bugs/13	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target edited","severity":"MID","owner":"vanny","description":"edited","state":"CLOSED"}
+P02-valid-upper-state	PUT	/api/bugs/13	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target edited","severity":"MID","owner":"vanny","description":"edited","state":"OPEN"}
+P03-missing-state	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"invalid_state","message":"State must be Open or Closed."}
+P04-invalid-state	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"invalid_state","message":"State must be Open or Closed."}
+P05-blank-state	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"invalid_state","message":"State must be Open or Closed."}
+P06-state-number	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"invalid_state","message":"State must be Open or Closed."}
+P07-partial-title-only	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+P08-missing-title	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+P09-missing-owner	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_owner","message":"Owner is required."}
+P10-missing-description	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_description","message":"Description is required."}
+P11-missing-severity	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+P12-ws-title	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+P13-invalid-severity	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+P14-title-null	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+P15-title-array	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+P16-owner-number	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_owner","message":"Owner is required."}
+P17-malformed-json	PUT	/api/bugs/13	400	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nbsp;at J
+P18-no-content-type	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+P19-empty-body	PUT	/api/bugs/13	400	application/json; charset=utf-8	{"error":"blank_title","message":"Title is required."}
+P20-missing-id-valid-body	PUT	/api/bugs/999999999	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+P21-missing-id-invalid-body	PUT	/api/bugs/999999999	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+P22-non-numeric-id	PUT	/api/bugs/abc	400	application/json; charset=utf-8	{"error":"invalid_id","message":"Bug ID must be a number."}
+P23-1abc	PUT	/api/bugs/13abc	200	application/json; charset=utf-8	{"id":13,"title":"[contract] via 1abc","severity":"LOW","owner":"buggy","description":"d","state":"OPEN"}
+P24-negative-id	PUT	/api/bugs/-1	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+P25-body-id-ignored	PUT	/api/bugs/13	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target edited","severity":"MID","owner":"vanny","description":"edited","state":"OPEN"}
+P26-state-padded	PUT	/api/bugs/13	200	application/json; charset=utf-8	{"id":13,"title":"[contract] target edited","severity":"MID","owner":"vanny","description":"edited","state":"CLOSED"}
+D01-valid	DELETE	/api/bugs/14	204		
+D02-already-deleted	DELETE	/api/bugs/14	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+D03-get-after-delete	GET	/api/bugs/14	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+D04-missing	DELETE	/api/bugs/999999999	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+D05-non-numeric	DELETE	/api/bugs/abc	400	application/json; charset=utf-8	{"error":"invalid_id","message":"Bug ID must be a number."}
+D06-1abc	DELETE	/api/bugs/15abc	204		
+D07-1abc-confirm	GET	/api/bugs/15	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+D08-negative	DELETE	/api/bugs/-1	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+D09-with-body-no-ct	DELETE	/api/bugs/999999999	404	application/json; charset=utf-8	{"error":"not_found","message":"Bug not found."}
+D10-malformed-json-body	DELETE	/api/bugs/999999999	400	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>SyntaxError: Expected property name or &#39;}&#39; in JSON at p
+D11-no-id	DELETE	/api/bugs	404	text/html; charset=utf-8	<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot DELETE /api/bugs</pre></body></html>

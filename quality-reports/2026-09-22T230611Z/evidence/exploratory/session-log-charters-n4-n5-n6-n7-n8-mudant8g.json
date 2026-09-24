@@ -1,0 +1,30 @@
+{
+  "N4": [
+    "20 failed logins using case/space variants of 'probe-exploratory-0fpyn2' took 60ms: 401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401,401",
+    "exact username 'probe-exploratory-0fpyn2' afterwards -> 429 {\"error\":\"too_many_attempts\",\"message\":\"Too many failed attempts. Try again later.\"}",
+    "blank password for locked user -> 429 {\"error\":\"too_many_attempts\",\"message\":\"Too many failed attempts. Try again later.\"}",
+    "UI for locked user: alert='Too many failed attempts. Try again later.' focus=INPUT#username 'probe-exploratory-0fpyn2' username aria-invalid=true",
+    "'Buggy' + buggy's correct password (<redacted>) -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "'buggy' + correct password -> 200 (resets buggy's counter)",
+    "login input autocapitalize=null autocorrect=null spellcheck=null"
+  ],
+  "N5": [
+    "tab2 with a typed draft after tab1 logout: url=http://localhost:5173/login dialogs=0 (no warning; draft gone)",
+    "tab1 logs in as vanny: tab2 url=http://localhost:5173/board",
+    "tab2 New Bug owner default='vanny'",
+    "save pending in tab2 when tab1 logged out: tab2 url=http://localhost:5173/login bug created=1 owner=vanny; any message in tab2=0"
+  ],
+  "N6": [
+    "(a) Escape then reopen within one frame: {\"dialogOpen\":true,\"focus\":\"INPUT#bug-title \"}",
+    "(a2) keyboard Enter,Escape,Enter: dialogs=0 focus=BUTTON 'New Bug'",
+    "(b) Enter held on New Bug: dialogs=1 alert='Title is required.\nDescription is required.' title aria-invalid=true",
+    "(c) Enter held on title button: GETs=3 dialogs=1 focus=INPUT#edit-bug-title '[exploratory] N6 edit mudant8g'",
+    "(d) after Save (row stays): focus=BUTTON '[exploratory] N6 edit mudant8g'",
+    "(d) after Save that closes the bug (row leaves Open view): focus=H1#board-heading 'BuggyBoard'",
+    "(e) confirm opened: focus=BUTTON 'Cancel'",
+    "(e) Escape on confirm: confirm open=0 edit open=1 focus=BUTTON 'Delete'",
+    "(f) 12 Tabs inside unchanged edit modal all inside dialog=true",
+    "(g) Try again (still failing): focus=H1#board-heading 'BuggyBoard'",
+    "(g) Try again (recovers): focus=H1#board-heading 'BuggyBoard' rows=25"
+  ]
+}

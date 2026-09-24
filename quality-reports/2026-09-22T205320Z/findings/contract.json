@@ -1,0 +1,121 @@
+{
+  "agent": "contract",
+  "run": "2026-09-22T205320Z",
+  "scope": "All 7 route/method pairs (GET /api/health, POST /api/login, GET/POST /api/bugs, GET/PUT/DELETE /api/bugs/:id) plus unknown /api paths and unsupported methods: 112 curl requests through the Vite proxy (http://localhost:5173/api), spot-checked direct on :3002. Input classes: valid, each missing field, number/null/array/object types, blank and whitespace-only, lower/mixed/padded/invalid severity and state, non-numeric id, missing numeric id, 1abc, decimal, hex, negative, zero, huge id, malformed JSON, body null/array, missing and text/plain Content-Type. Port-change slice: repo-wide grep of specs, README and docs for 3000.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "quality-reports/2026-09-22T205320Z/evidence/contract/probe.sh http://localhost:5173",
+    "node quality-reports/2026-09-22T205320Z/evidence/contract/table.cjs",
+    "curl -s -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":123,\"password\":\"x\"}'",
+    "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":'",
+    "curl -s -i -X POST http://localhost:3002/api/login -H 'Content-Type: application/json' -d '{\"username\":[\"a\"],\"password\":\"x\"}'",
+    "curl -s -o /dev/null -w '%{http_code} %{content_type}' http://localhost:3002/api/nope",
+    "curl -s -o /dev/null -w '%{http_code} %{content_type}' http://localhost:3002/api/bugs/13abc",
+    "curl -s -i -X OPTIONS http://localhost:3002/api/bugs",
+    "curl -s http://localhost:5173/api/bugs | node -e '<shape check: keys id,title,severity,owner,description,state; enums HIGH|MID|LOW, OPEN|CLOSED>'",
+    "grep -rnE '300[0-9]' --exclude-dir=node_modules --exclude-dir=quality-reports --exclude-dir=.git --exclude=package-lock.json .",
+    "cleanup: DELETE /api/bugs/{7..13} (all [contract]-prefixed)"
+  ],
+  "findings": [
+    {
+      "id": "contract-01",
+      "title": "POST /api/login returns 500 HTML with a stack trace when username is a number, array or object",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Contract break: a client input error must produce a 4xx JSON {error,message} body like every other login failure; the bug routes already coerce non-strings to \"\".",
+      "location": "backend/src/index.ts:38; backend/src/authService.ts:19",
+      "evidence": "{\"username\":123}, {\"username\":[\"buggy\"]} and {\"username\":{}} each returned 500 text/html 'TypeError: username.trim is not a function' with absolute file paths (/Users/.../backend/src/authService.ts:19:36). `as string` is a compile-time cast only; `?? \"\"` only catches null/undefined. Server stayed up (health 200 afterwards). Saved: evidence/contract/500-login-username-number.html, probe-results.tsv L15/L17/L21.",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":123,\"password\":\"x\"}'",
+      "fix": "In index.ts use the same guard as the bug routes: const username = typeof req.body?.username === \"string\" ? req.body.username : \"\"; (and likewise for password)."
+    },
+    {
+      "id": "contract-02",
+      "title": "Malformed JSON body (and a bare `null` body) returns Express's HTML 400 page with a stack trace, not a JSON error",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Contract break: every /api error response is JSON {error,message}; body-parser failures bypass that shape.",
+      "location": "backend/src/index.ts:11 (express.json() with no error handler anywhere before app.listen at :184)",
+      "evidence": "POST /api/login, POST /api/bugs, PUT /api/bugs/13 with '{\"title\":' and DELETE with '{bad' all returned 400 text/html 'SyntaxError: Unexpected end of JSON input' with node_modules paths. Body 'null' on POST /api/login also 400 HTML (strict mode). Saved: evidence/contract/400-malformed-json.html, probe rows L22, L26, C25, P17, D10.",
+      "repro": "curl -s -i -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":'",
+      "fix": "Add a final error middleware: app.use((err, _req, res, _next) => { if (err.type === \"entity.parse.failed\") return res.status(400).json({ error: \"invalid_json\", message: \"Request body must be valid JSON.\" }); res.status(500).json({ error: \"internal_error\", message: \"Unexpected server error.\" }); });"
+    },
+    {
+      "id": "contract-03",
+      "title": "Bug id parsing accepts trailing garbage: /api/bugs/15abc, /13.9 and /%2013 act on the real bug, including DELETE",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Contract break: the route documents invalid_id (400) for a non-numeric id; parseInt(\"15abc\",10)=15 so the check at the handler never fires. Negative and hex ids also return 404 not_found instead of 400 invalid_id.",
+      "location": "backend/src/index.ts:81, :95, :140",
+      "evidence": "GET /api/bugs/13abc -> 200 bug 13; GET /api/bugs/13.9 -> 200 bug 13; GET /api/bugs/%2013 -> 200 bug 13; PUT /api/bugs/13abc -> 200 and wrote title '[contract] via 1abc' to bug 13; DELETE /api/bugs/15abc -> 204 and GET /api/bugs/15 then 404 (bug deleted). GET/PUT/DELETE /api/bugs/-1 -> 404 not_found; /api/bugs/0x1 -> 404 (parsed as 0). Probe rows R04, R05, R07, R09, R10, P23, P24, D06-D08.",
+      "repro": "ID=$(curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[contract] x\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}' | sed -E 's/.*\"id\":([0-9]+).*/\\1/'); curl -s -o /dev/null -w '%{http_code}\\n' -X DELETE http://localhost:5173/api/bugs/${ID}abc; curl -s -o /dev/null -w '%{http_code}\\n' http://localhost:5173/api/bugs/$ID   # 204 then 404",
+      "fix": "Replace parseInt with a strict check in one helper: if (!/^[1-9]\\d*$/.test(req.params.id)) return 400 invalid_id; const id = Number(req.params.id);"
+    },
+    {
+      "id": "contract-04",
+      "title": "Unknown /api/* paths and unsupported methods return Express's HTML 404 page, not JSON",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: api-conventions.md reserves /api for the API; responses under it should be JSON. Wrong method on a known path is 404 rather than 405.",
+      "location": "backend/src/index.ts:184 (no /api fallback before app.listen)",
+      "evidence": "GET /api/nope, POST /api/nope, POST /api/health, GET /api/login, PATCH /api/bugs/1, DELETE /api/bugs -> 404 text/html '<pre>Cannot GET /api/nope</pre>'. Same on :3002 direct. Probe rows H2, U1, U2, U4, U5, D11.",
+      "repro": "curl -s -i http://localhost:5173/api/nope",
+      "fix": "Before app.listen: app.use(\"/api\", (_req, res) => res.status(404).json({ error: \"not_found\", message: \"Route not found.\" }));"
+    },
+    {
+      "id": "contract-05",
+      "title": "Invalid severity reports error code `blank_severity`; wrong-type fields report `blank_*`",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Contract break: the service distinguishes INVALID_SEVERITY from BLANK_SEVERITY but the route collapses both into blank_severity, so a client cannot tell 'critical' from ''. Non-string values (title:42, owner:7, severity:[\"high\"]) are coerced to \"\" and reported as blank ('Title is required.').",
+      "location": "backend/src/index.ts:123-125, :171-173 (severity); :101-105, :155-158 (type coercion)",
+      "evidence": "POST severity 'critical' -> 400 {\"error\":\"blank_severity\"}; PUT severity 'urgent' -> 400 blank_severity; POST title 42 -> 400 blank_title; PUT owner 5 -> 400 blank_owner. Also PUT with state omitted -> invalid_state while severity omitted -> blank_severity (inconsistent missing-field vocabulary). Frontend keys only on `message` for bug errors, so no UI impact today. Probe rows C16, C17, C19, C20, C22, C23, P03, P13, P15, P16.",
+      "repro": "curl -s -X POST http://localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[contract] x\",\"severity\":\"critical\",\"owner\":\"buggy\",\"description\":\"d\"}'",
+      "fix": "Split the case: case \"INVALID_SEVERITY\": res.status(400).json({ error: \"invalid_severity\", message: \"Severity must be high, mid, or low.\" }). Optionally return invalid_type for non-string fields."
+    },
+    {
+      "id": "contract-06",
+      "title": "A valid JSON body without Content-Type: application/json is silently read as empty and reported as blank fields",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "Contract break (minor): a body the server cannot parse should be 415, not a misleading validation error.",
+      "location": "backend/src/index.ts:11",
+      "evidence": "POST /api/login with a correct JSON body and no Content-Type (curl default form-urlencoded) or text/plain -> 400 missing_credentials; POST /api/bugs -> 400 blank_title; PUT -> 400 blank_title. Probe rows L23, L24, C26, P18.",
+      "repro": "curl -s -X POST http://localhost:5173/api/login -d '{\"username\":\"buggy\",\"password\":\"1970beetle\"}'",
+      "fix": "For POST/PUT under /api, reject when !req.is(\"application/json\") with 415 {error:\"unsupported_media_type\"}."
+    },
+    {
+      "id": "contract-07",
+      "title": "Whitespace-only password is treated as a real password (401) rather than blank (400 blank_password)",
+      "status": "potential",
+      "severity": "low",
+      "requirement": "Business rule, ambiguous: 03-login.md requires a blank-password error and specifies trimming only for the username. Behaviour is confirmed; whether '   ' counts as blank is a product decision.",
+      "location": "backend/src/authService.ts:21, :27",
+      "evidence": "{\"username\":\"buggy\",\"password\":\"   \"} -> 401 invalid_credentials. Whitespace-only username -> 400 blank_username. Probe rows L09, L11.",
+      "repro": "curl -s -X POST http://localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":\"buggy\",\"password\":\"   \"}'",
+      "fix": "Ask product. If blank: use password.trim() === \"\" for the blank checks only, still comparing the untrimmed password."
+    },
+    {
+      "id": "contract-08",
+      "title": "No API contract document and no API tests exist",
+      "status": "gap",
+      "severity": "medium",
+      "requirement": "Every endpoint's status and shape should be pinned by a documented contract and at least one test per status; today only api-conventions.md (the /api prefix) exists and the only test file targets playwright.dev.",
+      "location": "specs/engineering/api-conventions.md; tests/example.spec.ts",
+      "evidence": "The contract in contract.md is reconstructed from index.ts. Lead's suite is 6/6 of example.spec.ts, which never calls /api. Backward compatibility cannot be judged.",
+      "repro": "ls tests/; cat specs/engineering/api-conventions.md",
+      "fix": "Commit the reconstructed contract to specs/engineering/api-conventions.md and add tests/contract/*.spec.ts using Playwright `request` (one status per test), starting from probe.sh's cases."
+    }
+  ],
+  "notTested": [
+    "Baseline (origin/main) was not run; findings are attributed as pre-existing because git diff shows no route, handler or service change, only PORT 3000 -> 3002 (code-reading attribution).",
+    "Authentication on the bug routes: all bug endpoints accept unauthenticated requests (observed throughout) - owned by security, not filed here.",
+    "Stack-trace disclosure in 500/400 HTML pages is noted in contract-01/02 as evidence; its security rating belongs to security.",
+    "Owner is not validated against users.json (POST owner 'nobody-at-all' -> 201); 06-create-bug.md does not state it must be a known user, so not filed.",
+    "Large payloads (>100kb body-parser limit -> 413 shape), very long strings, unicode/control characters, concurrent writes.",
+    "CORS behaviour beyond observing headers on :3002 (OPTIONS /api/bugs returns 200 text/html 'GET,HEAD,POST').",
+    "HEAD requests, query-string filtering (GET /api/bugs?state=closed ignores the query, as expected - no filter in the contract).",
+    "No Playwright spec was written; curl probe is the evidence."
+  ]
+}

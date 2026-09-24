@@ -1,0 +1,140 @@
+== security-01 anonymous verbs ==
+POST /api/bugs (anon) -> {"id":6932,"title":"[security] anon create","severity":"LOW","owner":"nobody","description":"created anonymously","state":"OPEN"}
+$ curl -s -o /dev/null -w GET /api/bugs (anon) %{http_code}
+ http://localhost:5173/api/bugs
+GET /api/bugs (anon) 200
+
+
+$ curl -s -w  %{http_code} -X PUT http://localhost:5173/api/bugs/6932 -H Content-Type: application/json -d {"title":"[security] anon PUT edited","severity":"high","owner":"nobody","description":"edited anonymously","state":"closed"}
+{"id":6932,"title":"[security] anon PUT edited","severity":"HIGH","owner":"nobody","description":"edited anonymously","state":"CLOSED"} 200
+
+$ curl -s -w  %{http_code} http://localhost:5173/api/bugs/6932
+{"id":6932,"title":"[security] anon PUT edited","severity":"HIGH","owner":"nobody","description":"edited anonymously","state":"CLOSED"} 200
+
+== security-09 id strictness on own bug 6932 ==
+GET /api/bugs/6932.9 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/6932e0 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/6932%20OR%201=1 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/6932;DROP%20TABLE%20bugs -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/06932 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/+6932 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/0 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/-1 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/99999999999999999999 -> {"error":"not_found","message":"Bug not found."} 404
+GET /api/bugs/abc -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/%E0%A4%A -> {"error":"bad_request","message":"The request could not be read."} 400
+PUT /api/bugs/6932.9 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+DELETE /api/bugs/6932.5 -> {"error":"invalid_id","message":"Bug ID must be a positive whole number."} 400
+GET /api/bugs/6932 (still there?) -> 200
+== security-06 error bodies ==
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/login -H Content-Type: application/json -d {"username":123,"password":"x"}
+{"error":"invalid_username","message":"username must be text."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/login -H Content-Type: application/json -d {"username":["buggy"],"password":"x"}
+{"error":"invalid_username","message":"username must be text."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/login -H Content-Type: application/json -d {"username":{"toString":1},"password":"x"}
+{"error":"invalid_username","message":"username must be text."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/login -H Content-Type: application/json -d {bad json
+{"error":"invalid_json","message":"The request body is not valid JSON."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/login -H Content-Type: application/json; charset=latin1 -d {"username":"a","password":"b"}
+{"error":"unsupported_media_type","message":"Send UTF-8 JSON without compression."} 415 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/login -H Content-Type: application/json -H Content-Encoding: gzip -d {"username":"a","password":"b"}
+{"error":"bad_request","message":"The request could not be read."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/bugs -H Content-Type: text/plain -d {"title":"[security] text/plain"}
+{"error":"unsupported_media_type","message":"Send the request body as application/json."} 415 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/bugs -H Content-Type: application/x-www-form-urlencoded -d title=[security]+form
+{"error":"unsupported_media_type","message":"Send the request body as application/json."} 415 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/bugs -H Content-Type: application/json -d [1,2]
+{"error":"blank_title","message":"Title is required."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X POST http://127.0.0.1:3002/api/bugs -H Content-Type: application/json -d "str"
+{"error":"invalid_json","message":"The request body is not valid JSON."} 400 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} -X PATCH http://127.0.0.1:3002/api/bugs/1
+{"error":"method_not_allowed","message":"Use GET, PUT, DELETE for /api/bugs/:id."} 405 application/json; charset=utf-8
+
+$ curl -s -w  %{http_code} %{content_type} http://127.0.0.1:3002/api/nope
+{"error":"not_found","message":"No such API route."} 404 application/json; charset=utf-8
+
+== security-08 headers (direct and via proxy) ==
+$ curl -s -D - -o /dev/null http://127.0.0.1:3002/api/health
+HTTP/1.1 200 OK
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 72
+ETag: W/"48-Acm3aEyQAd1C5riMit6cdgddOmg"
+Date: Tue, 22 Sep 2026 23:12:31 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+
+$ curl -s -D - -o /dev/null http://localhost:5173/api/health
+HTTP/1.1 200 OK
+Vary: Origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: no-referrer
+access-control-allow-origin: http://localhost:5173
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+access-control-allow-headers: Content-Type
+content-type: application/json; charset=utf-8
+content-length: 72
+etag: W/"48-Acm3aEyQAd1C5riMit6cdgddOmg"
+date: Tue, 22 Sep 2026 23:12:31 GMT
+connection: close
+
+
+
+$ curl -s -D - -o /dev/null http://localhost:5173/board
+HTTP/1.1 200 OK
+Vary: Origin
+Content-Type: text/html
+Cache-Control: no-cache
+Etag: W/"278-LTbQsWGqSFMaWLj40QBHKJeJWYw"
+Date: Tue, 22 Sep 2026 23:12:32 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 632
+
+
+
+== CORS foreign origin ==
+$ curl -s -i -X OPTIONS http://127.0.0.1:3002/api/bugs/1 -H Origin: http://evil.example -H Access-Control-Request-Method: DELETE
+HTTP/1.1 204 No Content
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Allow: GET, PUT, DELETE, OPTIONS
+Date: Tue, 22 Sep 2026 23:12:32 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+
+== security-14 Host header (DNS rebinding precondition) ==
+backend  Host: evil.example GET /api/bugs -> 200
+vite     Host: evil.example GET /api/bugs -> Blocked request. This host ("evil.example") is not allowed.
+To allow this host, add "evil.example" to `server.allowedHosts` in vite.config.js. 403
+backend  Host: evil.example DELETE own bug -> 204 (id 6933)
+== security-07 listeners ==
+COMMAND   PID        USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node     4244 <user>   14u  IPv6 0x4360a7cd8e096af6      0t0  TCP [::1]:5173 (LISTEN)
+node    60562 <user>   21u  IPv4 0xef3cf9c86fe2bf7d      0t0  TCP 127.0.0.1:3002 (LISTEN)
+== cleanup own bug 6932 ==
+DELETE /api/bugs/http://localhost:5173/api/bugs/6932 204

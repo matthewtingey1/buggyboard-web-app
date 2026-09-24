@@ -1,0 +1,35 @@
+{
+  "N3": [
+    "Tabs from page load to New Bug: 2",
+    "focus after open create: INPUT#bug-title ''",
+    "severity after ArrowDown: mid",
+    "focus before submit: BUTTON 'Save'",
+    "created: 1; focus after create closes: BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "Tabs from search box to first row: 10",
+    "edit open=1, focus=INPUT#edit-bug-title ''",
+    "3 tabs from title: INPUT#edit-bug-owner ''",
+    "state now: open",
+    "saved via keyboard: state=OPEN; focus after edit closes: BODY 'BuggyBoardLog inUsernamePasswo'",
+    "CHARTER ERROR locator.focus: Timeout 30000ms exceeded."
+  ],
+  "N4": [
+    "1280: {\"docW\":1280,\"vw\":1280,\"header\":1280,\"newBug\":{\"l\":1053,\"r\":1153,\"w\":100},\"logout\":{\"l\":1178,\"r\":1264,\"w\":86},\"table\":{\"l\":193,\"r\":1087,\"w\":894},\"search\":{\"l\":709,\"r\":1005,\"w\":296}}",
+    "1280 create modal: {\"panelL\":384,\"panelR\":896,\"saveBottom\":656,\"vh\":800}",
+    "768: {\"docW\":768,\"vw\":768,\"header\":768,\"newBug\":{\"l\":541,\"r\":641,\"w\":100},\"logout\":{\"l\":666,\"r\":752,\"w\":86},\"table\":{\"l\":25,\"r\":743,\"w\":718},\"search\":{\"l\":197,\"r\":493,\"w\":296}}",
+    "768 create modal: {\"panelL\":128,\"panelR\":640,\"saveBottom\":768,\"vh\":1024}",
+    "375-phone: {\"docW\":524,\"vw\":375,\"header\":524,\"newBug\":{\"l\":313,\"r\":413,\"w\":100},\"logout\":{\"l\":438,\"r\":524,\"w\":86},\"table\":{\"l\":17,\"r\":421,\"w\":404},\"search\":{\"l\":33,\"r\":265,\"w\":232}}",
+    "375-phone create modal: {\"panelL\":16,\"panelR\":359,\"saveBottom\":589,\"vh\":667}",
+    "320-400pct-zoom: {\"docW\":524,\"vw\":320,\"header\":524,\"newBug\":{\"l\":313,\"r\":413,\"w\":100},\"logout\":{\"l\":438,\"r\":524,\"w\":86},\"table\":{\"l\":17,\"r\":421,\"w\":404},\"search\":{\"l\":33,\"r\":265,\"w\":232}}",
+    "320-400pct-zoom create modal: {\"panelL\":16,\"panelR\":304,\"saveBottom\":544,\"vh\":568}",
+    "CSS zoom 200% @1280: docW=1280 vw=1280"
+  ],
+  "N5": [
+    "40x open/Escape create: dialogs=0",
+    "then open: owner='buggy', severity='mid'",
+    "20x open/Escape edit: dialogs=0",
+    "dblclick row: GETs=2, dialogs=1",
+    "Escape x2 from confirm: dialogs=0; bug still exists=200",
+    "Enter x5 on Delete: confirm open=1, bug exists=200; focus=Delete",
+    "page errors: []"
+  ]
+}

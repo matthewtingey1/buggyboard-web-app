@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth";
 
@@ -18,6 +19,7 @@ export function TitleBar({
   const navigate = useNavigate();
   const showSearch = onSearchChange != null;
   const showClear = showSearch && searchValue.trim() !== "";
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   function handleLogout() {
     logout();
@@ -25,8 +27,8 @@ export function TitleBar({
   }
 
   return (
-    <header className="flex items-center justify-between gap-4 bg-white border-b border-stone-200 px-4 py-3 shadow-sm">
-      <div className="flex items-center gap-3 min-w-0">
+    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 bg-white border-b border-stone-200 px-4 py-3 shadow-sm">
+      <div className="flex items-center gap-3">
         <div className="flex-shrink-0 rounded-lg overflow-hidden bg-stone-200 ring-1 ring-stone-300">
           <img
             src="/logo_50x50.png"
@@ -36,27 +38,33 @@ export function TitleBar({
             className="block"
           />
         </div>
-        <h1 className="text-3xl leading-10 font-bold text-stone-800 truncate">
+        <h1 id="board-heading" tabIndex={-1} className="text-3xl leading-10 font-bold text-stone-800 focus:outline-none">
           BuggyBoard
         </h1>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex flex-wrap items-center gap-3 min-w-0">
         {showSearch && (
-          <div className="flex items-center w-64 sm:w-80 rounded-lg border border-stone-200 bg-stone-50 focus-within:border-primary focus-within:bg-white focus-within:ring-1 focus-within:ring-primary transition-colors">
+          <div
+            role="search"
+            className="flex items-center w-full min-w-0 sm:w-80 rounded-lg border border-stone-500 bg-stone-50 focus-within:border-stone-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-stone-600 transition-colors"
+          >
             <input
+              ref={searchInputRef}
               type="text"
-              role="search"
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search bugs…"
               aria-label="Search bugs by title"
-              className="flex-1 min-w-0 rounded-l border-0 bg-transparent px-3 py-2 text-stone-800 placeholder-stone-400 focus:outline-none"
+              className="flex-1 min-w-0 rounded-l border-0 bg-transparent px-3 py-2 text-stone-800 placeholder-stone-500 focus:outline-none"
             />
             <button
               type="button"
-              onClick={() => onSearchChange("")}
+              onClick={() => {
+                onSearchChange("");
+                searchInputRef.current?.focus();
+              }}
               aria-label="Clear search"
-              className={`flex-shrink-0 rounded p-1.5 text-stone-500 hover:bg-stone-200 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${showClear ? "" : "invisible pointer-events-none"}`}
+              className={`flex-shrink-0 inline-flex h-8 w-8 items-center justify-center rounded text-stone-500 hover:bg-stone-200 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-1 ${showClear ? "" : "invisible pointer-events-none"}`}
             >
               <span aria-hidden="true">×</span>
             </button>
@@ -69,7 +77,7 @@ export function TitleBar({
           <button
             type="button"
             onClick={onNewBug}
-            className="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="rounded-lg px-4 py-2 text-base font-medium text-stone-800 border border-primary/60 bg-primary/25 hover:bg-primary/35 hover:border-primary focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2"
           >
             New Bug
           </button>
@@ -80,7 +88,7 @@ export function TitleBar({
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2"
         >
           Logout
         </button>

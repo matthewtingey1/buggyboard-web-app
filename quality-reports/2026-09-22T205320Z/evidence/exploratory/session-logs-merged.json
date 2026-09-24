@@ -1,0 +1,90 @@
+{
+  "c1_deleteWhileOpenElsewhere": [
+    "(session-log-mud5m4vh.json) ERROR locator.fill: Timeout 30000ms exceeded.",
+    "(session-log-mud5ohir.json) ERROR locator.click: Timeout 30000ms exceeded."
+  ],
+  "c2_lostUpdate": [
+    "(session-log-mud5m4vh.json) ERROR locator.fill: Timeout 30000ms exceeded.",
+    "(session-log-mud5ohir.json) ERROR locator.click: Timeout 30000ms exceeded."
+  ],
+  "C3": [
+    "(session-log-mud5m4vh.json) tab1 logged out; localStorage buggyboard_user in tab2 = null",
+    "(session-log-mud5m4vh.json) tab2 still on /board; created bug after logout: #90 owner=buggy",
+    "(session-log-mud5m4vh.json) tab1 now logged in as vanny; tab2 Create modal default owner = \"buggy\""
+  ],
+  "C4": [
+    "(session-log-mud5m4vh.json) dblclick: bugs created = 1",
+    "(session-log-mud5m4vh.json) enterRepeat: bugs created = 1",
+    "(session-log-mud5m4vh.json) syncDoubleClick: bugs created = 2",
+    "(session-log-mud5m4vh.json) doubleRequestSubmit: bugs created = 2",
+    "(session-log-mud5qy3e.json) dblclick: bugs created = 1",
+    "(session-log-mud5qy3e.json) enterRepeat: bugs created = 1",
+    "(session-log-mud5qy3e.json) syncDoubleClick: bugs created = 2",
+    "(session-log-mud5qy3e.json) doubleRequestSubmit: bugs created = 2"
+  ],
+  "c4_doubleSubmit": [
+    "(session-log-mud5m4vh.json) ERROR locator.fill: Timeout 30000ms exceeded."
+  ],
+  "C5": [
+    "(session-log-mud5ohir.json) logged in: /board?x=1 -> /board?x=1; dialog open=false",
+    "(session-log-mud5ohir.json) logged in: /board/1 -> /board; dialog open=false",
+    "(session-log-mud5ohir.json) logged in: /bugs/1 -> /board; dialog open=false",
+    "(session-log-mud5ohir.json) logged in: /nope -> /board; dialog open=false",
+    "(session-log-mud5ohir.json) logged in: /login?next=/board/1 -> /board; dialog open=false",
+    "(session-log-mud5ohir.json) logged in: /BOARD -> /BOARD; dialog open=false",
+    "(session-log-mud5ohir.json) Back with Create modal open (url stays false) -> now at http://localhost:5173/BOARD; typed draft lost; dialog open=false",
+    "(session-log-mud5q7vf.json) logged in: /board?x=1 -> /board?x=1; dialog open=false",
+    "(session-log-mud5q7vf.json) logged in: /board/1 -> /board; dialog open=false",
+    "(session-log-mud5q7vf.json) logged in: /bugs/1 -> /board; dialog open=false",
+    "(session-log-mud5q7vf.json) logged in: /nope -> /board; dialog open=false",
+    "(session-log-mud5q7vf.json) logged in: /login?next=/board/1 -> /board; dialog open=false",
+    "(session-log-mud5q7vf.json) logged in: /BOARD -> /BOARD; dialog open=false",
+    "(session-log-mud5q7vf.json) Back with Create modal open (url stays false) -> now at http://localhost:5173/BOARD; typed draft lost; dialog open=false",
+    "(session-log-mud5q7vf.json) Logout then Back -> /login",
+    "(session-log-mud5q7vf.json) anon deep link /board?search=foo -> login -> /board; search box=\"\"",
+    "(session-log-mud5q7vf.json) after setting search+Closed filter and reload: search=\"\", url=http://localhost:5173/board"
+  ],
+  "c5_deepLinks": [
+    "(session-log-mud5ohir.json) ERROR locator.click: Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 2 elements:"
+  ],
+  "C6": [
+    "(session-log-mud5ohir.json) login \" buggy \"/\"1970beetle\" -> 200 {\"username\":\"buggy\"}",
+    "(session-log-mud5ohir.json) login \"Buggy\"/\"1970beetle\" -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "(session-log-mud5ohir.json) login \"BUGGY\"/\"1970beetle\" -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "(session-log-mud5ohir.json) login \"buggy\"/\" 1970beetle\" -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "(session-log-mud5ohir.json) login \"matt\"/\"<redacted>\" -> 200 {\"username\":\"matt\"}",
+    "(session-log-mud5ohir.json) create owner=\"nobody-such-user\" -> 201 stored owner=\"nobody-such-user\"",
+    "(session-log-mud5ohir.json) create owner=\"  buggy  \" -> 201 stored owner=\"buggy\"",
+    "(session-log-mud5ohir.json) create owner=\"Buggy\" -> 201 stored owner=\"Buggy\"",
+    "(session-log-mud5ohir.json) create owner=\"bug gy\" -> 201 stored owner=\"bug gy\"",
+    "(session-log-mud5ohir.json) create owner=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -> 201 stored owner=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "(session-log-mud5ohir.json) owner-sorted (asc) C6 rows: [\"aaaaaaaaaaaaaaaaaaaa\",\"bug gy\",\"buggy\",\"Buggy\",\"nobody-such-user\"]",
+    "(session-log-mud5ohir.json) UI login with \"  buggy \" -> default owner=\"\""
+  ],
+  "C1": [
+    "(session-log-mud5q7vf.json) vanny opened edit modal for #137",
+    "(session-log-mud5q7vf.json) buggy deleted #137; GET now -> 404",
+    "(session-log-mud5q7vf.json) vanny save result: modal still open=true; contains 'Bug not found.'=true",
+    "(session-log-mud5q7vf.json) after Cancel, stale row still on vanny board: 1",
+    "(session-log-mud5q7vf.json) clicking stale row opens a dialog? false (no feedback if false)",
+    "(session-log-mud5q7vf.json) second delete of already-deleted #138: edit modal visible=true, text has 'Bug not found.'=true"
+  ],
+  "C2": [
+    "(session-log-mud5q7vf.json) buggy closed #139; server state=CLOSED",
+    "(session-log-mud5q7vf.json) vanny saved description only; server now state=OPEN description=\"vanny's description edit\" (buggy's close silently reverted: true)"
+  ],
+  "C7": [
+    "(session-log-mud5qy3e.json) created long-title bugs #146 (400-char unbroken word), #147 (1000+ chars with spaces)",
+    "(session-log-mud5qy3e.json) 20k-char title accepted by API: 201",
+    "(session-log-mud5qy3e.json) created 200 bulk bugs in 695 ms",
+    "(session-log-mud5qy3e.json) unbroken 400-char title: table scrollWidth=4529 vs container=894, viewport=1280",
+    "(session-log-mud5qy3e.json) 20k-char title row height=73px",
+    "(session-log-mud5qy3e.json) search to 200 bulk rows rendered in 13 ms; rows=200; no pagination control present=true"
+  ],
+  "C8": [
+    "(session-log-mud5qy3e.json) create with 120k description: modal open=true; message=\"Failed to save bug.\"",
+    "(session-log-mud5qy3e.json) direct POST 120k -> 413, body starts: \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>E",
+    "(session-log-mud5qy3e.json) malformed JSON -> 400, body starts: \"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>E",
+    "(session-log-mud5qy3e.json) edit with 120k description: message=\"Failed to save bug.\""
+  ]
+}

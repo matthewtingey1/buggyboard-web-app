@@ -1,0 +1,7 @@
+- heading "BuggyBoard" [level=1]
+- paragraph: Log in
+- text: Username
+- textbox "Username"
+- text: Password
+- textbox "Password"
+- button "Login"

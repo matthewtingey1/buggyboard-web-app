@@ -1,0 +1,1 @@
+clear search 22x36; modal Close 18x32

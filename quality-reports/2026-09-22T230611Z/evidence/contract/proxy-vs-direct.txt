@@ -1,0 +1,6 @@
+H03 OPTIONS /api/health proxy: 204    | direct: 204  GET, OPTIONS 
+L18 OPTIONS /api/login proxy: 204    | direct: 204  POST, OPTIONS 
+B03 OPTIONS /api/bugs proxy: 204    | direct: 204  GET, POST, OPTIONS 
+I03 OPTIONS /api/bugs/6977 proxy: 204    | direct: 204  GET, PUT, DELETE, OPTIONS 
+U03 GET /API/BUGS proxy: 200 text/html  <!doctype html> <html lang="en">   <head>     <script type="module">import { inj | direct: 200 application/json; charset=utf-8  [{"id":1,"title":"Login page accepts username with trailing spaces","severity":"
+U05 OPTIONS /api/nope proxy: 204    | direct: 404 application/json; charset=utf-8  {"error":"not_found","message":"No such API route."}

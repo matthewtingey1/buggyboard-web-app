@@ -1,0 +1,23 @@
+### GET /api/bugs/4 (no session, via proxy 5173)
+{"id":4,"title":"[security] unauth create","severity":"LOW","owner":"nobody","description":"created with no session","state":"OPEN"}
+HTTP 200
+### PUT /api/bugs/4 (no session)
+{"id":4,"title":"[security] unauth edited","severity":"HIGH","owner":"nobody","description":"edited with no session","state":"CLOSED"}
+HTTP 200
+### DELETE /api/bugs/4 (no session)
+HTTP 204
+### GET /api/bugs/4 after delete
+{"error":"not_found","message":"Bug not found."}
+HTTP 404
+### Cross-origin preflight from evil origin
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Allow: GET,HEAD,PUT,DELETE
+Content-Type: text/html; charset=utf-8
+Content-Length: 19
+### Simple cross-origin text/plain POST (CSRF-style) - does express.json parse it?
+{"error":"blank_title","message":"Title is required."}
+HTTP 400

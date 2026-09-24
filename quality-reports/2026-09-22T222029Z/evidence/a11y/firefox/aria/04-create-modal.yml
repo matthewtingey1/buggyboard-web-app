@@ -1,0 +1,128 @@
+- banner:
+  - img "BuggyBoard"
+  - heading "BuggyBoard" [level=1]
+  - search "Search bugs by title"
+  - button "New Bug"
+  - button "Logout"
+- main:
+  - group "Filter by bug state":
+    - button "Open"
+    - button "Closed"
+  - table "Bugs":
+    - rowgroup:
+      - row "ID Severity Title Owner":
+        - columnheader "ID":
+          - button "ID"
+        - columnheader "Severity":
+          - button "Severity"
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Owner":
+          - button "Owner"
+    - rowgroup:
+      - button "2 HIGH Bug API endpoints work without logging in matt":
+        - cell "2"
+        - cell "HIGH"
+        - cell "Bug API endpoints work without logging in"
+        - cell "matt"
+      - button "3146 HIGH [exploratory] R01 lost-update mud8rj8t buggy":
+        - cell "3146"
+        - cell "HIGH"
+        - cell "[exploratory] R01 lost-update mud8rj8t"
+        - cell "buggy"
+      - button "3149 HIGH [exploratory] R05 mud8rj8t XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX buggy":
+        - cell "3149"
+        - cell "HIGH"
+        - cell "[exploratory] R05 mud8rj8t XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        - cell "buggy"
+      - button "3151 HIGH [exploratory] R07 mud8rj8t nobody-such-user":
+        - cell "3151"
+        - cell "HIGH"
+        - cell "[exploratory] R07 mud8rj8t"
+        - cell "nobody-such-user"
+      - button "3152 HIGH [exploratory] R07b mud8rj8t Buggy":
+        - cell "3152"
+        - cell "HIGH"
+        - cell "[exploratory] R07b mud8rj8t"
+        - cell "Buggy"
+      - button "3 MID Search does not match on bug description matt":
+        - cell "3"
+        - cell "MID"
+        - cell "Search does not match on bug description"
+        - cell "matt"
+      - button "3249 MID [exploratory] R03 after-logout mud8sdm7 buggy":
+        - cell "3249"
+        - cell "MID"
+        - cell "[exploratory] R03 after-logout mud8sdm7"
+        - cell "buggy"
+      - button "3254 MID [exploratory] R06 dup mud8sdm7 buggy":
+        - cell "3254"
+        - cell "MID"
+        - cell "[exploratory] R06 dup mud8sdm7"
+        - cell "buggy"
+      - button "3255 MID [exploratory] R06 dup mud8sdm7 buggy":
+        - cell "3255"
+        - cell "MID"
+        - cell "[exploratory] R06 dup mud8sdm7"
+        - cell "buggy"
+      - button "1 LOW Login page accepts username with trailing spaces matt":
+        - cell "1"
+        - cell "LOW"
+        - cell "Login page accepts username with trailing spaces"
+        - cell "matt"
+      - button "1965 LOW buggy":
+        - cell "1965"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button "2009 LOW buggy":
+        - cell "2009"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button "2099 LOW buggy":
+        - cell "2099"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button "2437 LOW buggy":
+        - cell "2437"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button "2786 LOW buggy":
+        - cell "2786"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button:
+        - cell "3150"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button "3287 LOW buggy":
+        - cell "3287"
+        - cell "LOW"
+        - cell
+        - cell "buggy"
+      - button "3306 LOW [e2e] [data]probe untracked res1790115928 buggy":
+        - cell "3306"
+        - cell "LOW"
+        - cell "[e2e] [data]probe untracked res1790115928"
+        - cell "buggy"
+- dialog "Create bug":
+  - heading "Create bug" [level=2]
+  - button "Close"
+  - text: Title
+  - textbox "Title"
+  - text: Severity
+  - combobox "Severity":
+    - option "HIGH"
+    - option "MID" [selected]
+    - option "LOW"
+  - text: Owner
+  - textbox "Owner": buggy
+  - text: Description
+  - textbox "Description"
+  - button "Cancel"
+  - button "Save"

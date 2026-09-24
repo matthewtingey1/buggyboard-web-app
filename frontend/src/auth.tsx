@@ -49,6 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setUser(loadStoredUser());
     setInitialized(true);
+    // Another tab logging in, out, or as someone else changes the stored user; follow it here too.
+    function handleStorage(e: StorageEvent) {
+      if (e.key === STORAGE_KEY || e.key === null) setUser(loadStoredUser());
+    }
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   const login = useCallback((username: string) => {

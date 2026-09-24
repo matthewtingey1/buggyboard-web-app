@@ -1,0 +1,26 @@
+== 1. third party locks a username it does not own (upper-case variant, counted against the lower-case key) ==
+20 wrong for PROBE-SECURITY-bf2c9b4d: 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 
+next attempt as probe-security-bf2c9b4d: HTTP/1.1 429 Too Many Requests
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 84
+ETag: W/"54-rVvt5IheJR/8Q0Z4ylOQC6lCp5A"
+Date: Tue, 22 Sep 2026 23:13:00 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"too_many_attempts","message":"Too many failed attempts. Try again later."}
+
+== 2. spraying one password across 25 usernames: no global or per-client limit ==
+codes: 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 
+
+== 3. map growth: every distinct failed username is kept in process memory ==
+RSS before (KB):  76112
+200 x 90 KB usernames:  200 401 
+RSS after (KB):  98912
+{"ok":true,"message":"BuggyBoard API is running","database":"connected"}

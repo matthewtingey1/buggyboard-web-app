@@ -1,0 +1,110 @@
+{
+  "agent": "data",
+  "run": "2026-09-22T205320Z",
+  "scope": "Round-trip of title/owner/description (20 input classes each: Latin-1, CJK, emoji/ZWJ/flags, Arabic, Hebrew+LTR mix, bidi override, LF, CRLF, tabs, leading/trailing spaces/NBSP/newlines, zero-width-only, quotes/backslash, HTML, SQL-like, NUL, lone surrogate, 10k, 90k, 120k) through POST response, GET /api/bugs/:id, GET /api/bugs, read-only SQLite; UI create -> board row -> edit modal -> DB; severity/state enumerations; lifecycle Open->Closed via UI filter; delete and id non-reuse (AUTOINCREMENT); concurrent PUTs, stale overwrite, edit/delete of a bug deleted by another client (API and UI); path-id parsing on GET/PUT/DELETE; DB pragmas read-only.",
+  "verdict": "ready-with-known-risk",
+  "confidence": "high",
+  "commands": [
+    "curl -s localhost:5173/api/health",
+    "sqlite3 -readonly backend/data/buggyboard.db \"pragma journal_mode; pragma synchronous; select sql from sqlite_master; select * from sqlite_sequence;\"",
+    "cd quality-reports/2026-09-22T205320Z/evidence/data && node api-roundtrip.mjs > api-roundtrip.log 2>&1",
+    "cd quality-reports/2026-09-22T205320Z/evidence/data && node ui-roundtrip.mjs > ui-roundtrip.log 2>&1"
+  ],
+  "findings": [
+    {
+      "id": "data-01",
+      "title": "Edit modal silently strips newlines from a stored title; any title edit persists the joined text",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "09-edit-bug: modal shows the bug's title; save persists only the user's modifications. 06-create-bug: title is a one-line summary (not enforced server-side).",
+      "location": "backend/src/bugService.ts:60, backend/src/bugService.ts:107, frontend/src/EditBugModal.tsx:249",
+      "evidence": "API POST title \"[data] ml line1\\nline2\" -> 201, stored verbatim. Board cell renders \"[data] ml line1 line2\"; edit modal <input type=text> shows \"[data] ml line1line2\". Editing only the description keeps the newline (PUT sends React state). Typing X then Backspace in title enables Save; saving writes DB.title=\"[data] ml line1line2\" (words fused, no user intent). See evidence/data/ui-roundtrip.log section 3.",
+      "repro": "curl -s -XPOST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[data] a\\nb\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}'; open the row in the UI, type a character in Title and delete it, Save; GET /api/bugs/<id> -> title \"[data] ab\".",
+      "fix": "Enforce one-line titles server-side: in createBug/updateBug use input.title.replace(/[\\r\\n]+/g, ' ').trim() (or reject with 400 blank_title-style error)."
+    },
+    {
+      "id": "data-02",
+      "title": "Path ids with trailing junk (86abc, 86.5, 86e5) resolve to bug 86 on GET, PUT and DELETE",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "06-create-bug: ID is a unique integer identifier; index.ts intends to reject non-numeric ids with 400 invalid_id.",
+      "location": "backend/src/index.ts:81, backend/src/index.ts:95, backend/src/index.ts:140",
+      "evidence": "GET /api/bugs/86abc, /86.9, /86e5, /86%20junk -> 200 id=86. PUT /api/bugs/86abc -> 200 and DB row 86 became {title:'[data] idparse MODIFIED via 86abc', severity:HIGH, state:CLOSED}. DELETE /api/bugs/86.5 -> 204 and row 86 gone. evidence/data/api-roundtrip.log 'Id parsing'.",
+      "repro": "Create a [data] bug (id N); curl -XDELETE localhost:5173/api/bugs/N.5 -> 204; GET /api/bugs/N -> 404.",
+      "fix": "Replace parseInt with a strict check: const id = /^\\d+$/.test(req.params.id) ? Number(req.params.id) : NaN; in all three handlers."
+    },
+    {
+      "id": "data-03",
+      "title": "Create/update responses echo the input instead of the stored row; lone surrogates read back as U+FFFD",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "A bug reads back exactly as written; the 201/200 body should reflect what was persisted.",
+      "location": "backend/src/bugService.ts:76, backend/src/bugService.ts:123",
+      "evidence": "POST with title/owner/description containing \"x\\uD800y\": 201 body echoes \\ud800; GET :id, GET list and DB all return \"x\\uFFFDy\" (code points 78 fffd 79). All other 19 input classes matched at all four layers, including NUL, emoji ZWJ, RTL, CRLF and 90k strings.",
+      "repro": "curl -s -XPOST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[data] x\\ud800y\",\"severity\":\"low\",\"owner\":\"buggy\",\"description\":\"d\"}' then GET the id and compare title.",
+      "fix": "Return getBug(id) after INSERT/UPDATE, or reject strings where !s.isWellFormed() with 400."
+    },
+    {
+      "id": "data-04",
+      "title": "No field length limits; oversize body fails with an HTML 413 the UI reports as a generic error",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "06-create-bug: title is a concise one-line summary; errors should tell the user what is wrong.",
+      "location": "backend/src/bugService.ts:59, backend/src/index.ts:11, frontend/src/CreateBugModal.tsx:94",
+      "evidence": "90,006-char title and 90,000-char owner stored and read back intact. 120k-char description -> 413 text/html '<!DOCTYPE html>...'; UI create modal shows 'Failed to save bug.', stays open and keeps the 120,000 chars (no data loss). evidence/data/ui-05-oversize.png.",
+      "repro": "In the New Bug modal paste 120,000 characters into Description and Save.",
+      "fix": "Add maxLength on inputs (e.g. title 200, owner 64, description 10000) and the same limits in createBug/updateBug returning a JSON 400."
+    },
+    {
+      "id": "data-05",
+      "title": "Zero-width-only values (U+200B) pass the required-field check",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "06-create-bug: each field is required and cannot be left blank.",
+      "location": "backend/src/bugService.ts:60-68",
+      "evidence": "owner=\"\\u200B\" and description=\"\\u200B\" -> 201 and stored; String.prototype.trim does not remove U+200B, so the bug has visibly blank fields.",
+      "repro": "curl -s -XPOST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{\"title\":\"[data] zw\",\"severity\":\"low\",\"owner\":\"\\u200b\",\"description\":\"\\u200b\"}' -> 201.",
+      "fix": "Blank-check on s.replace(/[\\u200B-\\u200D\\u2060\\uFEFF]/g, '').trim() === ''."
+    },
+    {
+      "id": "data-06",
+      "title": "After a 404 on save (bug deleted elsewhere) the board keeps listing the deleted row",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Board reflects stored data; 09-edit-bug save/cancel semantics.",
+      "location": "frontend/src/EditBugModal.tsx:159",
+      "evidence": "Modal open, other client DELETE -> 204, UI Save -> PUT 404, alert 'Bug not found.', modal stays open, no resurrection in DB (good). After Escape the deleted row is still on the board until reload. evidence/data/ui-06-stale-edit.png.",
+      "repro": "Open a [data] bug's edit modal, DELETE it via curl, change Description and Save, press Escape; row still shown.",
+      "fix": "On res.status === 404 in handleSubmit/handleConfirmDelete, call onSaved() so the board refetches."
+    },
+    {
+      "id": "data-07",
+      "title": "Concurrent edits: last write wins with silent lost update",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "09-edit-bug Out of Scope: conflict detection (last write wins).",
+      "location": "backend/src/bugService.ts:119",
+      "evidence": "Two parallel PUTs -> both 200; DB holds PUT2's full row, no field mixing. Stale sequential write: client Y set description, client X saved its earlier copy -> Y's change lost. Matches spec; recorded as known risk.",
+      "repro": "evidence/data/api-roundtrip.mjs 'Concurrency' section.",
+      "fix": "Out of scope per spec; if wanted later, add a version column and WHERE id=? AND version=? returning 409."
+    },
+    {
+      "id": "data-08",
+      "title": "Persistence across a backend restart not demonstrated",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "tech-stack: single SQLite file at backend/data/buggyboard.db; 13-bug-status: state is stored in the database.",
+      "location": "backend/src/db.ts:14-15",
+      "evidence": "Restart forbidden this run. Code: file DB at backend/data/buggyboard.db, CREATE TABLE IF NOT EXISTS (no drop/reset), autocommit per statement. Read-only CLI: journal_mode=delete, synchronous=2 (FULL) on that connection; backend connection pragmas not observed. Every write this run was visible to an independent read-only connection immediately after the API response.",
+      "repro": "With a restart window: create a [data] bug, restart backend, GET /api/bugs/<id>.",
+      "fix": "Run the restart check in a window the lead grants."
+    }
+  ],
+  "notTested": [
+    "Persistence across backend restart (restart forbidden this run; see data-08)",
+    "Schema migration safety and backup/restore (no mechanism by design)",
+    "Lone surrogate / NUL input through the UI (API only)",
+    "Owner validity against users.json (spec does not require it)",
+    "Second browser session as vanny for concurrency (simulated with a parallel API client)"
+  ]
+}

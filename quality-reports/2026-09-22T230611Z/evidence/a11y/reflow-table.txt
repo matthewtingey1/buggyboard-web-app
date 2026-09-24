@@ -1,0 +1,6 @@
+chromium {"region":"17-303","cols":["ID@17-84","Severity\n↓@84-196","Title@196-281","Owner@281-380"],"regionFocusable":-1,"name":"Bug table"}
+chromium scrollLeft after focusing Owner header via Tab: 0
+chromium next Tab stop: BUTTON  Bug API endpoints work without scrollLeft 0
+firefox {"region":"17-303","cols":["ID@17-84","Severity\n↓@84-196","Title@196-281","Owner@281-380"],"regionFocusable":-1,"name":"Bug table"}
+firefox scrollLeft after focusing Owner header via Tab: 77
+firefox next Tab stop: BUTTON  Bug API endpoints work without scrollLeft 77

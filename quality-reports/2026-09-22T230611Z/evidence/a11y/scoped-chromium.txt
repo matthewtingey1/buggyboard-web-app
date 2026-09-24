@@ -1,0 +1,16 @@
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › tests/accessibility/accessibility.spec.ts:10:1 › a bug row opens with the keyboard
+[2/12] [chromium] › tests/accessibility/accessibility.spec.ts:20:1 › Escape closes the create modal
+[3/12] [chromium] › tests/accessibility/accessibility.spec.ts:28:1 › the search field is exposed as a text box
+[4/12] [chromium] › tests/accessibility/accessibility.spec.ts:33:1 › bug rows are exposed as table rows
+[5/12] [chromium] › tests/accessibility/accessibility.spec.ts:41:1 › the selected state filter is announced as pressed
+[6/12] [chromium] › tests/accessibility/accessibility.spec.ts:46:1 › Tab stays inside the create modal
+[7/12] [chromium] › tests/accessibility/accessibility.spec.ts:54:1 › closing the create modal returns focus to New Bug
+[8/12] [chromium] › tests/accessibility/accessibility.spec.ts:62:1 › Escape inside the Severity dropdown does not close the modal
+[9/12] [chromium] › tests/accessibility/accessibility.spec.ts:72:1 › the delete confirmation returns focus to Delete when cancelled
+[10/12] [chromium] › tests/accessibility/accessibility.spec.ts:84:1 › search results are announced in a status message
+[11/12] [chromium] › tests/accessibility/login.spec.ts:7:1 › a failed login puts focus back in Username and marks it invalid
+[12/12] [chromium] › tests/accessibility/login.spec.ts:17:1 › each route has its own page title
+  12 passed (7.5s)

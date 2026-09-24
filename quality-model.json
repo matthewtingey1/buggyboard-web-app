@@ -1,0 +1,1614 @@
+{
+  "meta": {
+    "app": "BuggyBoard",
+    "modelVersion": "1.0",
+    "authored": "2026-09-22",
+    "note": "Authored by the release lead from run 2026-09-22T205320Z and re-rated after runs 2026-09-22T222029Z and 2026-09-22T230611Z, plus the fixes made after each. The candidate now changes application code. Blocking items are the two product decisions (authentication, conflict handling); functional capabilities rest on the automated suite, the rest on a mix of guards and one-off agent measurements.",
+    "automation": {
+      "kind": "playwright",
+      "historyDir": "test-history",
+      "testDir": "tests",
+      "specPattern": "\\.spec\\.[jt]s$"
+    },
+    "sources": [
+      "specs/features/01-13",
+      "specs/product/vision.md",
+      "specs/design/theme.md",
+      "specs/engineering/api-conventions.md",
+      "backend/src",
+      "frontend/src",
+      "quality-reports/2026-09-22T205320Z/summary.md",
+      "quality-reports/2026-09-22T205320Z/findings/*.json",
+      ".claude/agents/*.md",
+      "tests/**/*.spec.ts",
+      "test-history/"
+    ],
+    "graphify": "No application graph exists; specs/features/ is the closest map of the surface."
+  },
+  "reconciliation": {
+    "contract-03": [
+      "data-02",
+      "security-09"
+    ],
+    "contract-02": [
+      "contract-01",
+      "security-06",
+      "exploratory-04"
+    ],
+    "security-10": [
+      "data-04",
+      "exploratory-05",
+      "contract-12"
+    ],
+    "data-06": [
+      "exploratory-02"
+    ],
+    "functional-04": [
+      "exploratory-09"
+    ],
+    "LEAD-01": [
+      "functional-02"
+    ],
+    "LEAD-02": [
+      "data-09",
+      "functional-05",
+      "functional-06"
+    ],
+    "LEAD-04": [
+      "functional-08",
+      "functional-09",
+      "functional-10",
+      "data-10",
+      "data-11",
+      "data-12",
+      "contract-04",
+      "contract-13",
+      "contract-14",
+      "contract-15",
+      "contract-16",
+      "security-14",
+      "security-15",
+      "security-17",
+      "exploratory-10",
+      "exploratory-12",
+      "exploratory-14",
+      "exploratory-15",
+      "exploratory-16",
+      "exploratory-18",
+      "exploratory-19",
+      "a11y-11",
+      "a11y-20",
+      "a11y-24",
+      "a11y-25",
+      "a11y-26"
+    ],
+    "LEAD-05": [
+      "a11y-19"
+    ]
+  },
+  "confidenceStates": {
+    "strong": {
+      "label": "Strong",
+      "glyph": "●",
+      "deficit": 0,
+      "definition": "Automated evidence that would have to be wrong for the capability to be broken."
+    },
+    "partial": {
+      "label": "Partial",
+      "glyph": "◐",
+      "deficit": 0.45,
+      "definition": "Automated evidence covers part of the behaviour; named parts are unguarded."
+    },
+    "weak": {
+      "label": "Weak",
+      "glyph": "○",
+      "deficit": 0.75,
+      "definition": "Measured once, by hand or by a one-off script; nothing guards it."
+    },
+    "unknown": {
+      "label": "Unknown",
+      "glyph": "?",
+      "deficit": 0.9,
+      "definition": "Looked at, but the evidence cannot tell either way."
+    },
+    "gap": {
+      "label": "Gap",
+      "glyph": "×",
+      "deficit": 1,
+      "definition": "Nobody looked."
+    }
+  },
+  "dimensions": [
+    {
+      "id": "functional",
+      "name": "Functional",
+      "owner": "functional-agent",
+      "slug": "functional",
+      "blurb": "Behaviour the product exists for, judged against specs/features Gherkin."
+    },
+    {
+      "id": "accessibility",
+      "name": "Accessibility",
+      "owner": "a11y-auditor",
+      "slug": "a11y",
+      "blurb": "The whole journey against WCAG 2.2 AA; the specs contain no accessibility requirement."
+    },
+    {
+      "id": "security",
+      "name": "Security",
+      "owner": "security-agent",
+      "slug": "security",
+      "blurb": "Hostile input, authentication, storage, dependencies. Owns authentication because there is no role model."
+    },
+    {
+      "id": "contract",
+      "name": "API contract",
+      "owner": "api-contract-agent",
+      "slug": "contract",
+      "blurb": "Status codes, response shapes and error bodies under /api."
+    },
+    {
+      "id": "data",
+      "name": "Data integrity",
+      "owner": "data-integrity-agent",
+      "slug": "data",
+      "blurb": "Whether a written bug reads back the way it was written, and survives."
+    },
+    {
+      "id": "exploratory",
+      "name": "Exploratory",
+      "owner": "exploratory-agent",
+      "slug": "exploratory",
+      "blurb": "Paths no spec names, chartered by risk."
+    },
+    {
+      "id": "authorization",
+      "name": "Authorization",
+      "owner": null,
+      "blurb": "Deliberately unowned: vision gives every user full access to every bug, so there is no role model to test."
+    },
+    {
+      "id": "theme",
+      "name": "Branding & theme",
+      "owner": null,
+      "blurb": "Unowned: theme.md colours and favicon art are visual judgements no agent made."
+    },
+    {
+      "id": "performance",
+      "name": "Performance",
+      "owner": null,
+      "blurb": "Unowned: no requirement and no measurement."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "login",
+      "dimension": "functional",
+      "name": "Login",
+      "sub": "specs 02-03",
+      "risk": 9,
+      "riskWhy": "Gate to every other workflow; failure blocks the whole product.",
+      "confidence": "strong",
+      "confidenceWhy": "Automated in tests/ and green in the archived run on Chromium, Firefox and WebKit, stable over repeated runs on 2026-09-22. Every spec 03 scenario has its own test, including each users.json account. Session forgery is a security finding, not a login-flow gap.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/login/valid-login.spec.ts",
+          "match": "valid login as"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/valid-login.spec.ts",
+          "match": "Enter on the"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/valid-login.spec.ts",
+          "match": "trimmed"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/invalid-login.spec.ts",
+          "match": "login with"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/redirects.spec.ts",
+          "match": "redirect"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/session.spec.ts",
+          "match": "persists"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/login-page.spec.ts",
+          "match": "login page displays"
+        }
+      ],
+      "requirements": [
+        "specs/features/02-user-accounts.md",
+        "specs/features/03-login.md"
+      ],
+      "findings": [],
+      "nextAction": "Keep it green; add a test when spec 03 changes."
+    },
+    {
+      "id": "logout",
+      "dimension": "functional",
+      "name": "Title bar & logout",
+      "sub": "specs 04-05",
+      "risk": 6,
+      "riskWhy": "Visible on every page; logout is the only session control.",
+      "confidence": "partial",
+      "confidenceWhy": "Automated in tests/ and green in the archived run on Chromium, Firefox and WebKit, stable over repeated runs on 2026-09-22. All four spec 05 scenarios and the title-bar layout are automated. Multi-tab logout (exploratory-03) is unspecified and untested, and the layout is checked by geometry, not by visual review.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/logout/logout.spec.ts",
+          "match": "logout"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/logout/logout.spec.ts",
+          "match": "Back"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/title-bar/layout.spec.ts",
+          "match": "title bar shows"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/title-bar/layout.spec.ts",
+          "match": "right-justified"
+        }
+      ],
+      "requirements": [
+        "specs/features/04-title-bar.md",
+        "specs/features/05-logout.md"
+      ],
+      "findings": [
+        "exploratory-03"
+      ],
+      "nextAction": "Decide multi-tab logout in spec 05, then automate it."
+    },
+    {
+      "id": "create-bug",
+      "dimension": "functional",
+      "name": "Create bug",
+      "sub": "spec 06",
+      "risk": 9,
+      "riskWhy": "Core write path; every other workflow depends on bugs existing.",
+      "confidence": "strong",
+      "confidenceWhy": "Every spec 06 scenario and every create-plan row is automated on three engines. Run 2026-09-22T222029Z found no create defect the suite misses; the two it knows (double submit, one-frame stale draft) are pinned with test.fail.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug-plan.spec.ts",
+          "match": "Enter in Title"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug-plan.spec.ts",
+          "match": "keeps the draft"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug-plan.spec.ts",
+          "match": "double submit"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug.spec.ts",
+          "match": "saving a complete bug"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug.spec.ts",
+          "match": "closing with"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug.spec.ts",
+          "match": "blocks saving"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug.spec.ts",
+          "match": "owner defaults"
+        }
+      ],
+      "requirements": [
+        "specs/features/06-create-bug.md"
+      ],
+      "findings": [
+        "functional-04",
+        "exploratory-06"
+      ],
+      "nextAction": "Fix exploratory-06 and functional-04, then drop their test.fail markers."
+    },
+    {
+      "id": "board",
+      "dimension": "functional",
+      "name": "Board & severity display",
+      "sub": "specs 07-08",
+      "risk": 8,
+      "riskWhy": "The main screen; wrong rows or colours mislead triage.",
+      "confidence": "partial",
+      "confidenceWhy": "Automated in tests/ and green in the archived run on Chromium, Firefox and WebKit, stable over repeated runs on 2026-09-22. Columns, rows, upper-case severity and badge colours are automated. The empty-board scenario needs an isolated database (functional-03).",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/bug-board/bug-board.spec.ts",
+          "match": "listed once"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/bug-board/bug-board.spec.ts",
+          "match": "columns are ordered"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/board-severity/severity-colors.spec.ts",
+          "match": "badge uses its colour"
+        }
+      ],
+      "requirements": [
+        "specs/features/07-bug-board.md",
+        "specs/features/08-board-severity.md"
+      ],
+      "findings": [
+        "functional-03"
+      ],
+      "nextAction": "Give the suite an isolated database for the empty-board scenario."
+    },
+    {
+      "id": "edit-bug",
+      "dimension": "functional",
+      "name": "Edit bug",
+      "sub": "spec 09",
+      "risk": 8,
+      "riskWhy": "Only way to change or close a bug; silent data changes are high impact.",
+      "confidence": "partial",
+      "confidenceWhy": "Every spec 09 scenario and every edit-plan row is automated; data-01 is pinned with test.fail. Concurrent edits stay unguarded pending the spec 09 decision (C1), and slow-network row swaps (exploratory-11) are measured once.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug-plan.spec.ts",
+          "match": "Enter in Title"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug-plan.spec.ts",
+          "match": "multi-line title"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug-plan.spec.ts",
+          "match": "deleted elsewhere"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug.spec.ts",
+          "match": "saving persists"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug.spec.ts",
+          "match": "discards the edits"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug.spec.ts",
+          "match": "Save is disabled"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/edit-bug/edit-bug.spec.ts",
+          "match": "read-only"
+        }
+      ],
+      "requirements": [
+        "specs/features/09-edit-bug.md"
+      ],
+      "findings": [],
+      "nextAction": "Add a regression test with data-01 when it is fixed."
+    },
+    {
+      "id": "sort",
+      "dimension": "functional",
+      "name": "Sort columns",
+      "sub": "spec 10",
+      "risk": 5,
+      "riskWhy": "Convenience; a wrong order is visible and recoverable.",
+      "confidence": "strong",
+      "confidenceWhy": "Automated in tests/ and green in the archived run on Chromium, Firefox and WebKit, stable over repeated runs on 2026-09-22. Every spec 10 scenario is automated, including a whole-board order check per column and direction.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/sort/sort.spec.ts",
+          "match": "sorts the whole board"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/sort/sort.spec.ts",
+          "match": "Severity ascending"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/sort/sort.spec.ts",
+          "match": "default sort"
+        }
+      ],
+      "requirements": [
+        "specs/features/10-sort-board-columns.md"
+      ],
+      "findings": [],
+      "nextAction": "Keep it green."
+    },
+    {
+      "id": "search",
+      "dimension": "functional",
+      "name": "Search board",
+      "sub": "spec 11",
+      "risk": 7,
+      "riskWhy": "Primary way to find a bug once the board grows.",
+      "confidence": "strong",
+      "confidenceWhy": "Run 2026-09-22T230611Z: functional-01 fixed and its regression (functional-10) fixed after the run. Spec 11 punctuation both ways, case, whitespace, clearing and sort are automated on three engines. Accent folding (exploratory-13) is outside the spec.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/search/search.spec.ts",
+          "match": "log in"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/search/search.spec.ts",
+          "match": "log-in fails"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/search/search.spec.ts",
+          "match": "matches a title containing"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/search/search.spec.ts",
+          "match": "ignores case"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/search/search.spec.ts",
+          "match": "clears the search"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/search/search.spec.ts",
+          "match": "no matches"
+        }
+      ],
+      "requirements": [
+        "specs/features/11-search-board.md"
+      ],
+      "findings": [
+        "functional-01",
+        "exploratory-13",
+        "functional-10"
+      ],
+      "nextAction": "Fix functional-01 and remove test.fail from the punctuation test."
+    },
+    {
+      "id": "delete-bug",
+      "dimension": "functional",
+      "name": "Delete bug",
+      "sub": "spec 12",
+      "risk": 7,
+      "riskWhy": "Irreversible; a wrong delete loses data.",
+      "confidence": "strong",
+      "confidenceWhy": "Every spec 12 scenario and every delete-plan row is automated; the confirmation focus (a11y-07) and the dead row after a remote delete (data-06) are pinned with test.fail.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/delete-bug/delete-bug-plan.spec.ts",
+          "match": "Escape closes only"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/delete-bug/delete-bug-plan.spec.ts",
+          "match": "Closed view"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/delete-bug/delete-bug.spec.ts",
+          "match": "confirming removes"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/delete-bug/delete-bug.spec.ts",
+          "match": "cancelling the confirmation"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/delete-bug/delete-bug.spec.ts",
+          "match": "asks for confirmation"
+        }
+      ],
+      "requirements": [
+        "specs/features/12-delete-bug.md"
+      ],
+      "findings": [
+        "data-06"
+      ],
+      "nextAction": "Keep it green."
+    },
+    {
+      "id": "state",
+      "dimension": "functional",
+      "name": "Open/Closed state",
+      "sub": "spec 13",
+      "risk": 7,
+      "riskWhy": "Closing is how work is finished; a wrong filter hides bugs.",
+      "confidence": "partial",
+      "confidenceWhy": "Automated in tests/ and green in the archived run on Chromium, Firefox and WebKit, stable over repeated runs on 2026-09-22. Every spec 13 scenario is automated. The all-open precondition of the no-bugs-matched scenario is approximated with a search on a shared database.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/bug-status/bug-status.spec.ts",
+          "match": "is Open"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/bug-status/bug-status.spec.ts",
+          "match": "selecting Closed"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/bug-status/bug-status.spec.ts",
+          "match": "apply together"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/bug-status/bug-status.spec.ts",
+          "match": "No bugs matched"
+        }
+      ],
+      "requirements": [
+        "specs/features/13-bug-status.md"
+      ],
+      "findings": [],
+      "nextAction": "Run the exact scenario once the suite has an isolated database."
+    },
+    {
+      "id": "regression-suite",
+      "dimension": "functional",
+      "name": "Product regression suite",
+      "sub": "tests/",
+      "risk": 9,
+      "riskWhy": "Without it every other capability can regress unseen.",
+      "confidence": "partial",
+      "confidenceWhy": "tests/ holds the functional suite on three engines, plan-generated tests for create/edit/delete, and API, data, security and accessibility guards. Run 2026-09-22T222029Z found four defects in the suite itself (LEAD-02), all fixed. Contrast, reflow, announcements, timing and restart persistence remain unguarded.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/seed.spec.ts",
+          "match": "seed"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/bugs.spec.ts",
+          "match": "POST /api/bugs"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/data/round-trip.spec.ts",
+          "match": "reads back"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/valid-login.spec.ts",
+          "match": "valid login as"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/sort/sort.spec.ts",
+          "match": "sorts the whole board"
+        },
+        {
+          "kind": "file",
+          "path": "tests/fixtures/index.ts"
+        },
+        {
+          "kind": "file",
+          "path": "tests/reporters/archive-reporter.ts"
+        }
+      ],
+      "requirements": [
+        "specs/engineering/test-automation-patterns.md"
+      ],
+      "findings": [
+        "LEAD-01",
+        "LEAD-02",
+        "LEAD-03"
+      ],
+      "nextAction": "Promote the contract probe and the data round-trip into API tests."
+    },
+    {
+      "id": "cross-browser",
+      "dimension": "functional",
+      "name": "Firefox & WebKit",
+      "sub": "configured, unexercised",
+      "risk": 5,
+      "riskWhy": "Configured projects in playwright.config.ts but no agent ran them against the product.",
+      "confidence": "partial",
+      "confidenceWhy": "The functional suite passes on Chromium, Firefox and WebKit in the archived run. Every agent check (a11y, security, contract, data, exploratory) ran on Chromium only.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/sort/sort.spec.ts",
+          "match": "sorts the whole board"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/login/valid-login.spec.ts",
+          "match": "valid login as"
+        }
+      ],
+      "requirements": [],
+      "findings": [],
+      "nextAction": "Run the keyboard walk in Firefox and WebKit."
+    },
+    {
+      "id": "a11y-keyboard",
+      "dimension": "accessibility",
+      "name": "Keyboard & focus",
+      "sub": "modals, focus return",
+      "risk": 8,
+      "riskWhy": "Keyboard users complete the journey but lose their place after most actions.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: 19 of 23 a11y findings fixed; focus trap, focus return, confirmation focus and focus after a failed save are guarded in Chromium. Firefox was walked by hand; Safari and a headed dropdown check (LEAD-05) remain.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "first focus on Cancel"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "failed save"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "keyboard"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "Tab stays inside"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "a11y"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/a11y/keyboard-walk.cjs"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/a11y/keyboard-path.log"
+        }
+      ],
+      "requirements": [
+        "WCAG 2.2 AA 2.1.1, 2.4.3"
+      ],
+      "findings": [
+        "a11y-05",
+        "a11y-06",
+        "a11y-07",
+        "a11y-14",
+        "a11y-19",
+        "a11y-23",
+        "LEAD-05",
+        "a11y-24"
+      ],
+      "nextAction": "Trap focus in modals and return it to the trigger."
+    },
+    {
+      "id": "a11y-semantics",
+      "dimension": "accessibility",
+      "name": "Names, roles, states",
+      "sub": "search, rows, toggle",
+      "risk": 8,
+      "riskWhy": "Screen-reader users get the wrong control types.",
+      "confidence": "partial",
+      "confidenceWhy": "Guarded in tests/ on 2026-09-22. Known defects are pinned with test.fail, so the suite stays green today and reports an unexpected pass when each one is fixed. The three wrong roles and states are pinned by role queries in Chromium. No axe scan and no screen reader.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "exposed as"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "announced as pressed"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "a11y"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/a11y/aria"
+        }
+      ],
+      "requirements": [
+        "WCAG 2.2 AA 1.3.1, 4.1.2"
+      ],
+      "findings": [
+        "a11y-02",
+        "a11y-03",
+        "a11y-04",
+        "a11y-16",
+        "a11y-18",
+        "a11y-20"
+      ],
+      "nextAction": "Fix the three roles, then add axe-core to the suite."
+    },
+    {
+      "id": "a11y-contrast",
+      "dimension": "accessibility",
+      "name": "Contrast",
+      "sub": "badges, subtitle, focus ring",
+      "risk": 6,
+      "riskWhy": "Low-vision users cannot read severity, the core triage signal.",
+      "confidence": "weak",
+      "confidenceWhy": "Measured once by the agent in run 2026-09-22T205320Z (headless Chromium). Nothing in tests/ asserts it, so it can regress silently. Computed from styles, 22 pairs.",
+      "evidence": [
+        {
+          "kind": "agent-report",
+          "slug": "a11y"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.cjs"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/a11y/contrast.json"
+        },
+        {
+          "kind": "manual",
+          "note": "measured once in run 2026-09-22T205320Z; scripts live in the run folder, not tests/"
+        }
+      ],
+      "requirements": [
+        "WCAG 2.2 AA 1.4.3, 1.4.11"
+      ],
+      "findings": [
+        "a11y-08",
+        "a11y-09",
+        "a11y-10",
+        "a11y-11"
+      ],
+      "nextAction": "Darken badge text and primary-derived borders."
+    },
+    {
+      "id": "a11y-reflow",
+      "dimension": "accessibility",
+      "name": "Reflow & targets",
+      "sub": "320 px, target size",
+      "risk": 5,
+      "riskWhy": "Zoom users lose Logout off-screen.",
+      "confidence": "weak",
+      "confidenceWhy": "Run 2026-09-22T230611Z: the header reflows and the table region is keyboard-scrollable (a11y-25 fixed after the run), measured by hand; nothing guards reflow.",
+      "evidence": [
+        {
+          "kind": "agent-report",
+          "slug": "a11y"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/a11y/screenshots"
+        },
+        {
+          "kind": "manual",
+          "note": "measured once in run 2026-09-22T205320Z; scripts live in the run folder, not tests/"
+        }
+      ],
+      "requirements": [
+        "WCAG 2.2 AA 1.4.10, 2.5.8"
+      ],
+      "findings": [
+        "a11y-12",
+        "a11y-13",
+        "a11y-15",
+        "a11y-21",
+        "a11y-25"
+      ],
+      "nextAction": "Let the title bar wrap below 400 px."
+    },
+    {
+      "id": "a11y-sr",
+      "dimension": "accessibility",
+      "name": "Screen-reader announcements",
+      "sub": "VoiceOver / NVDA",
+      "risk": 7,
+      "riskWhy": "Status of sort, filter and save is invisible without announcements.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: a status region announces results and actions, and it is guarded; no real screen reader has heard it.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/accessibility/accessibility.spec.ts",
+          "match": "status message"
+        },
+        {
+          "kind": "manual",
+          "note": "needs VoiceOver and NVDA by hand"
+        }
+      ],
+      "requirements": [
+        "WCAG 2.2 AA 4.1.3"
+      ],
+      "findings": [
+        "a11y-17",
+        "a11y-01",
+        "a11y-22",
+        "a11y-26"
+      ],
+      "nextAction": "Run a VoiceOver pass over the full journey."
+    },
+    {
+      "id": "api-auth",
+      "dimension": "security",
+      "name": "API authentication",
+      "sub": "/api/bugs",
+      "risk": 10,
+      "riskWhy": "Anyone who can reach the port can read, change and delete every bug.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: still anonymous, and a product decision. Exposure is narrowed by the loopback bind, Host check and 415. Guards stay as test.fail.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/api/auth.spec.ts",
+          "match": "without a session"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "security"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/unauth-probe-1.txt"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/unauth-probe-2.txt"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/login-probe.txt"
+        }
+      ],
+      "requirements": [
+        "specs/features/03-login.md",
+        "OWASP ASVS 4.1.1"
+      ],
+      "findings": [
+        "security-01",
+        "security-05",
+        "security-11"
+      ],
+      "nextAction": "Add server-side session checks to every /api/bugs route."
+    },
+    {
+      "id": "session",
+      "dimension": "security",
+      "name": "Client session & logout",
+      "sub": "localStorage",
+      "risk": 8,
+      "riskWhy": "A forged or replayed value opens the board.",
+      "confidence": "partial",
+      "confidenceWhy": "Guarded in tests/ on 2026-09-22. Known defects are pinned with test.fail, so the suite stays green today and reports an unexpected pass when each one is fixed. A forged session for a non-existent user is asserted. Logout replay (security-03) is not automated.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/security/security.spec.ts",
+          "match": "forged session"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "security"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/forged-session-board.png"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/logout-replay-board.png"
+        }
+      ],
+      "requirements": [
+        "specs/features/05-logout.md"
+      ],
+      "findings": [
+        "security-02",
+        "security-03"
+      ],
+      "nextAction": "Replace the localStorage flag with a server-issued session."
+    },
+    {
+      "id": "hostile-input",
+      "dimension": "security",
+      "name": "Hostile input",
+      "sub": "XSS, SQL, id parsing, size",
+      "risk": 8,
+      "riskWhy": "Bug fields are rendered to every user.",
+      "confidence": "partial",
+      "confidenceWhy": "Guarded in tests/ on 2026-09-22. Known defects are pinned with test.fail, so the suite stays green today and reports an unexpected pass when each one is fixed. Script payloads in every rendered field (board, edit modal, delete confirmation) and SQL metacharacters round-trip as text. Field length limits are unguarded.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/security/security.spec.ts",
+          "match": "renders as text"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/data/round-trip.spec.ts",
+          "match": "SQL metacharacters"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "security"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/injection-probe.txt"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/xss-board.png"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/resource-probe.txt"
+        }
+      ],
+      "requirements": [
+        "OWASP ASVS 5.1"
+      ],
+      "findings": [
+        "security-10"
+      ],
+      "nextAction": "Add an XSS regression test per rendered field."
+    },
+    {
+      "id": "credentials",
+      "dimension": "security",
+      "name": "Credential storage",
+      "sub": "users.json",
+      "risk": 6,
+      "riskWhy": "Plaintext passwords in a tracked file; the diff adds one.",
+      "confidence": "weak",
+      "confidenceWhy": "Run 2026-09-22T230611Z: the personal credential is in no commit (security-04 fixed) and the login limiter is guarded, including case variants. Passwords are still plaintext (security-13), and the pushed branch history still carries a home path (security-12).",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/api/auth.spec.ts",
+          "match": "case variant"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/auth.spec.ts",
+          "match": "429"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "security"
+        },
+        {
+          "kind": "manual",
+          "note": "measured once in run 2026-09-22T205320Z; scripts live in the run folder, not tests/"
+        }
+      ],
+      "requirements": [
+        "OWASP ASVS 2.4.1"
+      ],
+      "findings": [
+        "security-04",
+        "security-12",
+        "security-13",
+        "security-14",
+        "security-15"
+      ],
+      "nextAction": "Hash passwords and keep real credentials out of git."
+    },
+    {
+      "id": "hardening",
+      "dimension": "security",
+      "name": "Headers, binding, dependencies",
+      "sub": "deployment posture",
+      "risk": 5,
+      "riskWhy": "Dev server posture; production may differ.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: loopback bind, X-Powered-By removed, security headers and the Host check (security-17) are guarded. The limiter is per-process (security-16); production headers are unexamined.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/api/auth.spec.ts",
+          "match": "foreign Host header"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/auth.spec.ts",
+          "match": "security headers"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/auth.spec.ts",
+          "match": "advertise the server framework"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "security"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/listeners.txt"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/security/npm-audit.json"
+        }
+      ],
+      "requirements": [
+        "OWASP A05"
+      ],
+      "findings": [
+        "security-07",
+        "security-08",
+        "security-16",
+        "security-17"
+      ],
+      "nextAction": "Bind the API to loopback and drop X-Powered-By."
+    },
+    {
+      "id": "error-bodies",
+      "dimension": "contract",
+      "name": "Status codes & error bodies",
+      "sub": "4xx/5xx shape",
+      "risk": 7,
+      "riskWhy": "Any non-browser client or test hits HTML stack traces.",
+      "confidence": "strong",
+      "confidenceWhy": "Run 2026-09-22T230611Z: every error path returns JSON without a stack trace; 404, 405, 413, 415, invalid_type and wrong-method-before-body-check are each guarded in tests/api.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/api/error-bodies.spec.ts",
+          "match": "405"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/error-bodies.spec.ts",
+          "match": "415"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/error-bodies.spec.ts",
+          "match": "bare /api"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/bugs.spec.ts",
+          "match": "returns 400 blank_"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/error-bodies.spec.ts",
+          "match": "JSON"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "contract"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/contract/probe.sh"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/contract/probe-results.tsv"
+        }
+      ],
+      "requirements": [
+        "specs/engineering/api-conventions.md"
+      ],
+      "findings": [
+        "contract-02",
+        "contract-04",
+        "contract-05",
+        "contract-06",
+        "contract-09",
+        "contract-11"
+      ],
+      "nextAction": "Add a JSON error middleware and pin each status with an API test."
+    },
+    {
+      "id": "id-parsing",
+      "dimension": "contract",
+      "name": "Bug id parsing",
+      "sub": "/api/bugs/:id",
+      "risk": 6,
+      "riskWhy": "A malformed id deletes a real bug.",
+      "confidence": "strong",
+      "confidenceWhy": "Run 2026-09-22T230611Z: GET, PUT and DELETE reject malformed ids with invalid_id, and a malformed PUT leaves the bug unchanged; all guarded.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/api/id-parsing.spec.ts",
+          "match": "PUT /api/bugs/<id>abc"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/id-parsing.spec.ts",
+          "match": "invalid_id"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/api/id-parsing.spec.ts",
+          "match": "does not delete"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "contract"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/contract/probe-results.tsv"
+        }
+      ],
+      "requirements": [
+        "specs/features/06-create-bug.md"
+      ],
+      "findings": [
+        "contract-03"
+      ],
+      "nextAction": "Reject ids not matching /^\\d+$/ with 400."
+    },
+    {
+      "id": "login-endpoint",
+      "dimension": "contract",
+      "name": "Login endpoint",
+      "sub": "POST /api/login",
+      "risk": 7,
+      "riskWhy": "Non-string input crashes to 500.",
+      "confidence": "strong",
+      "confidenceWhy": "Guarded in tests/ on 2026-09-22. Known defects are pinned with test.fail, so the suite stays green today and reports an unexpected pass when each one is fixed. Every documented success and rejection case is asserted, for each users.json account. Whitespace-only passwords are left out pending a product decision (contract-07).",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/api/login.spec.ts",
+          "match": "POST /api/login"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "contract"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/contract/500-login-username-number.html"
+        }
+      ],
+      "requirements": [
+        "specs/features/03-login.md"
+      ],
+      "findings": [
+        "contract-07"
+      ],
+      "nextAction": "Type-check login fields before trimming."
+    },
+    {
+      "id": "contract-doc",
+      "dimension": "contract",
+      "name": "Documented API contract",
+      "sub": "no spec",
+      "risk": 6,
+      "riskWhy": "Nothing to judge the API against beyond the /api prefix.",
+      "confidence": "gap",
+      "confidenceWhy": "api-conventions.md documents only the prefix; no API tests exist.",
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "specs/engineering/api-conventions.md"
+        }
+      ],
+      "requirements": [
+        "specs/engineering/api-conventions.md"
+      ],
+      "findings": [
+        "contract-08",
+        "contract-10"
+      ],
+      "nextAction": "Write the endpoint contract and one test per status."
+    },
+    {
+      "id": "round-trip",
+      "dimension": "data",
+      "name": "Field round-trip",
+      "sub": "title, owner, description",
+      "risk": 8,
+      "riskWhy": "Silent alteration of stored text.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: stored rows are returned, one-line titles and invisible-only blanks are enforced and guarded; 8 input classes round-trip. Lone surrogates on the UI path and length limits (security-10) remain.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/data/round-trip.spec.ts",
+          "match": "line breaks in a title"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/data/round-trip.spec.ts",
+          "match": "reads back unchanged"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/data/round-trip.spec.ts",
+          "match": "not reused"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "data"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/data/api-roundtrip.mjs"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/data/api-roundtrip.log"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/data/ui-roundtrip.log"
+        }
+      ],
+      "requirements": [
+        "specs/features/06-create-bug.md",
+        "specs/features/09-edit-bug.md"
+      ],
+      "findings": [
+        "data-01",
+        "data-03",
+        "data-05",
+        "data-11"
+      ],
+      "nextAction": "Keep api-roundtrip.mjs as an API test in tests/."
+    },
+    {
+      "id": "concurrency",
+      "dimension": "data",
+      "name": "Concurrent edits",
+      "sub": "last write wins",
+      "risk": 7,
+      "riskWhy": "Two users editing one bug lose a change silently.",
+      "confidence": "weak",
+      "confidenceWhy": "Measured once by the agent in run 2026-09-22T205320Z (headless Chromium). Nothing in tests/ asserts it, so it can regress silently. Data reads it as spec-sanctioned hardening; exploratory reads it as a high lost update. The spec 09 owner decides.",
+      "evidence": [
+        {
+          "kind": "agent-report",
+          "slug": "data"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/data/ui-06-stale-edit.png"
+        },
+        {
+          "kind": "manual",
+          "note": "measured once in run 2026-09-22T205320Z; scripts live in the run folder, not tests/"
+        }
+      ],
+      "requirements": [
+        "specs/features/09-edit-bug.md"
+      ],
+      "findings": [
+        "exploratory-01",
+        "data-07",
+        "data-06"
+      ],
+      "nextAction": "Decide whether conflict detection stays out of scope."
+    },
+    {
+      "id": "persistence",
+      "dimension": "data",
+      "name": "Persistence across restart",
+      "sub": "SQLite file",
+      "risk": 8,
+      "riskWhy": "Losing the database loses every bug.",
+      "confidence": "weak",
+      "confidenceWhy": "Run 2026-09-22T230611Z: rows 1-3 and the id sequence survived several backend restarts during the day's code edits (observed by the lead and the data agent). No controlled restart test exists, so nothing guards it.",
+      "evidence": [
+        {
+          "kind": "file",
+          "path": "backend/src/db.ts"
+        }
+      ],
+      "requirements": [
+        "specs/engineering/tech-stack.md"
+      ],
+      "findings": [
+        "data-08"
+      ],
+      "nextAction": "Run a restart check in an isolated environment."
+    },
+    {
+      "id": "multi-session",
+      "dimension": "exploratory",
+      "name": "Multi-user & multi-tab",
+      "sub": "two sessions, one bug",
+      "risk": 7,
+      "riskWhy": "Every user edits every bug, so collisions are expected.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: logout and user switch follow across tabs and are guarded; the lost update on concurrent edit (exploratory-01) is a spec 09 decision.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/resilience/resilience.spec.ts",
+          "match": "logging out in one tab"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "exploratory"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/exploratory/explore.mjs"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/exploratory/session-logs-merged.json"
+        },
+        {
+          "kind": "manual",
+          "note": "measured once in run 2026-09-22T205320Z; scripts live in the run folder, not tests/"
+        }
+      ],
+      "requirements": [
+        "specs/product/vision.md"
+      ],
+      "findings": [
+        "exploratory-01",
+        "exploratory-03",
+        "exploratory-17"
+      ],
+      "nextAction": "Turn charters C1-C3 into atomic tests."
+    },
+    {
+      "id": "navigation",
+      "dimension": "exploratory",
+      "name": "Navigation & deep links",
+      "sub": "Back, reload, URLs",
+      "risk": 4,
+      "riskWhy": "Drafts lost on Back; no shareable bug URL.",
+      "confidence": "weak",
+      "confidenceWhy": "Measured once by the agent in run 2026-09-22T205320Z (headless Chromium). Nothing in tests/ asserts it, so it can regress silently.",
+      "evidence": [
+        {
+          "kind": "agent-report",
+          "slug": "exploratory"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T205320Z/evidence/exploratory/screenshots"
+        },
+        {
+          "kind": "manual",
+          "note": "measured once in run 2026-09-22T205320Z; scripts live in the run folder, not tests/"
+        }
+      ],
+      "requirements": [
+        "specs/product/vision.md"
+      ],
+      "findings": [
+        "exploratory-08"
+      ],
+      "nextAction": "Decide whether a bug view route is in scope."
+    },
+    {
+      "id": "owner-field",
+      "dimension": "exploratory",
+      "name": "Owner values",
+      "sub": "free text",
+      "risk": 3,
+      "riskWhy": "Case variants split ownership.",
+      "confidence": "gap",
+      "confidenceWhy": "No spec says whether owner must be a real user.",
+      "evidence": [],
+      "requirements": [
+        "specs/features/06-create-bug.md"
+      ],
+      "findings": [
+        "exploratory-07"
+      ],
+      "nextAction": "Specify owner validation."
+    },
+    {
+      "id": "roles",
+      "dimension": "authorization",
+      "name": "Per-user permissions",
+      "sub": "no role model",
+      "risk": 2,
+      "riskWhy": "Vision grants every user full access; risk is low until that changes.",
+      "confidence": "gap",
+      "confidenceWhy": "Deliberately unowned; nothing tested.",
+      "evidence": [],
+      "requirements": [
+        "specs/product/vision.md"
+      ],
+      "findings": [],
+      "nextAction": "Revisit only if roles enter the vision."
+    },
+    {
+      "id": "theme-conformance",
+      "dimension": "theme",
+      "name": "Beetle theme & favicon",
+      "sub": "theme.md",
+      "risk": 3,
+      "riskWhy": "Cosmetic; contrast failures are owned by accessibility.",
+      "confidence": "partial",
+      "confidenceWhy": "Severity colour tokens and badge styling are asserted in tests/. The favicon art and overall palette conformance have not been judged by anyone.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/board-severity/severity-colors.spec.ts",
+          "match": "colour tokens match the theme"
+        },
+        {
+          "kind": "file",
+          "path": "specs/design/theme.md"
+        }
+      ],
+      "requirements": [
+        "specs/design/theme.md"
+      ],
+      "findings": [],
+      "nextAction": "Visual review against theme.md."
+    },
+    {
+      "id": "board-scale",
+      "dimension": "performance",
+      "name": "Board at scale",
+      "sub": "filter-as-you-type",
+      "risk": 3,
+      "riskWhy": "Small app, but search filters on every keystroke.",
+      "confidence": "gap",
+      "confidenceWhy": "Not measured; exploratory created 200 bulk bugs but timed nothing.",
+      "evidence": [],
+      "requirements": [
+        "specs/features/11-search-board.md"
+      ],
+      "findings": [],
+      "nextAction": "Time search with 1,000 bugs."
+    },
+    {
+      "id": "timing",
+      "dimension": "exploratory",
+      "name": "Late and failed responses",
+      "sub": "slow network, out-of-order replies",
+      "risk": 6,
+      "riskWhy": "Every save, open and refresh is async; a late or failed reply acts on whatever modal is open or tells the user there are no bugs.",
+      "confidence": "partial",
+      "confidenceWhy": "Run 2026-09-22T230611Z: stale row opens, New Bug over a pending open, ordered refreshes, the header Close during save and visible open errors are fixed; all but ordered refreshes are guarded in tests/resilience.",
+      "evidence": [
+        {
+          "kind": "automation",
+          "spec": "tests/resilience/resilience.spec.ts",
+          "match": "cancels a row open"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/resilience/resilience.spec.ts",
+          "match": "Close button is disabled"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/resilience/resilience.spec.ts",
+          "match": "deleted elsewhere says so"
+        },
+        {
+          "kind": "agent-report",
+          "slug": "exploratory"
+        },
+        {
+          "kind": "automation",
+          "spec": "tests/create-bug/create-bug-plan.spec.ts",
+          "match": "Save shows progress"
+        },
+        {
+          "kind": "file",
+          "path": "quality-reports/2026-09-22T222029Z/exploratory.md"
+        }
+      ],
+      "requirements": [
+        "specs/features/06-create-bug.md",
+        "specs/features/09-edit-bug.md"
+      ],
+      "findings": [
+        "exploratory-10",
+        "exploratory-11",
+        "exploratory-12",
+        "exploratory-14",
+        "exploratory-15"
+      ],
+      "nextAction": "Ignore stale responses (abort or sequence-check fetches) and show an error state on the board."
+    }
+  ],
+  "findings": [
+    {
+      "id": "LEAD-01",
+      "title": "No feature in specs/features/ had automated product coverage",
+      "dimension": "functional",
+      "severity": "medium",
+      "status": "fixed",
+      "detail": "tests/ held only example.spec.ts against playwright.dev. Replaced on 2026-09-22 by a POM suite covering specs 01-13 on three engines.",
+      "requirement": "specs/engineering/test-automation-patterns.md",
+      "source": "tests/fixtures/index.ts"
+    },
+    {
+      "id": "LEAD-02",
+      "title": "The e2e suite leaked rows, used ambiguous locators and under-asserted two tests",
+      "dimension": "functional",
+      "severity": "medium",
+      "status": "fixed",
+      "detail": "Found in run 2026-09-22T222029Z: zero-width-title rows skipped by cleanup (6 deleted), bugs created before track() could leak, New Bug and Logout locators matched bug rows (20 tests failed when such a title existed), and two tests asserted less than their titles. Fixed in tests/ the same day; the full suite re-ran green with no residue.",
+      "requirement": "specs/engineering/test-automation-patterns.md (test independence)",
+      "source": "tests/fixtures/bug-api.ts"
+    },
+    {
+      "id": "LEAD-03",
+      "title": "Test-plan gap rows were not guarded",
+      "dimension": "functional",
+      "severity": "low",
+      "status": "fixed",
+      "detail": "Every gap row in specs/testing/ is now a test generated with /playwright-cli; known defects among them are pinned with test.fail.",
+      "requirement": "specs/testing/*.md",
+      "source": "specs/testing/create-bug-test-plan.md"
+    },
+    {
+      "id": "LEAD-04",
+      "title": "Findings from run 3 fixed after the run, including regressions the first fixes introduced",
+      "dimension": "functional",
+      "severity": "high",
+      "status": "fixed",
+      "detail": "26 findings fixed on 2026-09-22 after run 2026-09-22T230611Z: the lockout DoS (security-14/exploratory-16), the Escape-on-dropdown spec break (functional-08), the search regression (functional-10), invisible-character and U+2028 rules, 405/404 before 415, invalid_type, Retry-After, Host check, the header Close during save, visible row-open errors, ordered refreshes, New Bug cancelling a pending open, held Enter, drag-select, and five a11y items. Each has a guard in tests/ that fails with the fix disabled. Verified by the lead only; the next run should re-confirm them independently.",
+      "requirement": "specs/features/06, 09, 11; OWASP ASVS 2.2.1; WCAG 2.2 AA",
+      "source": "quality-reports/2026-09-22T230611Z/summary.md"
+    },
+    {
+      "id": "LEAD-05",
+      "title": "Escape inside an open native dropdown may close the whole modal (a11y-19 reopened)",
+      "dimension": "accessibility",
+      "severity": "medium",
+      "status": "potential",
+      "detail": "The Escape-in-select exception was removed because specs 06 and 09 say Escape acts like Cancel (functional-08). Whether a native dropdown list that is actually open swallows Escape needs a headed-browser check; the rule itself is a decision for the spec owner.",
+      "requirement": "specs/features/06-create-bug.md, 09-edit-bug.md; WCAG 2.1.2",
+      "source": "quality-reports/2026-09-22T230611Z/summary.md"
+    },
+    {
+      "id": "LEAD-06",
+      "title": "Invalid-login tests shared one unknown username and tripped the new rate limit",
+      "dimension": "functional",
+      "severity": "medium",
+      "status": "fixed",
+      "detail": "The fixed username never logged in successfully, so its failures piled up across runs until the lock engaged and the first lead run of 2026-09-22T230611Z failed. Each test now uses a unique username.",
+      "requirement": "specs/engineering/test-automation-patterns.md (test independence)",
+      "source": "quality-reports/2026-09-22T230611Z/evidence/lead/full-suite-first-attempt.txt"
+    }
+  ]
+}

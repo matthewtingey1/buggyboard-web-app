@@ -1,4 +1,6 @@
-import { useState, useEffect, FormEvent, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, FormEvent, useRef } from "react";
+import { useDialogFocus } from "./useDialogFocus";
+import { isBlank } from "./text";
 
 export type Severity = "high" | "mid" | "low";
 
@@ -16,7 +18,9 @@ export interface Bug {
 interface EditBugModalProps {
   bug: Bug | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (outcome: "saved" | "deleted") => void;
+  /** Called when the API says the bug no longer exists, so the board can drop the stale row. */
+  onGone: () => void;
 }
 
 const SEVERITIES: Severity[] = ["high", "mid", "low"];
@@ -41,7 +45,7 @@ function toLowerSeverity(s: string): Severity {
   return "mid";
 }
 
-export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
+export function EditBugModal({ bug, onClose, onSaved, onGone }: EditBugModalProps) {
   const [title, setTitle] = useState("");
   const [severity, setSeverity] = useState<Severity>("mid");
   const [state, setState] = useState<BugState>("open");
@@ -52,10 +56,13 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
   const [deleting, setDeleting] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const confirmRef = useRef<HTMLDivElement>(null);
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null);
 
   const isOpen = bug !== null;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (bug) {
       setTitle(bug.title);
       setSeverity(toLowerSeverity(bug.severity));
@@ -66,25 +73,27 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
       setLoading(false);
       setDeleting(false);
       setShowConfirmDelete(false);
-      queueMicrotask(() => titleInputRef.current?.focus());
     }
   }, [bug]);
+
+  useDialogFocus(isOpen, dialogRef, titleInputRef);
+  useDialogFocus(showConfirmDelete, confirmRef, cancelDeleteRef);
 
   useEffect(() => {
     if (!isOpen) return;
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        if (showConfirmDelete) {
-          setShowConfirmDelete(false);
-        } else {
-          onClose();
-        }
+      // Escape acts like Cancel (spec 09), except while a save or delete is in flight.
+      if (e.key !== "Escape" || loading || deleting) return;
+      e.preventDefault();
+      if (showConfirmDelete) {
+        setShowConfirmDelete(false);
+      } else {
+        onClose();
       }
     }
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose, showConfirmDelete]);
+  }, [isOpen, onClose, showConfirmDelete, loading, deleting]);
 
   const initial = bug
     ? {
@@ -112,19 +121,21 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
       current.owner !== initial.owner ||
       current.description !== initial.description);
 
-  const hasBlank =
-    current.title === "" ||
-    current.owner === "" ||
-    current.description === "" ||
-    !SEVERITIES.includes(severity);
+  const blankFields = [
+    isBlank(title) && "Title",
+    isBlank(owner) && "Owner",
+    isBlank(description) && "Description",
+  ].filter((f): f is string => Boolean(f));
+
+  const hasBlank = blankFields.length > 0 || !SEVERITIES.includes(severity);
 
   const saveDisabled = loading || !hasChanges || hasBlank;
 
   function validate(): string[] {
     const errors: string[] = [];
-    if (!title.trim()) errors.push("Title is required.");
-    if (!owner.trim()) errors.push("Owner is required.");
-    if (!description.trim()) errors.push("Description is required.");
+    if (isBlank(title)) errors.push("Title is required.");
+    if (isBlank(owner)) errors.push("Owner is required.");
+    if (isBlank(description)) errors.push("Description is required.");
     if (!SEVERITIES.includes(severity)) errors.push("Severity is required.");
     return errors;
   }
@@ -152,10 +163,11 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
         }),
       });
       if (res.ok) {
-        onSaved();
+        onSaved("saved");
         onClose();
         return;
       }
+      if (res.status === 404) onGone();
       const data = (await res.json().catch(() => ({}))) as { message?: string };
       setValidationErrors([data.message ?? "Failed to save bug."]);
     } catch {
@@ -165,7 +177,14 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
     }
   }
 
+  // After a failed save or delete the fields re-enable; put focus back in the form instead of leaving it on <body>.
+  useEffect(() => {
+    if (!isOpen || loading || deleting || validationErrors.length === 0) return;
+    if (!dialogRef.current?.contains(document.activeElement)) titleInputRef.current?.focus();
+  }, [isOpen, loading, deleting, validationErrors]);
+
   function handleCancel() {
+    if (loading || deleting) return;
     onClose();
   }
 
@@ -175,6 +194,7 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
   }
 
   function handleCancelDelete() {
+    if (deleting) return;
     setShowConfirmDelete(false);
   }
 
@@ -185,10 +205,11 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
     try {
       const res = await fetch(`/api/bugs/${bug.id}`, { method: "DELETE" });
       if (res.ok) {
-        onSaved();
+        onSaved("deleted");
         onClose();
         return;
       }
+      if (res.status === 404) onGone();
       const data = (await res.json().catch(() => ({}))) as { message?: string };
       setShowConfirmDelete(false);
       setValidationErrors([data.message ?? "Failed to delete bug."]);
@@ -205,10 +226,12 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
   return (
     <>
     <div
+      ref={dialogRef}
       className="bug-modal-overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-bug-modal-title"
+      aria-hidden={showConfirmDelete || undefined}
     >
       <div className="bug-modal-panel">
         <div className="bug-modal-header">
@@ -218,14 +241,21 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            disabled={loading || deleting}
+            className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50"
             aria-label="Close"
           >
             <span className="sr-only">Close</span>
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="bug-modal-body space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.repeat) e.preventDefault();
+          }}
+          className="bug-modal-body space-y-4"
+        >
           <div>
             <label htmlFor="edit-bug-id" className="block text-sm font-medium text-stone-700 mb-1">
               ID
@@ -245,11 +275,13 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
             </label>
             <input
               id="edit-bug-title"
+              aria-invalid={blankFields.includes("Title") || undefined}
+              aria-describedby={blankFields.includes("Title") ? "edit-bug-blank-hint" : undefined}
               ref={titleInputRef}
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
               disabled={loading}
               autoComplete="off"
             />
@@ -262,7 +294,7 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
               id="edit-bug-severity"
               value={severity}
               onChange={(e) => setSeverity(e.target.value as Severity)}
-              className={`w-full rounded border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary ${severitySelectClass(severity)}`}
+              className={`w-full rounded border border-stone-500 px-3 py-2 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 ${severitySelectClass(severity)}`}
               disabled={loading}
             >
               {SEVERITIES.map((s) => (
@@ -280,7 +312,7 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
               id="edit-bug-state"
               value={state}
               onChange={(e) => setState(e.target.value as BugState)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
               disabled={loading}
             >
               {BUG_STATES.map((s) => (
@@ -296,10 +328,12 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
             </label>
             <input
               id="edit-bug-owner"
+              aria-invalid={blankFields.includes("Owner") || undefined}
+              aria-describedby={blankFields.includes("Owner") ? "edit-bug-blank-hint" : undefined}
               type="text"
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
               disabled={loading}
               autoComplete="off"
             />
@@ -310,14 +344,21 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
             </label>
             <textarea
               id="edit-bug-description"
+              aria-invalid={blankFields.includes("Description") || undefined}
+              aria-describedby={blankFields.includes("Description") ? "edit-bug-blank-hint" : undefined}
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 resize-y"
               disabled={loading}
               autoComplete="off"
             />
           </div>
+          {blankFields.length > 0 && (
+            <p id="edit-bug-blank-hint" className="text-sm text-red-700">
+              {blankFields.join(", ")} {blankFields.length === 1 ? "is" : "are"} required to save.
+            </p>
+          )}
           {validationErrors.length > 0 && (
             <ul className="text-sm text-red-600" role="alert">
               {validationErrors.map((msg, i) => (
@@ -338,14 +379,14 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded px-4 py-2 text-sm font-medium text-stone-700 bg-stone-200 hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 disabled:opacity-50"
+                className="rounded px-4 py-2 text-sm font-medium text-stone-700 bg-stone-200 hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50"
                 disabled={loading || deleting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={saveDisabled || deleting}
             >
               {loading ? "Saving…" : "Save"}
@@ -357,6 +398,7 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
     </div>
     {showConfirmDelete && (
       <div
+        ref={confirmRef}
         className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-stone-900/50"
         role="dialog"
         aria-modal="true"
@@ -370,7 +412,8 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
             <button
               type="button"
               onClick={handleCancelDelete}
-              className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              disabled={deleting}
+              className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50"
               aria-label="Close"
             >
               <span className="sr-only">Close</span>
@@ -383,9 +426,10 @@ export function EditBugModal({ bug, onClose, onSaved }: EditBugModalProps) {
             </p>
             <div className="flex gap-3 justify-end pt-2">
               <button
+                ref={cancelDeleteRef}
                 type="button"
                 onClick={handleCancelDelete}
-                className="rounded px-4 py-2 text-sm font-medium text-stone-700 bg-stone-200 hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 disabled:opacity-50"
+                className="rounded px-4 py-2 text-sm font-medium text-stone-700 bg-stone-200 hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50"
                 disabled={deleting}
               >
                 Cancel

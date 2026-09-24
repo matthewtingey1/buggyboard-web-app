@@ -147,3 +147,15 @@ vite.config.ts.timestamp-*
 
 # SQLite database (single file, no env-specific DBs)
 backend/data
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+/test-history/
+/.playwright-cli/
+
+# Playwright traces embed absolute local paths
+quality-reports/**/trace.zip

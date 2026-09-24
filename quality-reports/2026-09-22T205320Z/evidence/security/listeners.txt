@@ -1,0 +1,3 @@
+COMMAND  PID        USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+node    4244 <user>   27u  IPv6 0x3ada3f52173cfb65      0t0  TCP [::1]:5173 (LISTEN)
+node    5305 <user>   21u  IPv6 0x7d0a34c8b275c785      0t0  TCP *:3002 (LISTEN)

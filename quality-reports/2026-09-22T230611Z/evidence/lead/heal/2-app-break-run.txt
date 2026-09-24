@@ -1,0 +1,830 @@
+
+Running 39 tests using 6 workers
+
+[1/39] [chromium] › tests/bug-status/bug-status.spec.ts:41:1 › closing a bug in the edit modal persists and hides it from the Open view
+[2/39] [chromium] › tests/bug-status/bug-status.spec.ts:20:1 › the create modal has no State field
+[3/39] [chromium] › tests/bug-status/bug-status.spec.ts:30:1 › the edit modal shows the state with Open and Closed options
+[4/39] [chromium] › tests/bug-status/bug-status.spec.ts:69:1 › selecting Closed shows closed bugs and hides open ones
+[5/39] [chromium] › tests/bug-status/bug-status.spec.ts:55:1 › the filter defaults to Open, shown as selected, and hides closed bugs
+[6/39] [chromium] › tests/bug-status/bug-status.spec.ts:3:1 › a bug created from the New Bug modal is Open
+[7/39] [chromium] › tests/bug-status/bug-status.spec.ts:82:1 › sorting applies within the selected state
+[8/39] [chromium] › tests/bug-status/bug-status.spec.ts:97:1 › search and the state filter apply together
+[9/39] [chromium] › tests/bug-status/bug-status.spec.ts:113:1 › a selected state with no matching bugs shows "No bugs matched."
+[10/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:17:1 › 1.2 Title has focus when the modal opens
+[11/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:23:1 › 1.3 Severity defaults to MID
+[12/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:29:1 › 1.5 Reopening starts clean from the first frame
+[13/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:39:1 › 2.4 Enter in Title submits the bug
+  1) [chromium] › tests/bug-status/bug-status.spec.ts:20:1 › the create modal has no State field ───
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/bug-status/bug-status.spec.ts:24:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/bug-status-bug-status-the-create-modal-has-no-State-field-chromium/error-context.md
+
+
+[14/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:51:1 › 2.5 Leading and trailing whitespace is trimmed
+  2) [chromium] › tests/bug-status/bug-status.spec.ts:3:1 › a bug created from the New Bug modal is Open 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/bug-status/bug-status.spec.ts:8:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/bug-status-bug-status-a-bu-57138-m-the-New-Bug-modal-is-Open-chromium/error-context.md
+
+
+[15/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form
+  3) [chromium] › tests/create-bug/create-bug-plan.spec.ts:17:1 › 1.2 Title has focus when the modal opens 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:18:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-620f5--focus-when-the-modal-opens-chromium/error-context.md
+
+
+  4) [chromium] › tests/create-bug/create-bug-plan.spec.ts:23:1 › 1.3 Severity defaults to MID ─────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:24:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-1-3-Severity-defaults-to-MID-chromium/error-context.md
+
+
+[16/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:79:1 › 4.4 Errors clear when the modal is reopened
+[17/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:90:1 › 5.1 A server rejection keeps the draft
+  5) [chromium] › tests/create-bug/create-bug-plan.spec.ts:29:1 › 1.5 Reopening starts clean from the first frame 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:30:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-7b22c--clean-from-the-first-frame-chromium/error-context.md
+
+
+  6) [chromium] › tests/create-bug/create-bug-plan.spec.ts:39:1 › 2.4 Enter in Title submits the bug 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:42:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-94db4-er-in-Title-submits-the-bug-chromium/error-context.md
+
+
+[18/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:104:1 › 5.2 A network failure keeps the draft
+[19/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:117:1 › 5.3 A double submit creates one bug
+  7) [chromium] › tests/create-bug/create-bug-plan.spec.ts:51:1 › 2.5 Leading and trailing whitespace is trimmed 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:54:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-82a36-iling-whitespace-is-trimmed-chromium/error-context.md
+
+
+[20/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:130:1 › 6.1 A bug created from the Closed view is Open and appears under Open
+  8) [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:69:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-66821-progress-and-locks-the-form-chromium/error-context.md
+
+
+[21/39] [chromium] › tests/create-bug/create-bug-plan.spec.ts:146:1 › 6.2 An active search is kept after creating a bug
+  9) [chromium] › tests/create-bug/create-bug-plan.spec.ts:79:1 › 4.4 Errors clear when the modal is reopened 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:80:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-3a837--when-the-modal-is-reopened-chromium/error-context.md
+
+
+  10) [chromium] › tests/create-bug/create-bug-plan.spec.ts:90:1 › 5.1 A server rejection keeps the draft 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:94:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-ecf5b-r-rejection-keeps-the-draft-chromium/error-context.md
+
+
+[22/39] [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button
+[23/39] [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user
+  11) [chromium] › tests/create-bug/create-bug-plan.spec.ts:104:1 › 5.2 A network failure keeps the draft 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:108:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-73752-ork-failure-keeps-the-draft-chromium/error-context.md
+
+
+[24/39] [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal
+  12) [chromium] › tests/create-bug/create-bug-plan.spec.ts:117:1 › 5.3 A double submit creates one bug 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:120:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-39ace-uble-submit-creates-one-bug-chromium/error-context.md
+
+
+[25/39] [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload
+  13) [chromium] › tests/create-bug/create-bug-plan.spec.ts:130:1 › 6.1 A bug created from the Closed view is Open and appears under Open 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:134:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-ca471-Open-and-appears-under-Open-chromium/error-context.md
+
+
+[26/39] [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Cancel does not save the bug
+  14) [chromium] › tests/create-bug/create-bug-plan.spec.ts:146:1 › 6.2 An active search is kept after creating a bug 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at openSettled (~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:12:19)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug-plan.spec.ts:151:9
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-plan-63f02-s-kept-after-creating-a-bug-chromium/error-context.md
+
+
+[27/39] [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with the X button does not save the bug
+  15) [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:9:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-New--bbe22-with-every-field-and-button-chromium/error-context.md
+
+
+  16) [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user ───
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:26:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-owner-defaults-to-the-current-user-chromium/error-context.md
+
+
+[28/39] [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Escape does not save the bug
+[29/39] [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data
+  17) [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:34:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-savi-8c644-sts-it-and-closes-the-modal-chromium/error-context.md
+
+
+[30/39] [chromium] › tests/create-bug/create-bug.spec.ts:92:1 › saving with every field blank names each required field
+  18) [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:53:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-a-cr-3b1a3--the-board-without-a-reload-chromium/error-context.md
+
+
+[31/39] [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only title blocks saving
+  19) [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Cancel does not save the bug 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:65:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-clos-e3cd5-ancel-does-not-save-the-bug-chromium/error-context.md
+
+
+[32/39] [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only owner blocks saving
+  20) [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with the X button does not save the bug 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:65:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-clos-40285-utton-does-not-save-the-bug-chromium/error-context.md
+
+
+[33/39] [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only description blocks saving
+  21) [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Escape does not save the bug 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:65:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-clos-1a974-scape-does-not-save-the-bug-chromium/error-context.md
+
+
+  22) [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:80:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-clic-5e255-the-modal-open-and-its-data-chromium/error-context.md
+
+
+[34/39] [chromium] › tests/create-bug/create-bug.spec.ts:127:1 › severity has no blank option in the create modal
+[35/39] [chromium] › tests/create-bug/create-bug.spec.ts:133:1 › the API rejects a bug with a blank severity
+  23) [chromium] › tests/create-bug/create-bug.spec.ts:92:1 › saving with every field blank names each required field 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:93:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-savi-c2fd8-k-names-each-required-field-chromium/error-context.md
+
+
+[36/39] [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected HIGH severity is shown in its severity colour
+  24) [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only title blocks saving 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:109:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-a-whitespace-only-title-blocks-saving-chromium/error-context.md
+
+
+[37/39] [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected MID severity is shown in its severity colour
+[38/39] [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected LOW severity is shown in its severity colour
+  25) [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only owner blocks saving 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:109:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-a-whitespace-only-owner-blocks-saving-chromium/error-context.md
+
+
+[39/39] [chromium] › tests/seed.spec.ts:5:1 › seed
+  26) [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only description blocks saving 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:109:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-a-wh-f9b32-y-description-blocks-saving-chromium/error-context.md
+
+
+  27) [chromium] › tests/create-bug/create-bug.spec.ts:127:1 › severity has no blank option in the create modal 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:128:19
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-seve-ee015--option-in-the-create-modal-chromium/error-context.md
+
+
+  28) [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected HIGH severity is shown in its severity colour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:141:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-sele-89c9d-hown-in-its-severity-colour-chromium/error-context.md
+
+
+  29) [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected MID severity is shown in its severity colour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:141:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-sele-2deed-hown-in-its-severity-colour-chromium/error-context.md
+
+
+  30) [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected LOW severity is shown in its severity colour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       at pages/board-page.ts:157
+
+      155 |
+      156 |   async openNewBug() {
+    > 157 |     await this.newBugButton.click();
+          |                             ^
+      158 |   }
+      159 |
+      160 |   async openNewBugWithKeyboard() {
+        at BoardPage.openNewBug (~/DEV/IdeaProjects/buggyboard-web-app/tests/pages/board-page.ts:157:29)
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/create-bug/create-bug.spec.ts:141:21
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/create-bug-create-bug-sele-be867-hown-in-its-severity-colour-chromium/error-context.md
+
+
+  31) [chromium] › tests/seed.spec.ts:5:1 › seed ───────────────────────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('header').getByRole('button', { name: 'New Bug', exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('header').getByRole('button', { name: 'New Bug', exact: true }) with timeout 5000ms
+      - waiting for locator('header').getByRole('button', { name: 'New Bug', exact: true })
+
+
+       8 |
+       9 |   await expect(boardPage.bugTable).toBeVisible();
+    > 10 |   await expect(boardPage.newBugButton).toBeVisible();
+         |                                        ^
+      11 | });
+      12 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/tests/seed.spec.ts:10:40
+
+    Error Context: quality-reports/2026-09-22T230611Z/evidence/lead/heal/app-break/seed-seed-chromium/error-context.md
+
+
+  31 failed
+    [chromium] › tests/bug-status/bug-status.spec.ts:3:1 › a bug created from the New Bug modal is Open 
+    [chromium] › tests/bug-status/bug-status.spec.ts:20:1 › the create modal has no State field ────
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:17:1 › 1.2 Title has focus when the modal opens 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:23:1 › 1.3 Severity defaults to MID ──────
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:29:1 › 1.5 Reopening starts clean from the first frame 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:39:1 › 2.4 Enter in Title submits the bug 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:51:1 › 2.5 Leading and trailing whitespace is trimmed 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:65:1 › 2.6 Save shows progress and locks the form 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:79:1 › 4.4 Errors clear when the modal is reopened 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:90:1 › 5.1 A server rejection keeps the draft 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:104:1 › 5.2 A network failure keeps the draft 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:117:1 › 5.3 A double submit creates one bug 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:130:1 › 6.1 A bug created from the Closed view is Open and appears under Open 
+    [chromium] › tests/create-bug/create-bug-plan.spec.ts:146:1 › 6.2 An active search is kept after creating a bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:8:1 › New Bug opens the create modal with every field and button 
+    [chromium] › tests/create-bug/create-bug.spec.ts:25:1 › owner defaults to the current user ─────
+    [chromium] › tests/create-bug/create-bug.spec.ts:31:1 › saving a complete bug persists it and closes the modal 
+    [chromium] › tests/create-bug/create-bug.spec.ts:50:1 › a created bug appears on the board without a reload 
+    [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Cancel does not save the bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with the X button does not save the bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:62:3 › closing with Escape does not save the bug 
+    [chromium] › tests/create-bug/create-bug.spec.ts:77:1 › clicking the backdrop keeps the modal open and its data 
+    [chromium] › tests/create-bug/create-bug.spec.ts:92:1 › saving with every field blank names each required field 
+    [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only title blocks saving ─
+    [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only owner blocks saving ─
+    [chromium] › tests/create-bug/create-bug.spec.ts:106:3 › a whitespace-only description blocks saving 
+    [chromium] › tests/create-bug/create-bug.spec.ts:127:1 › severity has no blank option in the create modal 
+    [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected HIGH severity is shown in its severity colour 
+    [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected MID severity is shown in its severity colour 
+    [chromium] › tests/create-bug/create-bug.spec.ts:140:3 › selected LOW severity is shown in its severity colour 
+    [chromium] › tests/seed.spec.ts:5:1 › seed ─────────────────────────────────────────────────────
+  8 passed (2.7m)

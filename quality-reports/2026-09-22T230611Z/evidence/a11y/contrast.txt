@@ -1,0 +1,26 @@
+FAIL  3.77:1 (need 4.5)  #b84a2e on #efd7d1  Severity HIGH badge text on its tint (white row)
+FAIL  3.66:1 (need 4.5)  #b84a2e on #ecd4cd  Severity HIGH badge text on its tint (hovered row stone-50/80)
+FAIL  2.93:1 (need 4.5)  #a67c47 on #ebe2d7  Severity MID badge text on its tint (white row)
+FAIL  2.85:1 (need 4.5)  #a67c47 on #e8dfd3  Severity MID badge text on its tint (hovered row stone-50/80)
+FAIL  4.32:1 (need 4.5)  #4a6b5e on #d7dedc  Severity LOW badge text on its tint (white row)
+FAIL  4.20:1 (need 4.5)  #4a6b5e on #d4dbd8  Severity LOW badge text on its tint (hovered row stone-50/80)
+PASS  6.76:1 (need 4.5)  #292524 on #b8ae76  Primary #b8ae76 bg with stone-800 text (Login, Save, selected toggle)
+PASS  7.63:1 (need 4.5)  #57534e on #ffffff  "Log in" subtitle (now h2) on white
+PASS  4.59:1 (need 4.5)  #78716c on #fafaf9  Search placeholder on stone-50 wrapper
+PASS  4.80:1 (need 4.5)  #78716c on #ffffff  Search placeholder on white (focused)
+PASS  4.83:1 (need 4.5)  #dc2626 on #ffffff  Error text red-600 on white (login, modal errors)
+PASS  4.80:1 (need 4.5)  #78716c on #ffffff  Unselected toggle text on white
+PASS  6.76:1 (need 3)  #292524 on #b8ae76  Selected toggle underline (stone-800) on primary fill
+FAIL  2.25:1 (need 3)  #b8ae76 on #ffffff  Selected toggle fill (primary) vs white track
+PASS  7.63:1 (need 3)  #57534e on #ffffff  Focus ring on Login button vs white offset
+PASS  7.63:1 (need 3)  #57534e on #ffffff  Focus ring on inputs vs white
+PASS  7.63:1 (need 3)  #57534e on #ffffff  Focus ring on row title button vs white row
+PASS  7.63:1 (need 3)  #57534e on #ffffff  Focus ring on New Bug vs white header
+PASS  7.63:1 (need 3)  #57534e on #ffffff  Focus ring on modal Save vs white
+FAIL  2.52:1 (need 3)  #a8a29e on #ffffff  Focus ring on modal Cancel (ring-stone-400) vs white
+PASS  7.63:1 (need 3)  #57534e on #ffffff  Focus ring on toggle vs white track
+PASS  4.80:1 (need 3)  #78716c on #ffffff  Login input border vs white
+PASS  4.80:1 (need 3)  #78716c on #ffffff  Modal input border vs white
+PASS  4.80:1 (need 3)  #78716c on #ffffff  Search wrapper border vs white header
+PASS  4.80:1 (need 3)  #78716c on #ffffff  Modal Close X glyph vs white
+PASS  3.76:1 (need 3)  #ef4444 on #ffffff  Focus ring on Delete buttons (ring-red-500) vs white

@@ -1,0 +1,26 @@
+### 30 consecutive wrong-password attempts for buggy, then correct password
+401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 
+{"username":"buggy"} HTTP 200
+### response headers on login (any RateLimit/Retry-After?)
+HTTP/1.1 401 Unauthorized
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 73
+ETag: W/"49-pny2qZH5VlGlxpl4Nw300HNuApg"
+Date: Tue, 22 Sep 2026 20:55:00 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+### headers on the SPA document via 5173
+HTTP/1.1 200 OK
+Vary: Origin
+Content-Type: text/html
+Cache-Control: no-cache
+Etag: W/"268-z//OmOQ5iQvy2sXTF1mXKQW9HXY"
+Date: Tue, 22 Sep 2026 20:55:00 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+

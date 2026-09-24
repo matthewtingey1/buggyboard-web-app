@@ -1,0 +1,2 @@
+Live snapshot at create-bug-plan.spec.ts:74 showed: button "Saving\u2026" [disabled]
+Heal: tests/pages/create-bug-modal.ts savingButton name 'Saving...' -> 'Saving\u2026' (script defect; spec unchanged).

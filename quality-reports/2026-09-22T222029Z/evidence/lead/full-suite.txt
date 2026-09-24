@@ -1,0 +1,12 @@
+Lead full-suite run (from test-history/2026-09-22T222029797Z/run.json; the configured reporters printed nothing to stdout)
+{
+  "started": "2026-09-22T22:20:29.797Z",
+  "status": "passed",
+  "total": 422,
+  "expected": 410,
+  "unexpected": 0,
+  "flaky": 0,
+  "skipped": 12,
+  "duration": 64699,
+  "scope": "api, chromium, firefox, webkit|npx playwright test"
+}

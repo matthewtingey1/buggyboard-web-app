@@ -1,4 +1,6 @@
-import { useState, useEffect, FormEvent, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, FormEvent, useRef } from "react";
+import { useDialogFocus } from "./useDialogFocus";
+import { isBlank } from "./text";
 
 export type Severity = "high" | "mid" | "low";
 
@@ -26,49 +28,74 @@ export function CreateBugModal({
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // State updates are async, so a second submit in the same tick would still see loading === false.
+  const submittingRef = useRef(false);
 
-  useEffect(() => {
+  // Layout effect: the reset must land before the first paint, or the previous draft flashes and
+  // keystrokes typed in that frame are lost.
+  useLayoutEffect(() => {
     if (isOpen) {
       setTitle("");
       setSeverity("mid");
       setOwner(defaultOwner);
       setDescription("");
       setValidationErrors([]);
+      setInvalidFields(new Set());
       setLoading(false);
-      queueMicrotask(() => titleInputRef.current?.focus());
+      submittingRef.current = false;
     }
   }, [isOpen, defaultOwner]);
+
+  useDialogFocus(isOpen, dialogRef, titleInputRef);
 
   useEffect(() => {
     if (!isOpen) return;
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
+      // Escape acts like Cancel (spec 06), except while a save is in flight.
+      if (e.key !== "Escape" || loading) return;
+      e.preventDefault();
+      onClose();
     }
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, loading]);
 
-  function validate(): string[] {
+  function validate(): { errors: string[]; fields: Set<string> } {
     const errors: string[] = [];
-    if (!title.trim()) errors.push("Title is required.");
-    if (!owner.trim()) errors.push("Owner is required.");
-    if (!description.trim()) errors.push("Description is required.");
-    if (!SEVERITIES.includes(severity)) errors.push("Severity is required.");
-    return errors;
+    const fields = new Set<string>();
+    if (isBlank(title)) {
+      errors.push("Title is required.");
+      fields.add("title");
+    }
+    if (isBlank(owner)) {
+      errors.push("Owner is required.");
+      fields.add("owner");
+    }
+    if (isBlank(description)) {
+      errors.push("Description is required.");
+      fields.add("description");
+    }
+    if (!SEVERITIES.includes(severity)) {
+      errors.push("Severity is required.");
+      fields.add("severity");
+    }
+    return { errors, fields };
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const errors = validate();
+    if (submittingRef.current) return;
+    const { errors, fields } = validate();
+    setInvalidFields(fields);
     if (errors.length > 0) {
       setValidationErrors(errors);
       return;
     }
+    submittingRef.current = true;
     setValidationErrors([]);
     setLoading(true);
     try {
@@ -92,11 +119,19 @@ export function CreateBugModal({
     } catch {
       setValidationErrors(["Something went wrong. Please try again."]);
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   }
 
+  // After a failed save the fields re-enable; put focus back in the form instead of leaving it on <body>.
+  useEffect(() => {
+    if (!isOpen || loading || validationErrors.length === 0) return;
+    if (!dialogRef.current?.contains(document.activeElement)) titleInputRef.current?.focus();
+  }, [isOpen, loading, validationErrors]);
+
   function handleCancel() {
+    if (loading) return;
     onClose();
   }
 
@@ -104,6 +139,7 @@ export function CreateBugModal({
 
   return (
     <div
+      ref={dialogRef}
       className="bug-modal-overlay"
       role="dialog"
       aria-modal="true"
@@ -117,25 +153,35 @@ export function CreateBugModal({
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            disabled={loading}
+            className="rounded p-1 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50"
             aria-label="Close"
           >
             <span className="sr-only">Close</span>
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="bug-modal-body space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            // A held-down Enter (for example from the New Bug button) must not submit the form.
+            if (e.key === "Enter" && e.repeat) e.preventDefault();
+          }}
+          className="bug-modal-body space-y-4"
+        >
           <div>
             <label htmlFor="bug-title" className="block text-sm font-medium text-stone-700 mb-1">
               Title
             </label>
             <input
               id="bug-title"
+              aria-invalid={invalidFields.has("title") || undefined}
+              aria-describedby={invalidFields.has("title") ? "create-bug-errors" : undefined}
               ref={titleInputRef}
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
               disabled={loading}
               autoComplete="off"
             />
@@ -148,7 +194,7 @@ export function CreateBugModal({
               id="bug-severity"
               value={severity}
               onChange={(e) => setSeverity(e.target.value as Severity)}
-              className={`w-full rounded border border-stone-300 px-3 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary ${severitySelectClass(severity)}`}
+              className={`w-full rounded border border-stone-500 px-3 py-2 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 ${severitySelectClass(severity)}`}
               disabled={loading}
             >
               {SEVERITIES.map((s) => (
@@ -164,10 +210,12 @@ export function CreateBugModal({
             </label>
             <input
               id="bug-owner"
+              aria-invalid={invalidFields.has("owner") || undefined}
+              aria-describedby={invalidFields.has("owner") ? "create-bug-errors" : undefined}
               type="text"
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600"
               disabled={loading}
               autoComplete="off"
             />
@@ -178,16 +226,18 @@ export function CreateBugModal({
             </label>
             <textarea
               id="bug-description"
+              aria-invalid={invalidFields.has("description") || undefined}
+              aria-describedby={invalidFields.has("description") ? "create-bug-errors" : undefined}
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded border border-stone-300 px-3 py-2 text-stone-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              className="w-full rounded border border-stone-500 px-3 py-2 text-stone-800 focus:border-stone-600 focus:outline-none focus:ring-1 focus:ring-stone-600 resize-y"
               disabled={loading}
               autoComplete="off"
             />
           </div>
           {validationErrors.length > 0 && (
-            <ul className="text-sm text-red-600" role="alert">
+            <ul id="create-bug-errors" className="text-sm text-red-600" role="alert">
               {validationErrors.map((msg, i) => (
                 <li key={i}>{msg}</li>
               ))}
@@ -197,14 +247,14 @@ export function CreateBugModal({
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded px-4 py-2 text-sm font-medium text-stone-700 bg-stone-200 hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 disabled:opacity-50"
+              className="rounded px-4 py-2 text-sm font-medium text-stone-700 bg-stone-200 hover:bg-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? "Saving…" : "Save"}

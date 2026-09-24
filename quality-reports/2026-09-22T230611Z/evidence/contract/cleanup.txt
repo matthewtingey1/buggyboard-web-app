@@ -1,0 +1,25 @@
+reset buggy counter via successful login: 200
+6972 mine
+DELETE 6972 (unprefixed invisible-title probe) 204
+6973 mine
+DELETE 6973 (unprefixed invisible-title probe) 204
+7009 mine
+DELETE 7009 (unprefixed invisible-title probe) 204
+7010 mine
+DELETE 7010 (unprefixed invisible-title probe) 204
+DELETE 6967 204
+DELETE 6968 204
+DELETE 6969 204
+DELETE 6970 204
+DELETE 6971 204
+DELETE 6974 204
+DELETE 6975 204
+DELETE 6976 204
+DELETE 7001 204
+DELETE 7005 204
+DELETE 7006 204
+DELETE 7007 204
+DELETE 7008 204
+DELETE 7011 204
+DELETE 7012 204
+DELETE 7013 204

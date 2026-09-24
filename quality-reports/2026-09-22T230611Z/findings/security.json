@@ -1,0 +1,220 @@
+{
+  "agent": "security",
+  "run": "2026-09-22T230611Z",
+  "scope": "Re-test of all 13 run-2 findings. Diff slice: backend/src/index.ts (login rate limiter, 127.0.0.1 bind, headers, 415, JSON error handler, typed login fields, strict ids), frontend/vite.config.ts proxy target, frontend/src/auth.tsx cross-tab logout. Anonymous GET/POST/PUT/DELETE; id edge cases on own [security] bugs; typed/malformed/charset/gzip/oversized bodies; response headers direct and via proxy; foreign-origin preflight; Host-header acceptance (DNS rebinding precondition); listeners; rate-limiter design with throwaway usernames only (lockout of an unowned name, case-folded key, spraying 25 names, 200 x 90 KB usernames with RSS before/after); <script>, <svg onload>, <img onerror>, <iframe javascript:> and SQL metacharacters in title, owner, description on board and edit modal; logout replay, cross-tab logout, forged session from a second tab; security-12 redaction in working tree, index and pushed history incl. committed trace.zip contents; npm audit prod and full. Scoped guards: tests/api/auth.spec.ts, tests/security/security.spec.ts.",
+  "verdict": "not-ready",
+  "confidence": "high",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "npx playwright test tests/api/auth.spec.ts --project=api --reporter=line --workers=1 --output=quality-reports/2026-09-22T230611Z/evidence/security/test-results-api",
+    "npx playwright test tests/security/security.spec.ts --project=chromium --reporter=line --workers=1 --output=quality-reports/2026-09-22T230611Z/evidence/security/test-results",
+    "sh quality-reports/2026-09-22T230611Z/evidence/security/api-probe.sh",
+    "sh quality-reports/2026-09-22T230611Z/evidence/security/ratelimit-probe.sh",
+    "node quality-reports/2026-09-22T230611Z/evidence/security/browser-probe.mjs",
+    "curl -s -X POST http://127.0.0.1:3002/api/bugs -H 'Content-Type: application/json' --data-binary @{b90,b150,b1100}.json",
+    "npm audit --omit=dev --json; npm audit --json",
+    "git status --short; git diff --cached --stat; git check-ignore -v <trace.zip>; git ls-files | grep trace.zip",
+    "git grep -I -c -E '(<user>|<user-dashed>|/Users/|/private/tmp|claude-NNN)' a7fa601 ffb95fd HEAD; git show a7fa601:<trace.zip> | unzip + grep -c /Users/<user>",
+    "git log --all -S<matt password read at runtime> --oneline; git diff origin/main -- specs/features"
+  ],
+  "findings": [
+    {
+      "id": "security-01",
+      "title": "Every /api/bugs verb works with no session: anonymous read, create, edit and delete",
+      "status": "confirmed",
+      "severity": "critical",
+      "requirement": "03-login.md 'Only users listed in users.json are valid login credentials'; 05-logout.md 'prevent other users from using my credentials'; OWASP A01/A07, ASVS 4.1.1",
+      "location": "backend/src/index.ts:144-241",
+      "evidence": "Still reproduces (open by product decision). No cookie or auth header: POST /api/bugs -> 201 id 6932; GET /api/bugs -> 200; PUT /api/bugs/6932 -> 200, title/severity/state changed to CLOSED, GET confirms; DELETE -> 204. GET/POST/DELETE are pinned by passing test.fail guards in tests/api/auth.spec.ts; anonymous PUT has no guard. Exposure narrowed by this diff: backend now on 127.0.0.1 only, and the 415 middleware stops cross-site text/plain and form POSTs (415), so a browser on another origin can no longer write via simple requests. Any local process, and a DNS-rebinding page (security-17), still can. evidence/security/api-probe.txt, scoped-auth-spec.txt",
+      "repro": "curl -s -X DELETE -w '%{http_code}' http://127.0.0.1:3002/api/bugs/<own id>  # 204, no login",
+      "fix": "Have /api/login issue a server session (HttpOnly SameSite=Lax cookie) and add requireAuth middleware on every /api/bugs route returning 401 without it."
+    },
+    {
+      "id": "security-02",
+      "title": "Session is a client-side localStorage flag; any string, including a non-existent user, opens the board",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "03-login.md 'Only users listed in users.json are valid login credentials'; ASVS 3.1/3.2",
+      "location": "frontend/src/auth.tsx:25-43, frontend/src/ProtectedRoute.tsx",
+      "evidence": "Still reproduces. tests/security/security.spec.ts forged-session test.fail passed (defect present). Browser probe: writing {\"username\":\"no-such-user\"} from a second tab and loading /board in the first -> URL /board, header shows New Bug and Logout. The new storage listener (auth.tsx:53-56) also makes a value planted in any tab propagate to every open tab. evidence/security/browser-probe-output.json (forgedUrl), forged-session-board.png",
+      "repro": "On http://localhost:5173: localStorage.setItem('buggyboard_user', JSON.stringify({username:'anyone'})); location='/board'",
+      "fix": "Derive authentication from the server session in security-01 (e.g. GET /api/me on load) instead of trusting localStorage."
+    },
+    {
+      "id": "security-03",
+      "title": "Logout is client-only: nothing is invalidated server-side and the stored value replays",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "05-logout.md 'close my session and prevent other users from using my credentials'; ASVS 3.3.1",
+      "location": "frontend/src/auth.tsx:68-71",
+      "evidence": "Still reproduces. UI login as buggy: 0 cookies, localStorage {\"username\":\"buggy\"}. Logout made no non-GET API call; fetch('/api/bugs') after logout -> 200; restoring the saved value and loading /board -> /board with 34 rows. Claimed cross-tab fix verified: tab B went to /login when tab A logged out (also guarded by tests/resilience/resilience.spec.ts). That is client state only; no server state exists to invalidate. Replay is not guarded by any test. evidence/security/browser-probe-output.json, logout-replay-board.png",
+      "repro": "Log in, copy localStorage.buggyboard_user, log out, set it back, open /board.",
+      "fix": "Add POST /api/logout that destroys the server session from security-01; call it from logout()."
+    },
+    {
+      "id": "security-04",
+      "title": "Diff adds a plaintext password (matt / <redacted>) to tracked users.json",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "OWASP A02/A07, ASVS 2.4.1",
+      "location": "users.json",
+      "evidence": "Still fixed in commits: git show HEAD:users.json lists buggy,vanny; git log --all -S<matt password, read at runtime> -> 0 commits; the password is in no other working-tree file. Residual risk unchanged: the working tree users.json lists buggy,vanny,matt as an unstaged change (git status ' M users.json', not in git diff --cached), so `git commit -a` would publish it.",
+      "repro": "git show HEAD:users.json; git log --all -S\"$P\" --oneline  # empty",
+      "fix": "Keep the personal account out of the tracked file (gitignored users.local.json, or git update-index --skip-worktree users.json)."
+    },
+    {
+      "id": "security-05",
+      "title": "No rate limiting or lockout on POST /api/login",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "OWASP A07, ASVS 2.2.1",
+      "location": "backend/src/index.ts:49-103",
+      "evidence": "Fixed: 20 wrong passwords for a throwaway username -> 20 x 401, the 21st -> 429 {\"error\":\"too_many_attempts\"} (ratelimit-probe.txt; also guarded by the passing auth.spec.ts 429 test). Only throwaway names were used. The limiter's design introduces new problems, filed as security-14, -15 and -16.",
+      "repro": "sh quality-reports/2026-09-22T230611Z/evidence/security/ratelimit-probe.sh",
+      "fix": "n/a"
+    },
+    {
+      "id": "security-06",
+      "title": "Non-string login fields and malformed or oversized bodies return HTML stack traces with absolute paths",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "OWASP A05, ASVS 7.4.1; ASVS 5.1.3",
+      "location": "backend/src/index.ts:41-47, 265-283",
+      "evidence": "Fixed: login {\"username\":123}, [\"buggy\"], {\"toString\":1} -> 400 JSON invalid_username; malformed JSON -> 400 JSON invalid_json; charset=latin1 -> 415 JSON; gzip -> 400 JSON bad_request; bad percent-encoding in the id -> 400 JSON; 150 KB and 1.1 MB bodies -> 413 JSON payload_too_large. No stack or path in any body. Guarded by tests/api/error-bodies.spec.ts. evidence/security/api-probe.txt, resource-probe.txt",
+      "repro": "curl -s -X POST 127.0.0.1:3002/api/login -H 'Content-Type: application/json' -d '{\"username\":123,\"password\":\"x\"}'",
+      "fix": "n/a"
+    },
+    {
+      "id": "security-07",
+      "title": "Backend listens on all interfaces (*:3002) while the UI binds to loopback only",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "OWASP A05",
+      "location": "backend/src/index.ts:9,285",
+      "evidence": "Fixed: lsof shows node TCP 127.0.0.1:3002 (LISTEN) and [::1]:5173 (LISTEN). The Vite proxy targets 127.0.0.1:3002 and works (all /api calls through :5173 answered). evidence/security/api-probe.txt",
+      "repro": "lsof -nP -iTCP:3002 -sTCP:LISTEN",
+      "fix": "n/a"
+    },
+    {
+      "id": "security-08",
+      "title": "Missing security headers and X-Powered-By: Express on API responses",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "OWASP A05, ASVS 14.4, 14.3.3",
+      "location": "backend/src/index.ts:13-19",
+      "evidence": "Fixed: direct and proxied /api/health carry X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: no-referrer, no X-Powered-By. Two guarded by auth.spec.ts; Referrer-Policy is not. The API still sends no Content-Security-Policy; for JSON responses with nosniff this adds little and is not reopened. The UI document is served by the Vite dev server with no security headers, which is not a production signal.",
+      "repro": "curl -s -D - -o /dev/null 127.0.0.1:3002/api/health",
+      "fix": "n/a"
+    },
+    {
+      "id": "security-09",
+      "title": "Lax bug-id parsing: '1 OR 1=1', '1;DROP TABLE bugs', '1.9', '1e3' resolve to bug 1",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "ASVS 5.1.3",
+      "location": "backend/src/index.ts:33-39",
+      "evidence": "Fixed: on own bug 6932, GET <id>.9, <id>e0, '<id> OR 1=1', '<id>;DROP TABLE bugs', 0<id>, +<id>, 0, -1, abc -> 400 invalid_id; PUT <id>.9 and DELETE <id>.5 -> 400 and the bug survived. 99999999999999999999 -> 404. Guarded by tests/api/id-parsing.spec.ts. evidence/security/api-probe.txt",
+      "repro": "curl -s -X DELETE -w '%{http_code}' http://localhost:5173/api/bugs/<own id>.5  # 400",
+      "fix": "n/a"
+    },
+    {
+      "id": "security-10",
+      "title": "No per-field length limit: a 90 KB title is stored and rendered",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "ASVS 5.1.4; bounded resource use",
+      "location": "backend/src/bugService.ts:66-78",
+      "evidence": "Still reproduces: 90,015-char title -> 201 id 7091, stored in full (deleted afterwards). The 100 KB express.json limit holds: 150 KB and 1.1 MB -> 413 JSON. evidence/security/resource-probe.txt",
+      "repro": "POST /api/bugs with a title of 'A' * 90000",
+      "fix": "Cap title/owner/description (e.g. 200/100/10000 chars) in validateFields and return 400."
+    },
+    {
+      "id": "security-11",
+      "title": "Specs contain no security requirements (API authentication, session, password storage, brute-force)",
+      "status": "gap",
+      "severity": "medium",
+      "requirement": "Missing requirement: specs/features/02,03,05 describe only UI-level login/logout",
+      "location": "specs/features/02-user-accounts.md, 03-login.md, 05-logout.md",
+      "evidence": "Re-checked: git diff origin/main -- specs/features is empty. The new rate limit (20 failures / 15 min) and the decision to leave the API unauthenticated are not written into any spec.",
+      "repro": "git diff origin/main -- specs/features | wc -l  # 0",
+      "fix": "Add a security spec covering API auth on /api/bugs (or the accepted-risk decision), session lifecycle, hashed passwords and the login throttling policy."
+    },
+    {
+      "id": "security-12",
+      "title": "Committed quality reports publish the local home path, OS username and full server stack traces",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "OWASP A05 / ASVS 7.4.1 intent; data in a place it should not be",
+      "location": "origin/e2e-suite-and-quality-run commits a7fa601, ffb95fd",
+      "evidence": "Fixed in the working tree, not yet in any commit, and still in the pushed history. Working tree: no home path or OS username in any tracked or untracked non-ignored file; only placeholders remain (plus 3 lsof warning lines with a system /private/var/folders/zz path in run-2 evidence). trace.zip is ignored (.gitignore:161) and untracked (git ls-files: 0); git diff --cached stages only the two trace.zip deletions, and every redaction is unstaged. Pushed branch (origin == HEAD == ffb95fd): the OS username appears in 11 files, 1,161 lines (quality-report/quality-data.json 1146), in both a7fa601 and ffb95fd, and the two trace.zip files added in a7fa601 contain /Users/<user> 48 and 38 times. A new commit removes it from the tip only; history keeps it unless rewritten. GitHub not queried. evidence/security/history-leak-check.txt",
+      "repro": "git grep -I -c \"$(whoami)\" origin/e2e-suite-and-quality-run",
+      "fix": "Stage and commit the redactions (git add -u); to remove it from history, rewrite the branch before merge (e.g. git filter-repo --replace-text on the two commits, or squash-merge) and force-push."
+    },
+    {
+      "id": "security-13",
+      "title": "users.json stores passwords in plaintext and login compares them with !==",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "ASVS 2.4.1 (L2); OWASP A02/A07",
+      "location": "users.json, backend/src/authService.ts:33",
+      "evidence": "Still reproduces: authService.ts is unchanged (user.password !== password on the raw value); HEAD:users.json keeps a plaintext password field per account; UI login with the plaintext value succeeds (browser probe).",
+      "repro": "git show HEAD:users.json | grep -c password",
+      "fix": "Store bcrypt/argon2 hashes in users.json and verify with the library's compare."
+    },
+    {
+      "id": "security-14",
+      "title": "Login lockout is keyed on username alone: any anonymous caller can lock any user out for 15 minutes, repeatably",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "03-login.md (a listed user can log in); OWASP A07 / ASVS 2.2.1 note that anti-automation must not enable account denial of service",
+      "location": "backend/src/index.ts:85-103",
+      "evidence": "With a throwaway name: 20 wrong passwords sent as PROBE-SECURITY-<r> -> 20 x 401; the next request as '  probe-security-<r> ' -> 429 too_many_attempts. So the caller needs no credential, no proof of ownership, and not even the exact username: the key is trim().toLowerCase() while login() is case-sensitive, so failures for 'BUGGY' (never a valid login) count against buggy. The 429 check (line 88) runs before login() (line 93), so while locked the correct password is also refused; that leg is read from code and was not exercised on a real account (instructed not to). The window runs from the first failure, so 20 requests per 15 minutes keep an account locked indefinitely. No client identity is part of the key. evidence/security/ratelimit-probe.txt",
+      "repro": "for i in $(seq 1 20); do curl -s -o /dev/null -X POST 127.0.0.1:3002/api/login -H 'Content-Type: application/json' -d '{\"username\":\"PROBE-X\",\"password\":\"w\"}'; done; curl -s -X POST 127.0.0.1:3002/api/login -H 'Content-Type: application/json' -d '{\"username\":\"probe-x\",\"password\":\"w\"}'  # 429",
+      "fix": "Key the counter on client IP + username so a third party only locks itself (app.set('trust proxy','loopback') and xfwd: true on the Vite proxy so the real client IP arrives), or replace the hard lock with an increasing per-attempt delay."
+    },
+    {
+      "id": "security-15",
+      "title": "Failed-login map grows without bound and stores each distinct username (up to ~100 KB) in memory",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Bounded resource use; OWASP API4 (unrestricted resource consumption)",
+      "location": "backend/src/index.ts:52,100-103",
+      "evidence": "200 failed logins with distinct 90 KB usernames -> 200 x 401; backend RSS 76,112 KB -> 98,912 KB (+22.8 MB, about 200 x 90 KB kept). Entries are only deleted on success or when the same key is retried after 15 minutes, so unique names are never evicted. Server stayed healthy. evidence/security/ratelimit-probe.txt",
+      "repro": "Send POST /api/login with {username: <unique 90 KB string>, password: 'x'} N times; watch ps -o rss of the :3002 process.",
+      "fix": "Only count usernames that exist in users.json (or cap the username at e.g. 100 chars before keying), and sweep expired entries."
+    },
+    {
+      "id": "security-16",
+      "title": "Login limiter is per-username and per-process only: unlimited password spraying, state lost on every restart",
+      "status": "hardening",
+      "severity": "low",
+      "requirement": "ASVS 2.2.1 (anti-automation), OWASP A07",
+      "location": "backend/src/index.ts:49-52",
+      "evidence": "One password against 25 distinct usernames -> 25 x 401, no 429: there is no per-client or global limit. The counter is a module-level Map (index.ts:52), so every backend restart (tsx watch restarts on each backend save) clears all counters and lockouts, and multiple instances would not share it. 429 responses carry no Retry-After. Spraying measured; restart behaviour read from code (not restarting the shared server). evidence/security/ratelimit-probe.txt",
+      "repro": "for i in $(seq 1 25); do curl -s -o /dev/null -w '%{http_code} ' -X POST 127.0.0.1:3002/api/login -H 'Content-Type: application/json' -d \"{\\\"username\\\":\\\"probe-$i\\\",\\\"password\\\":\\\"Summer2026\\\"}\"; done",
+      "fix": "Add a per-client-IP cap across usernames (e.g. express-rate-limit) and a Retry-After header; accept the in-memory store for a single-instance app or document it."
+    },
+    {
+      "id": "security-17",
+      "title": "Backend accepts any Host header, so a DNS-rebinding page could drive the unauthenticated API",
+      "status": "potential",
+      "severity": "medium",
+      "requirement": "OWASP A05/A01; aggravates security-01 now that the port is loopback-only",
+      "location": "backend/src/index.ts (no Host check)",
+      "evidence": "Direct to 127.0.0.1:3002 with Host: evil.example:3002: GET /api/bugs -> 200 and DELETE of an own [security] bug -> 204. The Vite server refuses the same Host with 403 'Blocked request. This host (\"evil.example\") is not allowed'. After rebinding, a hostile page is same-origin with the backend, so CORS does not apply and, with no auth (security-01), it could read, edit and delete every bug. The full rebinding attack was not run (localhost-only rule); recent Chrome Local Network Access prompts may block it, other browsers may not. evidence/security/api-probe.txt",
+      "repro": "curl -s -o /dev/null -w '%{http_code}' -H 'Host: evil.example:3002' http://127.0.0.1:3002/api/bugs  # 200",
+      "fix": "Reject requests whose Host is not 127.0.0.1:3002 or localhost:3002 with 403 (the Vite proxy's changeOrigin already sends 127.0.0.1:3002)."
+    }
+  ],
+  "notTested": [
+    "TLS, HSTS, cookie flags and production headers: local dev server over plain HTTP, no cookies are issued, and the Vite dev document headers are not production headers",
+    "Lockout of a real account and whether its correct password is refused while locked: not sent (would lock a shared account for 15 minutes); read from code (index.ts:88 before :93)",
+    "Lockout expiry after 15 minutes and reset-on-success for a real account: not waited for / needs a real account; read from code",
+    "Limiter reset on backend restart: not restarting the shared server; read from code",
+    "End-to-end DNS rebinding and off-host reachability (localhost-only rule)",
+    "Statistically meaningful timing oracle: plaintext !== compare, identical 401 bodies for unknown user and wrong password",
+    "PR / remote state on GitHub: not queried; history assessed from local refs (origin/e2e-suite-and-quality-run == HEAD ffb95fd)",
+    "Authorization / per-user ownership: deliberately unowned, no role model",
+    "XSS in the delete confirmation with <script>/<svg> payloads: <img onerror> guarded by tests/security/security.spec.ts; frontend/src has no dangerouslySetInnerHTML or innerHTML"
+  ]
+}

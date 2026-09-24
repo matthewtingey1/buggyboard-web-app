@@ -1,0 +1,17 @@
+username=probe-contract-rl-2513218502
+401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401 
+### 21st attempt
+HTTP/1.1 429 Too Many Requests
+Vary: Origin
+content-type: application/json; charset=utf-8
+content-length: 84
+etag: W/"54-rVvt5IheJR/8Q0Z4ylOQC6lCp5A"
+
+{"error":"too_many_attempts","message":"Too many failed attempts. Try again later."}
+
+### upper-cased and padded variant of the same username
+{"error":"too_many_attempts","message":"Too many failed attempts. Try again later."} 429
+### blank password for locked username
+{"error":"too_many_attempts","message":"Too many failed attempts. Try again later."} 429
+### same username direct to :3002
+{"error":"too_many_attempts","message":"Too many failed attempts. Try again later."} 429

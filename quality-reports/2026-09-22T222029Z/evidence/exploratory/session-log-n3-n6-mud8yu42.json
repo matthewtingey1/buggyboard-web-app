@@ -1,0 +1,31 @@
+{
+  "N3": [
+    "Tabs from page load to New Bug: 2",
+    "focus after open create: INPUT#bug-title ''",
+    "severity after ArrowDown: mid",
+    "focus before submit: BUTTON 'Save'",
+    "created: 1; focus after create closes: BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "Tabs from search box to first row: 10",
+    "edit open=1, focus=INPUT#edit-bug-title ''",
+    "2 tabs from title: SELECT#edit-bug-state 'OpenClosed'",
+    "state after type-ahead 'c': closed",
+    "Tabs from State to Save: 5",
+    "saved via keyboard: state=CLOSED; focus after edit closes: BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "Tabs from title to Delete: 5",
+    "confirm open=1, focus=BUTTON 'Delete'",
+    "Tabs to reach confirm Delete=4",
+    "after confirm: bug exists=0; dialogs=0; focus=BODY 'BuggyBoard×New BugLogoutOpenCl'",
+    "unchanged edit, Tab x9 from title: [\"SELECT#edit-bug-severity 'HIGHMIDLOW'\",\"SELECT#edit-bug-state 'OpenClosed'\",\"INPUT#edit-bug-owner ''\",\"TEXTAREA#edit-bug-description 'exploratory charter'\",\"BUTTON 'Delete'\",\"BUTTON 'Cancel'\",\"BODY 'BuggyBoard×New BugLogoutOpenCl'\",\"INPUT 'Search bugs by title'\",\"BUTTON 'Clear search'\"]"
+  ],
+  "N6": [
+    "created 200 bugs in 445ms",
+    "board load with >=200 extra rows: 43ms, rows=210",
+    "typing 11 chars: 101ms; rows=200",
+    "search+sort title asc: 200 rows, sorted=true, first='[exploratory] N6 mud8yu42 000 engine lon'",
+    "owner sort desc aria-sort=descending; first owner=vanny",
+    "after renaming a row out of the search: search box='n6 mud8yu42', rows=200, owner sort kept=descending",
+    "search 'unicode' finds 'Ünïcödé' rows: 1",
+    "search 'ünïcödé' rows: 10",
+    "6 severity sort toggles over full board: 298ms"
+  ]
+}

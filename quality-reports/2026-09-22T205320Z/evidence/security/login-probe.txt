@@ -1,0 +1,47 @@
+### POST /api/login {"username":"buggy","password":"<pw>"}
+{"username":"buggy"}
+HTTP 200 time=0.002254
+### POST /api/login {"username":"buggy","password":"wrong"}
+{"error":"invalid_credentials","message":"Invalid username or password."}
+HTTP 401 time=0.001234
+### POST /api/login {"username":"nosuchuser","password":"wrong"}
+{"error":"invalid_credentials","message":"Invalid username or password."}
+HTTP 401 time=0.001215
+### POST /api/login {"username":"matt","password":"<pw>"}
+{"username":"matt"}
+HTTP 200 time=0.001422
+### POST /api/login {"username":"buggy","password":""}
+{"error":"blank_password","message":"Password cannot be blank."}
+HTTP 400 time=0.001153
+### POST /api/login {"username":"nosuchuser","password":""}
+{"error":"blank_password","message":"Password cannot be blank."}
+HTTP 400 time=0.001021
+### POST /api/login {"username":["buggy"],"password":"x"}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: username.trim is not a function<br> &nbsp; &nbsp;at login (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/authService.ts:19:36)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/index.ts:40:18)<br> &nbsp; &nbsp;at Layer.handle [as handle_request] (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/layer.js:95:5)<br> &nbsp; &nbsp;at next (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/route.js:149:13)<br> &nbsp; &nbsp;at Route.dispatch (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/route.js:119:3)<br> &nbsp; &nbsp;at Layer.handle [as handle_request] (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/layer.js:95:5)<br> &nbsp; &nbsp;at ~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/index.js:284:15<br> &nbsp; &nbsp;at router.process_params (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/index.js:346:12)<br> &nbsp; &nbsp;at next (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/index.js:280:10)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/index.ts:20:3)</pre>
+</body>
+</html>
+
+HTTP 500 time=0.002820
+### POST /api/login {"username":"buggy","password":{"a":1}}
+{"error":"invalid_credentials","message":"Invalid username or password."}
+HTTP 401 time=0.001076
+### POST /api/login {"username":123,"password":"x"}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: username.trim is not a function<br> &nbsp; &nbsp;at login (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/authService.ts:19:36)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/index.ts:40:18)<br> &nbsp; &nbsp;at Layer.handle [as handle_request] (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/layer.js:95:5)<br> &nbsp; &nbsp;at next (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/route.js:149:13)<br> &nbsp; &nbsp;at Route.dispatch (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/route.js:119:3)<br> &nbsp; &nbsp;at Layer.handle [as handle_request] (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/layer.js:95:5)<br> &nbsp; &nbsp;at ~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/index.js:284:15<br> &nbsp; &nbsp;at router.process_params (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/index.js:346:12)<br> &nbsp; &nbsp;at next (~/DEV/IdeaProjects/buggyboard-web-app/node_modules/express/lib/router/index.js:280:10)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/index.ts:20:3)</pre>
+</body>
+</html>
+
+HTTP 500 time=0.000929

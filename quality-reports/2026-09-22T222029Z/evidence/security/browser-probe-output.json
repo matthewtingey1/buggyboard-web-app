@@ -1,0 +1,41 @@
+{
+  "logout": {
+    "storedValue": "{\"username\":\"buggy\"}",
+    "cookies": [],
+    "apiRequestsDuringLogout": [
+      "GET /api/bugs",
+      "GET /api/bugs",
+      "GET /api/bugs"
+    ],
+    "apiStatusAfterLogout": 200,
+    "replayedUrl": "http://localhost:5173/board"
+  },
+  "created": {
+    "id": 3239,
+    "title": "[security] XSS2 1790115904724 <script>window.__xss='script'</script> '; DROP TABLE bugs; -- \" OR 1=1 /*",
+    "severity": "LOW",
+    "owner": "<svg onload=\"window.__xss='svg'\"> '; DROP TABLE bugs; -- \" OR 1=1 /*",
+    "description": "<script>window.__xss='script'</script>\n<svg onload=\"window.__xss='svg'\">\n'; DROP TABLE bugs; -- \" OR 1=1 /*",
+    "state": "OPEN"
+  },
+  "xss": {
+    "board": {
+      "xss": null,
+      "injectedNodes": 0,
+      "rowText": "3239\tLOW\t[security] XSS2 1790115904724 <script>window.__xss='script'</script> '; DROP TABLE bugs; -- \" OR 1=1 /*\t<svg onload=\"window.__xss='svg'\"> '; DROP TABLE bugs; -- \" OR 1=1 /*"
+    },
+    "modal": {
+      "xss": null,
+      "injectedNodes": 0,
+      "fieldValues": [
+        "3239",
+        "[security] XSS2 1790115904724 <script>window.__xss='script'</script> '; DROP TABLE bugs; -- \" OR 1=1 /*",
+        "<svg onload=\"window.__xss='svg'\"> '; DROP TABLE bugs; -- \" OR 1=1 /*",
+        "<script>window.__xss='script'</script>\n<svg onload=\"window.__xss='svg'\">\n'; DROP TABLE bugs; -- \" OR 1=1 /*"
+      ]
+    },
+    "dialogs": []
+  },
+  "bugsTableStillThere": 200,
+  "cleanup": 204
+}

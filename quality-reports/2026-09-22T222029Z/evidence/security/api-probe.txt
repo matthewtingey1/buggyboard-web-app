@@ -1,0 +1,80 @@
+
+### create a [security] bug anonymously (proxied)
+{"id":3145,"title":"[security] anon PUT target","severity":"LOW","owner":"nobody","description":"d","state":"OPEN"}
+
+### PUT /api/bugs/3145 with no session (proxied)
+{"id":3145,"title":"[security] anon PUT edited","severity":"HIGH","owner":"nobody","description":"edited anonymously","state":"CLOSED"}
+HTTP 200
+
+### GET /api/bugs/3145 after anon PUT
+{"id":3145,"title":"[security] anon PUT edited","severity":"HIGH","owner":"nobody","description":"edited anonymously","state":"CLOSED"}
+HTTP 200
+
+### PUT /api/bugs/3145 with no session (direct :3002)
+{"error":"blank_severity","message":"Severity is required (high, mid, or low)."}
+HTTP 400
+
+### id edge cases on PUT against my own bug: '3145.9' and '3145e0' and '3145%20OR%201=1'
+3145.9 -> 200
+3145e0 -> 200
+3145%20OR%201=1 -> 200
+{"id":3145,"title":"[security] lax id PUT","severity":"LOW","owner":"nobody","description":"x","state":"OPEN"}
+
+### GET id edge cases
+1e3 -> 200
+1.9 -> 200
+1%20OR%201=1 -> 200
+abc -> 400
+0 -> 404
+-1 -> 404
+99999999999999999999 -> 404
+
+### DELETE /api/bugs/3145 with lax id '3145.5' (own bug)
+HTTP 204
+{"error":"not_found","message":"Bug not found."}
+HTTP 404
+
+### CORS preflight from foreign origin
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+
+### CORS simple text/plain POST from foreign origin
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+{"error":"blank_title","message":"Title is required."}
+
+### headers on /api/health
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 72
+ETag: W/"48-Acm3aEyQAd1C5riMit6cdgddOmg"
+Date: Tue, 22 Sep 2026 22:24:19 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+### login error disclosure: non-string username, malformed JSON, oversized body
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: username.trim is not a function<br> &nbsp; &nbsp;at login (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/authService.ts:19:36)<br> &nbsp; &nbsp;at &lt;anonymous&gt; (~/DEV/IdeaProjects/buggyboard-web-app/backend/src/index.ts:40:18)<br> &nbsp; &nbs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>SyntaxError: Expected property name or &#39;}&#39; in JSON at position 1 (line 1 column 2)<br> &nbsp; &nbsp;at JSON.parse (&lt;anonymous&gt;)<br> &nbsp; &nbsp;at parse (~/DEV/Idea

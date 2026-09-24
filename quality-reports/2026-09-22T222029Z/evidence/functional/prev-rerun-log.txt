@@ -1,0 +1,64 @@
+
+Running 19 tests using 1 worker
+
+[1/19] [chromium] › specs/01-02-static.spec.ts:5:1 › 01-AC1 app references /favicon.ico and it is served
+[2/19] [chromium] › specs/01-02-static.spec.ts:14:1 › 02-AC1..4 users.json at root, unique usernames, default buggy user present
+[3/19] [chromium] › specs/03-login.spec.ts:5:3 › 03 login › 03-S1 login page displays username, masked password, login button
+[4/19] [chromium] › specs/03-login.spec.ts:14:5 › 03 login › 03-S2 unauthenticated visit to /board redirects to /login
+[5/19] [chromium] › specs/03-login.spec.ts:14:5 › 03 login › 03-S2 unauthenticated visit to / redirects to /login
+[6/19] [chromium] › specs/03-login.spec.ts:14:5 › 03 login › 03-S2 unauthenticated visit to /nope/xyz redirects to /login
+[7/19] [chromium] › specs/03-login.spec.ts:20:3 › 03 login › 03-S3 valid login lands on /board
+[8/19] [chromium] › specs/03-login.spec.ts:27:3 › 03 login › 03-S3b valid login as second user vanny
+[9/19] [chromium] › specs/03-login.spec.ts:33:3 › 03 login › 03-S3c valid login as new user matt (diff slice)
+[10/19] [chromium] › specs/03-login.spec.ts:40:5 › 03 login › 03-S4 Enter on username field submits login
+[11/19] [chromium] › specs/03-login.spec.ts:40:5 › 03 login › 03-S4 Enter on password field submits login
+[12/19] [chromium] › specs/03-login.spec.ts:48:3 › 03 login › 03-S5 invalid username shows generic error
+[13/19] [chromium] › specs/03-login.spec.ts:56:3 › 03 login › 03-S6 invalid password shows same generic error
+[14/19] [chromium] › specs/03-login.spec.ts:64:3 › 03 login › 03-S7 blank username shows blank-username error
+[15/19] [chromium] › specs/03-login.spec.ts:71:3 › 03 login › 03-S8 blank password shows blank-password error
+[16/19] [chromium] › specs/03-login.spec.ts:78:3 › 03 login › 03-S9 blank username and password shows missing-credentials error
+[17/19] [chromium] › specs/03-login.spec.ts:85:3 › 03 login › 03-S10 username whitespace is trimmed and login succeeds
+[18/19] [chromium] › specs/03-login.spec.ts:92:3 › 03 login › 03-S11 authenticated user visiting /login is redirected to /board
+[19/19] [chromium] › specs/03-login.spec.ts:97:3 › 03 login › 03-S12 session persists across reload
+  1) [chromium] › specs/03-login.spec.ts:97:3 › 03 login › 03-S12 session persists across reload ───
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Logout' })
+    Expected: visible
+    Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 2 elements:
+        1) <button type="button" class="rounded-lg px-4 py-2 text-base font-medium text-stone-600 border border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Logout</button> aka getByRole('button', { name: 'Logout', exact: true })
+        2) <tr tabindex="0" role="button" class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors cursor-pointer">…</tr> aka getByRole('button', { name: '3249 MID [exploratory] R03' })
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Logout' }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Logout' })
+
+
+       98 |     await page.reload();
+       99 |     await expect(page).toHaveURL(/\/board$/);
+    > 100 |     await expect(signedIn.logoutButton).toBeVisible();
+          |                                         ^
+      101 |   });
+      102 | });
+      103 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T222029Z/evidence/functional/prev/specs/03-login.spec.ts:100:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/prev-rerun/03-login-03-login-03-S12-session-persists-across-reload-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/prev-rerun/03-login-03-login-03-S12-session-persists-across-reload-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/prev-rerun/03-login-03-login-03-S12-session-persists-across-reload-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/prev-rerun/03-login-03-login-03-S12-session-persists-across-reload-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+  1 failed
+    [chromium] › specs/03-login.spec.ts:97:3 › 03 login › 03-S12 session persists across reload ────
+  18 passed (11.2s)

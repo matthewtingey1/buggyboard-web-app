@@ -1,0 +1,15 @@
+[46/59] [api] › tests/api/login.spec.ts:6:3 › POST /api/login returns 200 and the username for matt
+[47/59] [api] › tests/api/login.spec.ts:14:1 › POST /api/login trims the username
+[48/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with wrong password returns 401 invalid_credentials
+[49/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with unknown user returns 401 invalid_credentials
+[50/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with username in the wrong case returns 401 invalid_credentials
+[51/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with blank username returns 400 blank_username
+[52/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with whitespace-only username returns 400 blank_username
+[53/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with missing password returns 400 blank_password
+[54/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with blank password returns 400 blank_password
+[55/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with both blank returns 400 missing_credentials
+[56/59] [api] › tests/api/login.spec.ts:34:3 › POST /api/login with empty body returns 400 missing_credentials
+[57/59] [api] › tests/api/login.spec.ts:43:3 › POST /api/login with a number username returns a 400 JSON error
+[58/59] [api] › tests/api/login.spec.ts:43:3 › POST /api/login with a array username returns a 400 JSON error
+[59/59] [api] › tests/api/login.spec.ts:43:3 › POST /api/login with a object username returns a 400 JSON error
+  59 passed (1.0s)

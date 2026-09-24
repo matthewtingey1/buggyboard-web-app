@@ -1,0 +1,34 @@
+{
+  "c1_deleteWhileOpenElsewhere": [
+    "ERROR locator.click: Timeout 30000ms exceeded."
+  ],
+  "c2_lostUpdate": [
+    "ERROR locator.click: Timeout 30000ms exceeded."
+  ],
+  "C5": [
+    "logged in: /board?x=1 -> /board?x=1; dialog open=false",
+    "logged in: /board/1 -> /board; dialog open=false",
+    "logged in: /bugs/1 -> /board; dialog open=false",
+    "logged in: /nope -> /board; dialog open=false",
+    "logged in: /login?next=/board/1 -> /board; dialog open=false",
+    "logged in: /BOARD -> /BOARD; dialog open=false",
+    "Back with Create modal open (url stays false) -> now at http://localhost:5173/BOARD; typed draft lost; dialog open=false"
+  ],
+  "c5_deepLinks": [
+    "ERROR locator.click: Error: strict mode violation: getByRole('button', { name: 'Logout' }) resolved to 2 elements:"
+  ],
+  "C6": [
+    "login \" buggy \"/\"1970beetle\" -> 200 {\"username\":\"buggy\"}",
+    "login \"Buggy\"/\"1970beetle\" -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "login \"BUGGY\"/\"1970beetle\" -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "login \"buggy\"/\" 1970beetle\" -> 401 {\"error\":\"invalid_credentials\",\"message\":\"Invalid username or password.\"}",
+    "login \"matt\"/\"<redacted>\" -> 200 {\"username\":\"matt\"}",
+    "create owner=\"nobody-such-user\" -> 201 stored owner=\"nobody-such-user\"",
+    "create owner=\"  buggy  \" -> 201 stored owner=\"buggy\"",
+    "create owner=\"Buggy\" -> 201 stored owner=\"Buggy\"",
+    "create owner=\"bug gy\" -> 201 stored owner=\"bug gy\"",
+    "create owner=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -> 201 stored owner=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "owner-sorted (asc) C6 rows: [\"aaaaaaaaaaaaaaaaaaaa\",\"bug gy\",\"buggy\",\"Buggy\",\"nobody-such-user\"]",
+    "UI login with \"  buggy \" -> default owner=\"\""
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "agent": "exploratory",
+  "run": "2026-09-22T230611Z",
+  "scope": "Re-test of all 13 previous exploratory findings (R01-R13), then 8 new time-boxed charters aimed at the new code, run headless in Chromium against the live app (UI :5173, API via the proxy): N1 the header Close (x) versus the Saving/Deleting lock, N2 a slow row open followed by New Bug (stacked dialogs), N3 out-of-order board refreshes, N4 login lockout by a third party (throwaway usernames only; one wrong-case attempt for buggy followed by a successful login), N5 two tabs with a logout and a user switch mid-draft and mid-save, N6 focus and keyboard (rapid open/close, Enter held, focus return, confirm stacking, Tab trap, Try again), N7 row padding versus the title button, text selection and header wrap at 375/320, N8 one-line titles and invisible characters through the edit form. Latency and failures were simulated with page.route. Every record carried the [exploratory] prefix; 27 were created and all deleted (0 remain).",
+  "verdict": "ready-with-known-risk",
+  "confidence": "medium",
+  "commands": [
+    "curl -s http://localhost:5173/api/health",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/retest.mjs",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/retest.mjs R02 R03 R04 R05 R06 R07 R08 R09 R10 R11 R12 R13",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/retest.mjs R10 R11 R12 R13",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/charters.mjs n1 n2 n3",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/charters.mjs n4 n5 n6 n7 n8",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/charters.mjs n7 n8",
+    "node quality-reports/2026-09-22T230611Z/evidence/exploratory/cleanup.mjs"
+  ],
+  "findings": [
+    {
+      "id": "exploratory-01",
+      "title": "Concurrent edits silently overwrite: saving a stale edit modal reverts another user's change (lost update)",
+      "status": "confirmed",
+      "severity": "high",
+      "requirement": "Charter C2: two users editing one bug. Vision: every user has full access to all bugs, so concurrent edits are expected, yet no spec says what happens when they collide.",
+      "location": "frontend/src/EditBugModal.tsx:160 (PUT sends the whole record); backend/src/bugService.ts:120 (unconditional UPDATE)",
+      "evidence": "Re-tested this run (R01): buggy set State=Closed and saved (server CLOSED); vanny then saved a description-only edit from a modal opened earlier, and the server went back to state=OPEN, description='vanny edit'. Still reproduces. Screenshot R01-after-stale-save.png; log session-log-retest-all-*.json.",
+      "repro": "Create a bug. Open its edit modal in context A (buggy) and in context B (vanny). In A set State=Closed and Save. In B change the Description and Save. GET /api/bugs/:id returns state OPEN.",
+      "fix": "Smallest fix: have the edit modal PUT only the fields the user changed (diff against `initial`). Proper fix: add an updated_at/version column, send it with PUT, and return 409 when it doesn't match. The modal then shows 'This bug changed since you opened it'."
+    },
+    {
+      "id": "exploratory-02",
+      "title": "After another session deletes a bug, the board keeps the dead row: Save/Delete show 'Bug not found.' and clicking the row does nothing",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "Charter C1: delete in one session while the bug is open in another. Spec 12 covers only the deleting user's board.",
+      "location": "frontend/src/EditBugModal.tsx:176,210 (404 path keeps the modal open, no refetch); frontend/src/BoardPage.tsx:118-127 (handleRowClick ignores !res.ok)",
+      "evidence": "Re-tested this run (R02): after another session deleted the bug, Save showed 'Bug not found.' and the stale row was removed from the board behind the modal (row count 0 before and after Cancel). Clicking a row deleted elsewhere opened nothing, removed the row and announced 'That bug no longer exists.' Delete on an already-deleted bug removed the row and showed 'Bug not found.' in the modal. No longer reproduces. The row-click message is screen-reader-only; that residual is tracked in exploratory-12. Screenshots R02-save-after-delete.png, R02-delete-already-deleted.png.",
+      "repro": "Open bug X's edit modal as vanny. Delete X as buggy (UI or DELETE /api/bugs/X). As vanny click Save, then Cancel, then click X's row again.",
+      "fix": "In EditBugModal, when PUT/DELETE returns 404, call onSaved() (it refetches) and close with a 'This bug was deleted' notice; a DELETE 404 can count as success. In handleRowClick, when the response is not ok, refetch the list and show a message."
+    },
+    {
+      "id": "exploratory-03",
+      "title": "Logging out or switching user in one tab doesn't reach other tabs: they keep creating bugs, and default the owner to the old user",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "Charter C3: two tabs, one session. Spec 05 says that after logout 'the user is ... no longer authenticated', but multi-tab behaviour isn't specified.",
+      "location": "frontend/src/auth.tsx:46-55 (user read from localStorage once on mount, no 'storage' event listener)",
+      "evidence": "Re-tested this run (R03 and N5): when tab 1 logged out, tab 2 in the same context went to /login within 600ms. When tab 1 then logged in as vanny, tab 2 followed to /board and New Bug defaulted owner to 'vanny'. No longer reproduces. Side effects are filed as exploratory-17. Screenshots R03-tab2-after-logout.png, N5-tab2-after-user-switch.png.",
+      "repro": "Log in as buggy and open /board in a second tab of the same context. Log out in tab 1. In tab 2 click New Bug and save: the bug is created. Log in as vanny in tab 1; tab 2's New Bug modal shows owner buggy.",
+      "fix": "In AuthProvider, add a window 'storage' event listener that re-runs loadStoredUser() and calls setUser. ProtectedRoute then redirects the stale tab to /login. Hand-off: the API has no server-side session at all, so any client can write bugs without logging in. That belongs to security."
+    },
+    {
+      "id": "exploratory-04",
+      "title": "Oversized or malformed body gets an HTML error page from the API; the modal shows only a generic 'Failed to save bug.'",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "Charter C8: the backend rejects a request while a modal is open. No field length limits are specified.",
+      "location": "backend/src/index.ts:10 (express.json() default 100kb limit, no JSON error handler); frontend/src/CreateBugModal.tsx and EditBugModal.tsx (no maxLength)",
+      "evidence": "Re-tested this run (R04): a 120,000-char description got 413 {\"error\":\"payload_too_large\",\"message\":\"The request body is too large.\"}, and malformed JSON got 400 {\"error\":\"invalid_json\",...}. The Create modal alert now reads 'The request body is too large.' No longer reproduces. The inputs still have no maxLength, so a user finds out only after pressing Save. Screenshot R04-create-413.png.",
+      "repro": "Paste 120k characters into Description and click Save. Or run: curl -X POST localhost:5173/api/bugs -H 'Content-Type: application/json' -d '{not json'",
+      "fix": "Add an Express error middleware that returns JSON {error:'payload_too_large'|'invalid_json', message} for body-parser errors, and add maxLength to the title and description inputs. Hand-off: the non-JSON error body is a contract issue, for the contract agent."
+    },
+    {
+      "id": "exploratory-05",
+      "title": "No title length limit: the API accepts a 20,000-char title, which renders as a 9,649px-tall row (the overflow part is fixed)",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter C7: long titles in the table layout.",
+      "location": "frontend/src/BoardPage.tsx:292 (title <td> has no wrapping rule); backend/src/bugService.ts:61 (no max length)",
+      "evidence": "Re-tested this run (R05): with a 400-char unbroken title the table scrollWidth now equals its container (894 = 894), so the overflow half is fixed. A 20,000-char title POST still got 201, and that row is 9,649px tall on the board. Still reproduces for the length limit. Screenshot R05-long-title.png.",
+      "repro": "POST /api/bugs with title '[exploratory] ' + 'X'.repeat(400), then view the board at 1280px width.",
+      "fix": "Have createBug/updateBug reject titles over a limit (for example 200 chars) with a JSON 400, and add a matching maxLength to both title inputs."
+    },
+    {
+      "id": "exploratory-06",
+      "title": "Create submit handler has no in-flight guard; two submits in one task create duplicate bugs",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "Charter C4: rapid double-click on Save, or Enter held down.",
+      "location": "frontend/src/CreateBugModal.tsx:56 (handleSubmit doesn't check `loading`; only the button's disabled attribute protects it)",
+      "evidence": "Re-tested this run (R06): two synchronous button.click() calls on Save created 1 bug. submittingRef now guards handleSubmit. No longer reproduces.",
+      "repro": "With the Create modal filled, run in the console: const b=document.querySelector('[role=dialog] button[type=submit]'); b.click(); b.click();",
+      "fix": "Add a useRef in-flight flag at the top of handleSubmit (`if (submittingRef.current) return; submittingRef.current = true;` and reset it in finally)."
+    },
+    {
+      "id": "exploratory-07",
+      "title": "Owner is free text: non-existent users and case variants ('Buggy' vs 'buggy') are stored as different owners",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Charter C6. Spec 06 defines owner as 'the name of the user who owns the bug' but doesn't say whether it must be a real user or how case is handled.",
+      "location": "backend/src/bugService.ts:62 (owner only trimmed)",
+      "evidence": "Re-tested this run (R07): the API stored owners 'nobody-such-user' and 'Buggy' as sent. Still open; no spec rule on owner. See also exploratory-16: login is case-sensitive, so 'Buggy' cannot log in.",
+      "repro": "POST /api/bugs with owner 'Buggy' and another with owner 'buggy', then sort the board by Owner.",
+      "fix": "Decide in the spec whether owner must be a known username. If yes, validate it against users.json in createBug/updateBug and offer a picker instead of free text."
+    },
+    {
+      "id": "exploratory-08",
+      "title": "No bug URL, and browser Back with a modal open leaves the board and silently discards the draft",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter C5: deep links and Back/Forward through modals. Vision lists a 'Bug view' but it has no route.",
+      "location": "frontend/src/App.tsx:22-34 (only /, /login, /board; modal and search state not in the URL); frontend/src/LoginPage.tsx:35 (ignores location.state.from)",
+      "evidence": "Re-tested this run (R08): /board/1 redirects to /board with no modal. With a half-typed Create draft, browser Back moved to the previous history entry and Forward showed no modal (dialogs=0), so the draft was lost with no warning. Still reproduces. Screenshot R08-back-with-modal.png.",
+      "repro": "On /board, click New Bug, type a title, press browser Back.",
+      "fix": "Add a /board/:id route that opens the edit modal, so Back closes the modal instead of leaving the page. Keep the search and filter in useSearchParams, and have LoginPage navigate to location.state.from. Also add a beforeunload handler while a save is in flight or a draft is dirty."
+    },
+    {
+      "id": "exploratory-09",
+      "title": "Reopening the create modal paints the previous draft and errors for one frame; keys typed in that frame are appended to the old draft (lead's P-1)",
+      "status": "fixed",
+      "severity": "low",
+      "requirement": "Charter N5 (rapid open/close). Lead's planning finding P-1 (specs/testing/create-bug-test-plan.md 1.5). This is the same root cause as functional-04, which is filed as hardening.",
+      "location": "frontend/src/CreateBugModal.tsx:32-42 (state reset in useEffect; the component stays mounted and returns null when closed, so the old state survives until the effect runs)",
+      "evidence": "Re-tested this run (R09): reopening after leaving draft 'OLD' plus an error and typing 'new' straight away gave 'new' 5 out of 5 times. A MutationObserver saw title='' and no alert at insertion, and the first animation frame had title='new'. The reset now runs in useLayoutEffect. No longer reproduces.",
+      "repro": "Open New Bug, type OLD, press Escape. Click New Bug and type 'new' at once (Playwright: click() then keyboard.type('new') with no wait). The title reads 'OLDnew'.",
+      "fix": "Reset the draft when the modal closes (in onClose), not after it opens. Or mount it conditionally, `{createModalOpen && <CreateBugModal .../>}`, so each open starts from initial state with owner=defaultOwner."
+    },
+    {
+      "id": "exploratory-10",
+      "title": "The header Close (x) button bypasses the Saving/Deleting lock: a late response closes the next draft, or drops its error into it",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Charter N1: slow network during save and delete. Specs 06 and 09 say Escape has the same effect as Cancel. Cancel is disabled while saving, but Escape is not (hand-off to functional for that clause). What a late response does to a newer modal is not specified anywhere.",
+      "location": "frontend/src/CreateBugModal.tsx:150-158 (header Close has no disabled={loading}) and 116-122 (a late response acts on whatever draft is open); frontend/src/EditBugModal.tsx:230-238 and 383-391 (Close buttons not disabled while loading/deleting)",
+      "evidence": "Re-tested this run. Escape is fixed: during 'Saving…' Escape left the modal open (R10a), and during 'Deleting…' Escape left the confirm open (R10d). The same defect still reproduces through the header Close (x) button, which is not disabled while Cancel is (N1). (a) Create: during Saving, Cancel disabled=true and Close disabled=false. Clicking Close closed the modal. The user reopened New Bug and half-typed a second bug; when the first POST returned, it closed the second modal and the second draft was discarded (saved=0). (b) Create with a POST that fails with 500 after Close: the error 'Simulated server error' appeared in the unrelated new draft. (c) Edit: after Close during bug A's pending PUT, the user opened bug B and typed; A's response closed B's modal and the typing was lost. (d) Confirm-delete Close (x) during 'Deleting…' dismissed the confirm and left the edit form fully editable while the DELETE was still pending. Screenshots N1a-second-draft-before-late-response.png, N1a-second-draft-closed-by-first-response.png, N1b-stale-error-in-new-draft.png, N1c-B-closed-by-A-response.png, N1d-after-close-during-delete.png. Suite note: tests/resilience/resilience.spec.ts 'Escape during a pending save' guards only the Escape path.",
+      "repro": "Delay POST /api/bugs by 2.5s with page.route. Fill Create, click Save, click the x in the header, click New Bug, and type. After 2.5s the new modal closes.",
+      "fix": "Add disabled={loading} to the Create header Close, and disabled={loading || deleting} to the Edit header Close and the confirm Close. Better: abort the in-flight fetch with an AbortController when the modal unmounts, so no stale response can act on a newer draft."
+    },
+    {
+      "id": "exploratory-11",
+      "title": "Clicking two rows on a slow network opens the second bug, then silently swaps the modal to the first and discards what the user typed",
+      "status": "fixed",
+      "severity": "medium",
+      "requirement": "Charter N1/N2: out-of-order responses. No spec says what happens when row opens overlap.",
+      "location": "frontend/src/BoardPage.tsx:114-124 (handleRowClick sets whichever GET response arrives last; no loading state)",
+      "evidence": "Re-tested this run (R11): GET for A was delayed 1.5s; after clicking A and then B, the modal stayed 'Edit bug #<B>' with 'typed into B' intact after A's response arrived. No longer reproduces. Screenshot R11-after-late-A.png. A related case is still open: a slow row open followed by New Bug. See exploratory-14.",
+      "repro": "Delay GET /api/bugs/<A> by 1.5s with page.route. Click row A, then row B. Type in B's modal. Wait 1.5s: the modal header changes to A.",
+      "fix": "Keep a ref to the latest requested id in handleRowClick and ignore responses for any other id (or abort the previous fetch). Show a pending state on the clicked row."
+    },
+    {
+      "id": "exploratory-12",
+      "title": "Failed row opens and 'That bug no longer exists.' are only announced to screen readers; sighted users see nothing happen (load failures are fixed)",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter N7: backend error on read paths. Spec 07 defines the empty-board message for an empty list; a failed load is not specified.",
+      "location": "frontend/src/BoardPage.tsx:148-155 (setLastAction feeds only the sr-only live region at 229-231)",
+      "evidence": "Re-tested this run (R12). Fixed parts: a 500 on board load shows 'Couldn't load bugs. Try again' instead of 'No bugs.', and when POST succeeds but the refresh gets 503 the table shows the same error state. Still reproduces: when a row open gets 500, no dialog opens and the only message, 'Couldn't open the bug. Try again.', sits in the sr-only role=status paragraph. The screenshot shows an unchanged board. The same holds for 'That bug no longer exists.' (R02, N3) and 'Bug created.' when the refresh fails. Screenshots R12-load-500.png, R12-row-open-500.png, R12-saved-refresh-503.png.",
+      "repro": "page.route('**/api/bugs/<id>', r => r.request().method()==='GET' ? r.fulfill({status:500, body:'{}'}) : r.fallback()); click that bug's title. Nothing visible changes.",
+      "fix": "Render lastAction failures in a visible banner (for example a role=alert line above the table) as well as in the live region."
+    },
+    {
+      "id": "exploratory-13",
+      "title": "Search does not fold accents: 'unicode' does not find 'Ünïcödé'",
+      "status": "gap",
+      "severity": "low",
+      "requirement": "Charter N6: many long titles with sort and search. Spec 11 requires case-insensitive, whitespace- and punctuation-normalised matching but says nothing about diacritics.",
+      "location": "frontend/src/BoardPage.tsx:42-46 (normalizeForSearch has no NFD/diacritic strip)",
+      "evidence": "Re-tested this run (R13): searching 'unicode cafe' matched 0 rows for '[exploratory] R13 Ünïcödé café'; the exact accented query matched 1. Still open; spec 11 is silent on diacritics.",
+      "repro": "POST a bug titled '[exploratory] café', then search 'cafe'.",
+      "fix": "Decide in spec 11. If accents should fold, add `.normalize('NFD').replace(/\\p{M}/gu, '')` in normalizeForSearch."
+    },
+    {
+      "id": "exploratory-14",
+      "title": "A slow row open followed by New Bug stacks the edit modal over the create modal: typing lands in the other bug's title, and one Escape discards the hidden create draft",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Charter N2: stacked dialogs from a stale row-click response. The stale-response guard (openRequest) covers only a second row click; no spec says what happens when another dialog opens in between.",
+      "location": "frontend/src/BoardPage.tsx:141-147 (openRequest is not bumped when the create modal opens) and 182 (onNewBug); frontend/src/CreateBugModal.tsx:59-69 and EditBugModal.tsx:81-95 (both Escape handlers listen on window regardless of which dialog is on top)",
+      "evidence": "GET /api/bugs/<A> was delayed 2s. The user clicked A's title, saw nothing happen for 400ms (0 dialogs, 0 aria-busy), clicked New Bug and typed 'my new bug title'. When A's response arrived, the Edit modal opened on top of Create (2 dialogs) and took focus. The user's next keystrokes (' more') went into bug A's title, which became '[exploratory] N2 slow ... more' with Save enabled. One Escape then closed the hidden Create modal and discarded its draft, left Edit open, and focus returned to New Bug behind the overlay. Screenshots N2-edit-stacked-over-create.png, N2-after-one-escape.png; log session-log-charters-n1-n2-n3-*.json.",
+      "repro": "Delay GET /api/bugs/<A> by 2s. Click A's title, then click New Bug and keep typing. After 2s the Edit modal covers Create, and the typing goes into A's title.",
+      "fix": "Bump openRequest.current when the create modal opens (onNewBug), so the pending row open is ignored; or ignore row-open responses while createModalOpen is true. Only the innermost dialog in useDialogFocus's openDialogs stack should act on Escape."
+    },
+    {
+      "id": "exploratory-15",
+      "title": "Board refreshes are not ordered: a slow refresh from before a delete lands afterwards and brings the deleted bug back",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Charter N3: out-of-order responses on the list refresh. Spec 12 says the deleted bug disappears from the board; the stale-response guard added for row clicks was not applied to fetchBugs.",
+      "location": "frontend/src/BoardPage.tsx:124-135 (fetchBugs sets whatever response arrives last)",
+      "evidence": "The user created bug X; the refresh that follows the POST was delayed 3s (its snapshot taken at request time). Inside that window the user opened bug Y and deleted it. Right after the delete, the board showed only X. When the slow refresh landed, Y was back on the board ('7122 HIGH [exploratory] N3 delete-me') although GET /api/bugs/7122 returned 404. Clicking the resurrected row removed it again, with only the sr-only 'That bug no longer exists.' Screenshot N3-deleted-bug-reappears.png; log session-log-charters-n1-n2-n3-*.json.",
+      "repro": "Delay the first GET /api/bugs after a POST by 3s. Create a bug, then immediately open another bug and delete it. Wait 3s: the deleted bug reappears.",
+      "fix": "Give fetchBugs a request counter like openRequest (`const seq = ++listRequest.current; ... if (seq !== listRequest.current) return;`), or abort the previous list fetch with an AbortController."
+    },
+    {
+      "id": "exploratory-16",
+      "title": "Anyone can lock any username for 15 minutes with 20 requests in 60ms; case and space variants count against the same account, although login itself is case-sensitive",
+      "status": "confirmed",
+      "severity": "medium",
+      "requirement": "Charter N4: rate-limit effects on a real user, and a third party locking someone out. The code comment says the limit is 'generous enough that no real user hits it'; it doesn't consider someone else hitting it for them.",
+      "location": "backend/src/index.ts:85-91 (key = username.trim().toLowerCase(); lockout checked before the password); backend/src/authService.ts:32 (exact, case-sensitive username match); frontend/src/LoginPage.tsx:97-108 (no autocapitalize/autocorrect/spellcheck off)",
+      "evidence": "Using throwaway 'probe-exploratory-0fpyn2' only: 20 failed logins that alternated '  Probe-exploratory-0fpyn2 ' and 'PROBE-EXPLORATORY-0FPYN2' took 60ms. The exact lowercase name then got 429 'Too many failed attempts. Try again later.', and so did a blank-password attempt, which shows the lock is checked before any credential check (a correct password is refused too, index.ts:88 precedes login() at :93). The UI shows the 429 message and marks both fields aria-invalid. One attempt as 'Buggy' with buggy's correct password (<redacted>) got 401 'Invalid username or password.', so a capitalised username never logs in yet counts toward locking 'buggy'. The username input has no autocapitalize='none', so a phone keyboard that capitalises the first letter walks a real user into that. The following buggy login (200) reset the counter. Screenshot N4-locked-login-ui.png; log session-log-charters-n4-*.json.",
+      "repro": "for i in $(seq 20); do curl -s -o /dev/null -w '%{http_code} ' -X POST localhost:5173/api/login -H 'Content-Type: application/json' -d '{\"username\":\"PROBE-EXPLORATORY-X\",\"password\":\"no\"}'; done; then POST {\"username\":\"probe-exploratory-x\",\"password\":\"any\"} returns 429.",
+      "fix": "Key the counter the same way login matches (the exact trimmed username), count failures only for existing users, and add a per-client throttle so one caller can't lock many accounts. Consider a short backoff instead of a hard 15-minute lock. Add autoCapitalize='none' autoCorrect='off' spellCheck={false} to the username input. Hand-off: login rate limiting belongs to security; filed here because the charter was its effect on real users."
+    },
+    {
+      "id": "exploratory-17",
+      "title": "Logging out in one tab silently throws away an unsaved draft in another tab, and a save already in flight there still completes with no feedback",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter N5: two tabs and a user switch. The new cross-tab logout follows spec 05 but says nothing about work open in the other tab.",
+      "location": "frontend/src/auth.tsx:53-55 (the storage listener clears the user at once; ProtectedRoute unmounts the board with its modals)",
+      "evidence": "Tab 2 had the Create modal open with a typed title and description. When tab 1 logged out, tab 2 went to /login within 500ms, with no warning and nothing kept. In a second pass, tab 2 clicked Save with the POST delayed 2s, and tab 1 logged out 300ms later. Tab 2 landed on /login with no message (0 alerts), but the bug was created (owner=vanny). The user can't tell whether it was saved. Screenshot N5-tab2-after-user-switch.png; log session-log-charters-n4-n5-n6-*.json.",
+      "repro": "Same context, two tabs on /board. In tab 2 open New Bug and type. In tab 1 click Logout. Tab 2 is on /login and the draft is gone.",
+      "fix": "Keep the Create/Edit draft in sessionStorage and restore it after the next login in that tab; or, when a storage logout arrives while a draft is dirty, show 'You were logged out in another tab' on the login page. Abort an in-flight save on unmount or report its outcome."
+    },
+    {
+      "id": "exploratory-18",
+      "title": "Holding Enter on New Bug opens the form already showing 'Title is required. Description is required.'",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter N6: keyboard-only flows, with Enter held (key repeat). Spec 06 expects validation messages after the user submits, not on open.",
+      "location": "frontend/src/TitleBar.tsx:77-83 and frontend/src/CreateBugModal.tsx:57,160 (focus moves into the title input on open, so repeated Enter keydowns submit the empty form)",
+      "evidence": "With focus on New Bug, keydown Enter followed by two auto-repeat keydowns opened one Create modal that already showed the alert 'Title is required. Description is required.' with the title marked aria-invalid=true. The same held Enter on a bug's title button sent 3 GETs and opened one edit modal; nothing else went wrong, because Save is disabled on an unchanged edit. Screenshot N6b-enter-held-on-new-bug.png.",
+      "repro": "Focus New Bug and hold Enter slightly longer than the key-repeat delay (Playwright: keyboard.down('Enter') three times, then up).",
+      "fix": "In the create form, ignore auto-repeated Enter: `onKeyDown={(e) => { if (e.key === 'Enter' && e.repeat) e.preventDefault(); }}` on the form."
+    },
+    {
+      "id": "exploratory-19",
+      "title": "Bug titles can no longer be selected or copied with the mouse: dragging across a title selects nothing and opens the bug",
+      "status": "confirmed",
+      "severity": "low",
+      "requirement": "Charter N7: clicking the row padding versus the title button. Copying a bug title (into chat, a commit message or a search) is an everyday use no spec mentions.",
+      "location": "frontend/src/BoardPage.tsx:340-349 (the title is a <button>, which Chromium makes unselectable; the row onClick at 326 also fires after a drag)",
+      "evidence": "Clicks on the ID cell, the owner cell and the padding right of the title all open the bug, which is fine. Dragging from the first to the last character of the title left getSelection() = '' and opened the edit modal. Dragging across the whole row also selected nothing and opened the modal. Screenshot N7-drag-select-title.png.",
+      "repro": "On /board, press the mouse at the start of a title, drag to its end, and release.",
+      "fix": "Add `select-text` (user-select: text) to the title button, and in the row and button click handlers return early when `window.getSelection()?.toString()` is non-empty."
+    }
+  ],
+  "notTested": [
+    "Real slow or flaky networks, other browsers (Firefox, WebKit), and real mobile or touch input. The mobile auto-capitalise path in exploratory-16 is inferred from the missing input attributes, not observed on a device.",
+    "A real lockout of buggy, vanny or matt (forbidden by the run rules). That the correct password is refused during a lock is shown with a blank password on a throwaway account plus the check order in index.ts, not with a real account.",
+    "Rapid close-and-reopen focus race: a scripted Escape-then-Enter with no human-scale gap sent the second Enter before the deferred focus return (setTimeout) put focus back on New Bug, so it opened nothing. A human gap is far longer than the timer, so this is not filed.",
+    "Screen readers and IME/composition input.",
+    "Hand-off to functional: in the edit modal, a title of only spaces leaves Save disabled with no message, while Create says 'Title is required.' A zero-width-only title in Edit enables Save and gets the server's 'Title is required.' Neither is filed here (N8).",
+    "Hand-off to a11y: the header now wraps at 375 and 320px with no horizontal scroll (Logout right edge at 240px), and the Tab trap held for 12 Tabs in an unchanged edit modal. This closes the previous run's reflow and Tab-escape hand-offs, but a11y owns the verdict.",
+    "Suite gap for the lead: tests/resilience covers Escape during a save but not the header Close button (exploratory-10), and nothing asserts a visible message after a failed row open (exploratory-12)."
+  ]
+}

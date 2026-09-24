@@ -1,0 +1,85 @@
+### http://localhost:5173 OPTIONS preflight
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: http://localhost:5173
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Content-Length: 0
+Date: Tue, 22 Sep 2026 22:24:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+### http://localhost:5173 OPTIONS plain
+HTTP/1.1 204 No Content
+Vary: Origin, Access-Control-Request-Headers
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Content-Length: 0
+Date: Tue, 22 Sep 2026 22:24:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+### http://localhost:5173 GET /api/bugs/1 headers
+HTTP/1.1 200 OK
+Vary: Origin
+x-powered-by: Express
+access-control-allow-origin: http://localhost:5173
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+access-control-allow-headers: Content-Type
+content-type: application/json; charset=utf-8
+content-length: 205
+etag: W/"cd-fXZH1vHGqIp5T9bRRSQ49GpTT14"
+date: Tue, 22 Sep 2026 22:24:26 GMT
+connection: close
+
+### http://localhost:5173 GET /API/BUGS
+200 text/html
+### http://localhost:5173 GET /api/bugs/1 with Origin evil
+access-control-allow-origin: http://localhost:5173
+### http://localhost:3002 OPTIONS preflight
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Allow: GET,HEAD,PUT,DELETE
+Content-Type: text/html; charset=utf-8
+Content-Length: 19
+ETag: W/"13-dU6690u+/fZ3lEqFItU6CiBI3Wo"
+Date: Tue, 22 Sep 2026 22:24:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+GET,HEAD,PUT,DELETE
+### http://localhost:3002 OPTIONS plain
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Allow: GET,HEAD,POST
+Content-Type: text/html; charset=utf-8
+Content-Length: 13
+ETag: W/"d-bMedpZYGrVt1nR4x+qdNZ2GqyRo"
+Date: Tue, 22 Sep 2026 22:24:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+GET,HEAD,POST
+### http://localhost:3002 GET /api/bugs/1 headers
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/json; charset=utf-8
+Content-Length: 205
+ETag: W/"cd-fXZH1vHGqIp5T9bRRSQ49GpTT14"
+Date: Tue, 22 Sep 2026 22:24:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+### http://localhost:3002 GET /API/BUGS
+200 application/json; charset=utf-8
+### http://localhost:3002 GET /api/bugs/1 with Origin evil
+Access-Control-Allow-Origin: http://localhost:5173

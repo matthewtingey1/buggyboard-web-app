@@ -1,0 +1,10 @@
+- rowgroup:
+  - row "ID Severity Title Owner":
+    - columnheader "ID":
+      - button "ID"
+    - columnheader "Severity":
+      - button "Severity"
+    - columnheader "Title":
+      - button "Title"
+    - columnheader "Owner":
+      - button "Owner"

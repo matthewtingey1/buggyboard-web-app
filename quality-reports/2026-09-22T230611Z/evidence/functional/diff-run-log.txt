@@ -1,0 +1,335 @@
+
+Running 14 tests using 1 worker
+
+[1/14] [chromium] › specs/diff-regressions.spec.ts:10:1 › 06 Escape after choosing a severity closes the create modal without saving
+  1) [chromium] › specs/diff-regressions.spec.ts:10:1 › 06 Escape after choosing a severity closes the create modal without saving 
+
+    Error: expect(locator).toBeHidden() failed
+
+    Locator:  getByRole('dialog', { name: 'Create bug' })
+    Expected: hidden
+    Received: visible
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeHidden" getByRole('dialog', { name: 'Create bug' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: 'Create bug' })
+        14 × locator resolved to <div role="dialog" aria-modal="true" class="bug-modal-overlay" aria-labelledby="create-bug-modal-title">…</div>
+           - unexpected value "visible"
+
+
+      16 |   await createBugModal.severitySelect.press('Escape');
+      17 |
+    > 18 |   await expect(createBugModal.dialog).toBeHidden();
+         |                                       ^
+      19 |   expect(await bugApi.findContaining(title)).toHaveLength(0);
+      20 | });
+      21 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:18:39
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-06-Escape-35ed9-create-modal-without-saving-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-06-Escape-35ed9-create-modal-without-saving-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-06-Escape-35ed9-create-modal-without-saving-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-06-Escape-35ed9-create-modal-without-saving-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[2/14] [chromium] › specs/diff-regressions.spec.ts:22:1 › 09 Escape after choosing a severity closes the edit modal and discards
+  2) [chromium] › specs/diff-regressions.spec.ts:22:1 › 09 Escape after choosing a severity closes the edit modal and discards 
+
+    Error: expect(locator).toBeHidden() failed
+
+    Locator:  getByRole('dialog', { name: /^Edit bug #\d+$/ })
+    Expected: hidden
+    Received: visible
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeHidden" getByRole('dialog', { name: /^Edit bug #\d+$/ }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /^Edit bug #\d+$/ })
+        14 × locator resolved to <div role="dialog" aria-modal="true" class="bug-modal-overlay" aria-labelledby="edit-bug-modal-title">…</div>
+           - unexpected value "visible"
+
+
+      29 |   await editBugModal.severitySelect.press('Escape');
+      30 |
+    > 31 |   await expect(editBugModal.dialog).toBeHidden();
+         |                                     ^
+      32 |   expect((await bugApi.get(bug.id))?.severity).toBe('LOW');
+      33 | });
+      34 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:31:37
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Escape-b44b9-the-edit-modal-and-discards-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-09-Escape-b44b9-the-edit-modal-and-discards-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Escape-b44b9-the-edit-modal-and-discards-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-09-Escape-b44b9-the-edit-modal-and-discards-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[3/14] [chromium] › specs/diff-regressions.spec.ts:35:1 › 09/13 Escape after choosing a state closes the edit modal and discards
+  3) [chromium] › specs/diff-regressions.spec.ts:35:1 › 09/13 Escape after choosing a state closes the edit modal and discards 
+
+    Error: expect(locator).toBeHidden() failed
+
+    Locator:  getByRole('dialog', { name: /^Edit bug #\d+$/ })
+    Expected: hidden
+    Received: visible
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeHidden" getByRole('dialog', { name: /^Edit bug #\d+$/ }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /^Edit bug #\d+$/ })
+        14 × locator resolved to <div role="dialog" aria-modal="true" class="bug-modal-overlay" aria-labelledby="edit-bug-modal-title">…</div>
+           - unexpected value "visible"
+
+
+      42 |   await editBugModal.stateSelect.press('Escape');
+      43 |
+    > 44 |   await expect(editBugModal.dialog).toBeHidden();
+         |                                     ^
+      45 |   expect((await bugApi.get(bug.id))?.state).toBe('OPEN');
+      46 | });
+      47 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:44:37
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-13-Esc-eedd7-the-edit-modal-and-discards-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-09-13-Esc-eedd7-the-edit-modal-and-discards-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-13-Esc-eedd7-the-edit-modal-and-discards-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-09-13-Esc-eedd7-the-edit-modal-and-discards-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[4/14] [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when title is changed to only a zero-width space
+  4) [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when title is changed to only a zero-width space 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' })
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' })
+        14 × locator resolved to <button type="submit" class="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
+           - unexpected value "enabled"
+
+
+      55 |     await editBugModal.fill({ [field]: '​' });
+      56 |
+    > 57 |     await expect(editBugModal.saveButton).toBeDisabled();
+         |                                           ^
+      58 |   });
+      59 | }
+      60 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:57:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Save-i-14570--to-only-a-zero-width-space-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-09-Save-i-14570--to-only-a-zero-width-space-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Save-i-14570--to-only-a-zero-width-space-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-09-Save-i-14570--to-only-a-zero-width-space-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[5/14] [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when owner is changed to only a zero-width space
+  5) [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when owner is changed to only a zero-width space 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' })
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' })
+        14 × locator resolved to <button type="submit" class="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
+           - unexpected value "enabled"
+
+
+      55 |     await editBugModal.fill({ [field]: '​' });
+      56 |
+    > 57 |     await expect(editBugModal.saveButton).toBeDisabled();
+         |                                           ^
+      58 |   });
+      59 | }
+      60 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:57:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Save-i-2efd5--to-only-a-zero-width-space-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-09-Save-i-2efd5--to-only-a-zero-width-space-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Save-i-2efd5--to-only-a-zero-width-space-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-09-Save-i-2efd5--to-only-a-zero-width-space-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[6/14] [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when description is changed to only a zero-width space
+  6) [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when description is changed to only a zero-width space 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' })
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /^Edit bug #\d+$/ }).getByRole('button', { name: 'Save' })
+        14 × locator resolved to <button type="submit" class="rounded px-4 py-2 text-sm font-medium text-stone-800 bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
+           - unexpected value "enabled"
+
+
+      55 |     await editBugModal.fill({ [field]: '​' });
+      56 |
+    > 57 |     await expect(editBugModal.saveButton).toBeDisabled();
+         |                                           ^
+      58 |   });
+      59 | }
+      60 |
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:57:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Save-i-0faf5--to-only-a-zero-width-space-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-09-Save-i-0faf5--to-only-a-zero-width-space-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-09-Save-i-0faf5--to-only-a-zero-width-space-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-09-Save-i-0faf5--to-only-a-zero-width-space-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[7/14] [chromium] › specs/diff-regressions.spec.ts:61:1 › 06 a zero-width-only title is blocked in the create modal
+[8/14] [chromium] › specs/diff-regressions.spec.ts:73:3 › 09 clicking the row's cell 1 (not the title) opens the edit modal
+[9/14] [chromium] › specs/diff-regressions.spec.ts:73:3 › 09 clicking the row's cell 2 (not the title) opens the edit modal
+[10/14] [chromium] › specs/diff-regressions.spec.ts:73:3 › 09 clicking the row's cell 4 (not the title) opens the edit modal
+[11/14] [chromium] › specs/diff-regressions.spec.ts:85:1 › 11 search "log in" (space) still finds "Issue with log-in"
+  7) [chromium] › specs/diff-regressions.spec.ts:85:1 › 11 search "log in" (space) still finds "Issue with log-in" 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      91 |   await boardPage.search(`log in ${token}`);
+      92 |
+    > 93 |   await expect.poll(() => boardPage.rowCount(bug.title)).toBe(1);
+         |                                                          ^
+      94 | });
+      95 |
+      96 | test('11 search "save load" finds "save/load broken"', async ({ bugApi, boardPage }) => {
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:93:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-11-search-a9e86-ll-finds-Issue-with-log-in--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-11-search-a9e86-ll-finds-Issue-with-log-in--chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-11-search-a9e86-ll-finds-Issue-with-log-in--chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-11-search-a9e86-ll-finds-Issue-with-log-in--chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[12/14] [chromium] › specs/diff-regressions.spec.ts:96:1 › 11 search "save load" finds "save/load broken"
+  8) [chromium] › specs/diff-regressions.spec.ts:96:1 › 11 search "save load" finds "save/load broken" 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      102 |   await boardPage.search(`save load broken ${token}`);
+      103 |
+    > 104 |   await expect.poll(() => boardPage.rowCount(bug.title)).toBe(1);
+          |                                                          ^
+      105 | });
+      106 |
+      107 | test('11 query "log-in" matches "Login fails" and the clear X resets', async ({ bugApi, boardPage }) => {
+        at ~/DEV/IdeaProjects/buggyboard-web-app/quality-reports/2026-09-22T230611Z/evidence/functional/gaps/specs/diff-regressions.spec.ts:104:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-11-search-save-load-finds-save-load-broken--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/diff/diff-regressions-11-search-save-load-finds-save-load-broken--chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/diff/diff-regressions-11-search-save-load-finds-save-load-broken--chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/diff/diff-regressions-11-search-save-load-finds-save-load-broken--chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[13/14] [chromium] › specs/diff-regressions.spec.ts:107:1 › 11 query "log-in" matches "Login fails" and the clear X resets
+[14/14] [chromium] › specs/diff-regressions.spec.ts:121:1 › 13 sort is kept across a state switch and after clearing search
+  8 failed
+    [chromium] › specs/diff-regressions.spec.ts:10:1 › 06 Escape after choosing a severity closes the create modal without saving 
+    [chromium] › specs/diff-regressions.spec.ts:22:1 › 09 Escape after choosing a severity closes the edit modal and discards 
+    [chromium] › specs/diff-regressions.spec.ts:35:1 › 09/13 Escape after choosing a state closes the edit modal and discards 
+    [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when title is changed to only a zero-width space 
+    [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when owner is changed to only a zero-width space 
+    [chromium] › specs/diff-regressions.spec.ts:49:3 › 09 Save is disabled when description is changed to only a zero-width space 
+    [chromium] › specs/diff-regressions.spec.ts:85:1 › 11 search "log in" (space) still finds "Issue with log-in" 
+    [chromium] › specs/diff-regressions.spec.ts:96:1 › 11 search "save load" finds "save/load broken" 
+  6 passed (1.1m)

@@ -1,0 +1,17 @@
+--- before
+e2e|0
+noprefix|7
+seq|7023
+[28/31] [api] › tests/data/round-trip.spec.ts:56:1 › an update reads back exactly as written
+[29/31] [api] › tests/data/round-trip.spec.ts:65:1 › a deleted bug's id is not reused
+[30/31] [api] › tests/data/round-trip.spec.ts:74:1 › an edit to a bug deleted elsewhere returns 404 and does not recreate it
+[31/31] [api] › tests/data/round-trip.spec.ts:84:1 › a zero-width-space-only title is rejected as blank
+  31 passed (860ms)
+--- after
+e2e|0
+noprefix|7
+seq|7054
+6972|C2ADE2808E
+6973|E2A080
+7009|C2ADE2808E
+7010|E2A080

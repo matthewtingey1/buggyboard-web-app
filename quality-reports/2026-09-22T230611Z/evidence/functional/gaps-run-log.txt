@@ -1,0 +1,30 @@
+
+Running 26 tests using 1 worker
+
+[1/26] [chromium] › specs/board-gaps.spec.ts:16:1 › 13 sort chosen in Open is kept after switching to Closed
+[2/26] [chromium] › specs/board-gaps.spec.ts:24:1 › 13 search text is kept and applied after switching state
+[3/26] [chromium] › specs/board-gaps.spec.ts:31:1 › 11/10 sort order is kept after clearing the search
+[4/26] [chromium] › specs/board-gaps.spec.ts:39:1 › 11 a query containing brackets matches the bracketed title
+[5/26] [chromium] › specs/create-gaps.spec.ts:13:1 › C1.2 Title has focus when the create modal opens
+[6/26] [chromium] › specs/create-gaps.spec.ts:18:1 › C1.3 Severity defaults to MID
+[7/26] [chromium] › specs/create-gaps.spec.ts:23:1 › C1.5 / functional-04 reopened modal is clean from the first frame (no stale draft)
+[8/26] [chromium] › specs/create-gaps.spec.ts:38:1 › functional-04 clearing Owner immediately after open is not overwritten
+[9/26] [chromium] › specs/create-gaps.spec.ts:45:1 › C2.4 Enter in Title submits and saves
+[10/26] [chromium] › specs/create-gaps.spec.ts:54:1 › C2.5 padded title/owner/description are saved trimmed (UI path)
+[11/26] [chromium] › specs/create-gaps.spec.ts:66:1 › C2.6 Save shows "Saving…" and disables the form while the POST is in flight
+[12/26] [chromium] › specs/create-gaps.spec.ts:82:1 › C4.4 validation errors are gone when the modal is reopened
+[13/26] [chromium] › specs/create-gaps.spec.ts:91:1 › 06-S8 blank Title alone names only "Title is required."
+[14/26] [chromium] › specs/create-gaps.spec.ts:98:1 › C5.1 server rejection (oversized description) keeps the modal open and the draft
+[15/26] [chromium] › specs/create-gaps.spec.ts:112:1 › C5.2 network failure shows "Something went wrong" and keeps the draft
+[16/26] [chromium] › specs/create-gaps.spec.ts:122:1 › C6.1 creating from the Closed view saves as Open and shows only under Open
+[17/26] [chromium] › specs/create-gaps.spec.ts:137:1 › C6.2 active search text is kept after creating a bug
+[18/26] [chromium] › specs/edit-delete-gaps.spec.ts:14:1 › E1.2 Title has focus when the edit modal opens
+[19/26] [chromium] › specs/edit-delete-gaps.spec.ts:19:1 › E2.3 Enter in Title saves the change
+[20/26] [chromium] › specs/edit-delete-gaps.spec.ts:26:1 › E2.4 Enter in Description adds a line and does not save
+[21/26] [chromium] › specs/edit-delete-gaps.spec.ts:35:1 › E3.4 a trailing-space-only change does not enable Save
+[22/26] [chromium] › specs/edit-delete-gaps.spec.ts:40:1 › E5.1 saving a bug deleted elsewhere shows "Bug not found." and does not recreate it
+[23/26] [chromium] › specs/edit-delete-gaps.spec.ts:48:1 › D1.3 Escape closes only the confirmation; edit modal stays; bug exists
+[24/26] [chromium] › specs/edit-delete-gaps.spec.ts:57:1 › D1.4 backdrop click keeps the confirmation open
+[25/26] [chromium] › specs/edit-delete-gaps.spec.ts:64:1 › 12-S4 cancelling the confirmation leaves the bug on the board
+[26/26] [chromium] › specs/edit-delete-gaps.spec.ts:71:1 › D2.3 deleting from the Closed view removes the bug and keeps Closed selected
+  26 passed (31.3s)
